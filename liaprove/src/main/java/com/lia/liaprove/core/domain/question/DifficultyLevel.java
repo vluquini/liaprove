@@ -1,7 +1,7 @@
-package com.lia.liaprove.core.domain.Question;
+package com.lia.liaprove.core.domain.question;
 
 public enum DifficultyLevel {
-    Easy("easy"), Medium("medium"), Hard("hard");
+    EASY("easy"), MEDIUM("medium"), HARD("hard");
 
     private String difficultyLevel;
 
