@@ -1,5 +1,10 @@
 package com.lia.liaprove.core.domain.user;
 
-public class UserProfessional extends User{
+import com.lia.liaprove.core.domain.assessment.Certificate;
 
+import java.util.List;
+
+public class UserProfessional extends User{
+    private Integer totalAssessmentsTaken;
+    private List<Certificate> certificates;
 }
