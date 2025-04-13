@@ -1,6 +1,6 @@
 package com.lia.liaprove.core.domain.assessment;
 
-import com.lia.liaprove.core.domain.question.Question;
+import com.lia.liaprove.core.domain.relationship.AssessmentFeedback;
 import com.lia.liaprove.core.domain.relationship.AssessmentQuestion;
 
 import java.time.Duration;
@@ -13,6 +13,7 @@ public class Assessment {
     // Como os Recruiters podem criar novas avaliações, a data de criação é uma informação importante
     private LocalDateTime creationDate;
     private List<AssessmentQuestion> questions;
+    private List<AssessmentFeedback> feedbacks;
     // Limite de tempo da avaliação
     private Duration evaluationTimer;
     // Data de expiração da avaliação (se necessário)
