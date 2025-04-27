@@ -1,6 +1,6 @@
 package com.lia.liaprove.core.domain.question;
 
-import com.lia.liaprove.core.domain.relationship.QuestionFeedback;
+import com.lia.liaprove.core.domain.relationship.FeedbackQuestion;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -13,7 +13,7 @@ public class Question {
     private EnumMap<DifficultyLevel, Integer> difficultyLevelVotes;
     // A comunidade avaliará a área de conhecimento da questão. Este atributo representa quantos votos cada área recebeu.
     private List<KnowledgeArea> knowledgeAreas = new ArrayList<>();
-    private List<QuestionFeedback> feedbacks = new ArrayList<>();
+    private List<FeedbackQuestion> feedbacks = new ArrayList<>();
     // A comunidade avaliará a relevância da questão. Este atributo representa quantos votos cada nível recebeu.
     private int[] relevanceVotes = new int[5]; // De 1 a 5
     private LocalDateTime submissionDate;

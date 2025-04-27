@@ -1,7 +1,7 @@
 package com.lia.liaprove.core.domain.user;
 
-import com.lia.liaprove.core.domain.relationship.UserCertificate;
-import com.lia.liaprove.core.domain.relationship.UserFeedback;
+import com.lia.liaprove.core.domain.assessment.Certificate;
+import com.lia.liaprove.core.domain.metrics.Feedback;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,12 +18,11 @@ public abstract class User {
     // Utilizado para medir o peso do voto nas questões
     private Integer voteWeight;
     private Integer totalAssessmentsTaken;
-    private List<UserCertificate> certificates;
+    private List<Certificate> certificates;
+    private List<Feedback> feedbacks;
     // Média de pontuação nas avaliações realizadas
     private Float averageScore;
     private LocalDateTime registrationDate;
     private LocalDateTime lastLogin;
-    // Feedbacks emitidos pelos usuários
-    private List<UserFeedback> feedbacks;
 
 }
