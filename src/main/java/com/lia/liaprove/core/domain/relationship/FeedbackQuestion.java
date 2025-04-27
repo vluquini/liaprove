@@ -5,11 +5,15 @@ import com.lia.liaprove.core.domain.question.Question;
 
 import java.time.LocalDateTime;
 
-public class QuestionFeedback extends Feedback{
+public class FeedbackQuestion extends Feedback{
+    private Integer upVote;
+    private Integer downVote;
     private Question question;
 
-    public QuestionFeedback(Question question, String comment, LocalDateTime submissionDate) {
+    public FeedbackQuestion(Question question, String comment, LocalDateTime submissionDate) {
         super(comment, submissionDate);
+        this.upVote = 0;
+        this.downVote = 0;
         this.question = question;
     }
 }
