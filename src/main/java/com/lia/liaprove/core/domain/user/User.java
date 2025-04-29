@@ -5,8 +5,10 @@ import com.lia.liaprove.core.domain.metrics.Feedback;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public abstract class User {
+    private UUID id;
     private String name;
     private String email;
     private String password;

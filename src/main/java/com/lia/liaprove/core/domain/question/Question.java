@@ -1,11 +1,12 @@
 package com.lia.liaprove.core.domain.question;
 
-import com.lia.liaprove.core.domain.relationship.FeedbackQuestion;
+import com.lia.liaprove.core.domain.metrics.FeedbackQuestion;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 public class Question {
+    private UUID id;
     private String title;
     private String description;
     private DifficultyLevel difficultyLevel;

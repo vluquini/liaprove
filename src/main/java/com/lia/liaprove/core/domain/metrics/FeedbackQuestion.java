@@ -1,11 +1,12 @@
-package com.lia.liaprove.core.domain.relationship;
+package com.lia.liaprove.core.domain.metrics;
 
-import com.lia.liaprove.core.domain.metrics.Feedback;
 import com.lia.liaprove.core.domain.question.Question;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 public class FeedbackQuestion extends Feedback{
+    private UUID id;
     private Integer upVote;
     private Integer downVote;
     private Question question;
