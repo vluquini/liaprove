@@ -6,8 +6,10 @@ import com.lia.liaprove.core.domain.question.Question;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 public abstract class Assessment {
+    private UUID id;
     private String title;
     private String description;
     // Como os Recruiters podem criar novas avaliações, a data de criação é uma informação importante
