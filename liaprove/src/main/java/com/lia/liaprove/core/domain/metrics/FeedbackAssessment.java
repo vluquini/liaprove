@@ -13,4 +13,20 @@ public class FeedbackAssessment extends Feedback {
         super(comment, submissionDate);
         this.assessment = assessment;
     }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public Assessment getAssessment() {
+        return assessment;
+    }
+
+    public void setAssessment(Assessment assessment) {
+        this.assessment = assessment;
+    }
 }

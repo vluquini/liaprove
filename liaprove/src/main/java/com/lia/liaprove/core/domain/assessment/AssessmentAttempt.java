@@ -17,4 +17,61 @@ public class AssessmentAttempt {
     private LocalDateTime startedAt;
     private LocalDateTime finishedAt;
     private Integer accuracyRate;
+
+    public AssessmentAttempt(UUID id, Assessment assessment, User user, LocalDateTime startedAt, LocalDateTime finishedAt, Integer accuracyRate) {
+        this.id = UUID.randomUUID();
+        this.assessment = assessment;
+        this.user = user;
+        this.startedAt = startedAt;
+        this.finishedAt = finishedAt;
+        this.accuracyRate = accuracyRate;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public Assessment getAssessment() {
+        return assessment;
+    }
+
+    public void setAssessment(Assessment assessment) {
+        this.assessment = assessment;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public LocalDateTime getStartedAt() {
+        return startedAt;
+    }
+
+    public void setStartedAt(LocalDateTime startedAt) {
+        this.startedAt = startedAt;
+    }
+
+    public LocalDateTime getFinishedAt() {
+        return finishedAt;
+    }
+
+    public void setFinishedAt(LocalDateTime finishedAt) {
+        this.finishedAt = finishedAt;
+    }
+
+    public Integer getAccuracyRate() {
+        return accuracyRate;
+    }
+
+    public void setAccuracyRate(Integer accuracyRate) {
+        this.accuracyRate = accuracyRate;
+    }
 }
