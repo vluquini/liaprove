@@ -18,4 +18,71 @@ public abstract class Assessment {
     private List<Feedback> feedbacks;
     // Limite de tempo da avaliação
     private Duration evaluationTimer;
+
+    public Assessment(UUID id, String title, String description, LocalDateTime creationDate, List<Question> questions,
+                      List<Feedback> feedbacks, Duration evaluationTimer) {
+        this.id = UUID.randomUUID();
+        this.title = title;
+        this.description = description;
+        this.creationDate = creationDate;
+        this.questions = questions;
+        this.feedbacks = feedbacks;
+        this.evaluationTimer = evaluationTimer;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public LocalDateTime getCreationDate() {
+        return creationDate;
+    }
+
+    public void setCreationDate(LocalDateTime creationDate) {
+        this.creationDate = creationDate;
+    }
+
+    public List<Question> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(List<Question> questions) {
+        this.questions = questions;
+    }
+
+    public List<Feedback> getFeedbacks() {
+        return feedbacks;
+    }
+
+    public void setFeedbacks(List<Feedback> feedbacks) {
+        this.feedbacks = feedbacks;
+    }
+
+    public Duration getEvaluationTimer() {
+        return evaluationTimer;
+    }
+
+    public void setEvaluationTimer(Duration evaluationTimer) {
+        this.evaluationTimer = evaluationTimer;
+    }
 }

@@ -9,7 +9,10 @@ public abstract class Feedback {
     private LocalDateTime submissionDate;
 
     public Feedback(String comment, LocalDateTime submissionDate) {
+        this.id = UUID.randomUUID();
         this.comment = comment;
         this.submissionDate = submissionDate;
     }
+
+
 }
