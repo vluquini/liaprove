@@ -4,7 +4,10 @@ import com.lia.liaprove.core.domain.assessment.Assessment;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
+/*
+Classe que será utilizada para usuários avaliarem os Assessments
+personalizados.
+ */
 public class FeedbackAssessment extends Feedback {
     private UUID id;
     private Assessment assessment;

@@ -20,12 +20,10 @@ public class Question {
     private LocalDateTime submissionDate;
     // Status da questão na plataforma
     private QuestionStatus status;
-    // Número de votos totais que a questão recebeu
-    private Integer totalVotes;
     private Boolean preEvaluatedByLLM;
     // Nível de relevância, atribuído pela LLM (1 a 5)
     private byte relevanceByLLM;
-    private Boolean isAproved;
+    private Boolean isApproved;
     private int upVote;
     private int downVote;
     // Número de vezes que o recruiter usou essa questão. Será utilizada no cálculo de sugestão pelas RBs.
@@ -33,7 +31,7 @@ public class Question {
 
     public Question(UUID id, String title, String description, DifficultyLevel difficultyLevel, EnumMap<DifficultyLevel, Integer> difficultyLevelVotes,
                     List<KnowledgeArea> knowledgeAreas, List<FeedbackQuestion> feedbacks, int[] relevanceVotes, LocalDateTime submissionDate,
-                    QuestionStatus status, Integer totalVotes, Boolean preEvaluatedByLLM, byte relevanceByLLM, Boolean isAproved, int upVote, int downVote,
+                    QuestionStatus status, Integer totalVotes, Boolean preEvaluatedByLLM, byte relevanceByLLM, Boolean isApproved, int upVote, int downVote,
                     int recruiterUsageCount) {
         this.id = UUID.randomUUID();
         this.title = title;
@@ -45,10 +43,9 @@ public class Question {
         this.relevanceVotes = relevanceVotes;
         this.submissionDate = submissionDate;
         this.status = status;
-        this.totalVotes = totalVotes;
         this.preEvaluatedByLLM = preEvaluatedByLLM;
         this.relevanceByLLM = relevanceByLLM;
-        this.isAproved = isAproved;
+        this.isApproved = isApproved;
         this.upVote = upVote;
         this.downVote = downVote;
         this.recruiterUsageCount = recruiterUsageCount;
@@ -134,13 +131,6 @@ public class Question {
         this.status = status;
     }
 
-    public Integer getTotalVotes() {
-        return totalVotes;
-    }
-
-    public void setTotalVotes(Integer totalVotes) {
-        this.totalVotes = totalVotes;
-    }
 
     public Boolean getPreEvaluatedByLLM() {
         return preEvaluatedByLLM;
@@ -158,12 +148,12 @@ public class Question {
         this.relevanceByLLM = relevanceByLLM;
     }
 
-    public Boolean getAproved() {
-        return isAproved;
+    public Boolean getApproved() {
+        return isApproved;
     }
 
-    public void setAproved(Boolean aproved) {
-        isAproved = aproved;
+    public void setApproved(Boolean approved) {
+        isApproved = approved;
     }
 
     public int getUpVote() {
