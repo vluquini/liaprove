@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 /*
-Esta classe refere-se a Assessments criados pelo sistema
+Esta classe refere-se a Assessments criados pelo sistema.
  */
 public class SystemAssessment extends Assessment{
     public SystemAssessment(UUID id, String title, String description, LocalDateTime creationDate, List<Question> questions, List<Feedback> feedbacks, Duration evaluationTimer) {

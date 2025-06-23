@@ -31,7 +31,7 @@ public class Question {
 
     public Question(UUID id, String title, String description, DifficultyLevel difficultyLevel, EnumMap<DifficultyLevel, Integer> difficultyLevelVotes,
                     List<KnowledgeArea> knowledgeAreas, List<FeedbackQuestion> feedbacks, int[] relevanceVotes, LocalDateTime submissionDate,
-                    QuestionStatus status, Integer totalVotes, Boolean preEvaluatedByLLM, byte relevanceByLLM, Boolean isApproved, int upVote, int downVote,
+                    QuestionStatus status, Boolean preEvaluatedByLLM, byte relevanceByLLM, Boolean isApproved, int upVote, int downVote,
                     int recruiterUsageCount) {
         this.id = UUID.randomUUID();
         this.title = title;
