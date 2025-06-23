@@ -11,7 +11,7 @@ import java.util.UUID;
 
 /*
 Esta entidade representa Assessments personalizados
-criados por um Recruiter
+criados por um Recruiter.
  */
 public class PersonalizedAssessment extends Assessment {
     private UserRecruiter createdBy;
