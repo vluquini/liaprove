@@ -1,7 +1,6 @@
 package com.lia.liaprove.core.domain.user;
 
 import com.lia.liaprove.core.domain.assessment.Certificate;
-import com.lia.liaprove.core.domain.metrics.Feedback;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,7 +20,6 @@ public abstract class User {
     private Integer voteWeight;
     private Integer totalAssessmentsTaken;
     private List<Certificate> certificates;
-    private List<Feedback> feedbacks;
     // Média de pontuação nas avaliações realizadas
     private Float averageScore;
     private LocalDateTime registrationDate;
@@ -29,7 +27,7 @@ public abstract class User {
 
     public User(UUID id, String name, String email, String password, String occupation, String bio,
                 ExperienceLevel experienceLevel, UserRole role, Integer voteWeight, Integer totalAssessmentsTaken,
-                List<Certificate> certificates, List<Feedback> feedbacks, Float averageScore, LocalDateTime registrationDate,
+                List<Certificate> certificates, Float averageScore, LocalDateTime registrationDate,
                 LocalDateTime lastLogin) {
         this.id = UUID.randomUUID();
         this.name = name;
@@ -42,7 +40,6 @@ public abstract class User {
         this.voteWeight = voteWeight;
         this.totalAssessmentsTaken = totalAssessmentsTaken;
         this.certificates = certificates;
-        this.feedbacks = feedbacks;
         this.averageScore = averageScore;
         this.registrationDate = registrationDate;
         this.lastLogin = lastLogin;
@@ -136,14 +133,6 @@ public abstract class User {
         this.certificates = certificates;
     }
 
-    public List<Feedback> getFeedbacks() {
-        return feedbacks;
-    }
-
-    public void setFeedbacks(List<Feedback> feedbacks) {
-        this.feedbacks = feedbacks;
-    }
-
     public Float getAverageScore() {
         return averageScore;
     }
@@ -167,4 +156,5 @@ public abstract class User {
     public void setLastLogin(LocalDateTime lastLogin) {
         this.lastLogin = lastLogin;
     }
+
 }
