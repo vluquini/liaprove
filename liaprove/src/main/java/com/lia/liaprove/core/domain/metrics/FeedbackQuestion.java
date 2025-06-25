@@ -1,52 +1,30 @@
 package com.lia.liaprove.core.domain.metrics;
 
+import com.lia.liaprove.core.domain.question.DifficultyLevel;
+import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.Question;
+import com.lia.liaprove.core.domain.question.RelevanceLevel;
+import com.lia.liaprove.core.domain.user.User;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-
+/*
+Entidade usada para registrar os votos dos usuários
+nas questões em fase de votação.
+ */
 public class FeedbackQuestion extends Feedback{
-    private UUID id;
-    private Integer upVote;
-    private Integer downVote;
     private Question question;
+    // A comunidade avaliará o nível de dificuldade da questão
+    private DifficultyLevel difficultyLevel;
+    // A comunidade avaliará a área de conhecimento da questão
+    private KnowledgeArea knowledgeArea;
+    private RelevanceLevel relevanceLevel;
 
-    public FeedbackQuestion(Question question, String comment, LocalDateTime submissionDate) {
-        super(comment, submissionDate);
-        this.upVote = 0;
-        this.downVote = 0;
+    public FeedbackQuestion(UUID id, User user, String comment, Vote vote, LocalDateTime submissionDate, Question question, DifficultyLevel difficultyLevel, KnowledgeArea knowledgeArea, RelevanceLevel relevanceLevel) {
+        super(id, user, comment, vote, submissionDate);
         this.question = question;
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public Integer getUpVote() {
-        return upVote;
-    }
-
-    public void setUpVote(Integer upVote) {
-        this.upVote = upVote;
-    }
-
-    public Integer getDownVote() {
-        return downVote;
-    }
-
-    public void setDownVote(Integer downVote) {
-        this.downVote = downVote;
-    }
-
-    public Question getQuestion() {
-        return question;
-    }
-
-    public void setQuestion(Question question) {
-        this.question = question;
+        this.difficultyLevel = difficultyLevel;
+        this.knowledgeArea = knowledgeArea;
+        this.relevanceLevel = relevanceLevel;
     }
 }
