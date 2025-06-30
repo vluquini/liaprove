@@ -11,13 +11,12 @@ public class Question {
     // Nível de dificuldade da Questão atribuído pela comunidade
     private DifficultyLevel difficultyLevel;
     // Nível de relevância da Questão atribuído pela comunidade
-    private RelevanceLevel relevanceLevel;
+    private RelevanceLevel relevanceByCommunity;
     private LocalDateTime submissionDate;
     // Status da questão na plataforma
     private QuestionStatus status;
-    // Pré-avaliação feita pela LLM
-    private Boolean preEvaluatedByLLM;
-    // Nível de relevância, atribuído pela LLM
+    // Nível de relevância, atribuído pela LLM - Este campo poderá ser utilizado pelas Redes Bayesianas ao sugerir questões
+    // aos Recruiters
     private RelevanceLevel relevanceByLLM;
     // Número de vezes que o recruiter usou essa questão. Será utilizada no cálculo de sugestão pelas RBs.
     private int recruiterUsageCount;

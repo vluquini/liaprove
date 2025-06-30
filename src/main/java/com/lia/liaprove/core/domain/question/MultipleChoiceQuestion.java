@@ -1,22 +1,22 @@
 package com.lia.liaprove.core.domain.question;
 
-import java.util.List;
+import java.util.Set;
 
 public class MultipleChoiceQuestion extends Question {
     // Lista de opções de resposta
-    private List<String> choices;
+    private Set<String> choices;
     private String correctAnswer;
 
-    public MultipleChoiceQuestion(List<String> choices, String correctAnswer) {
+    public MultipleChoiceQuestion(Set<String> choices, String correctAnswer) {
         this.choices = choices;
         this.correctAnswer = correctAnswer;
     }
 
-    public List<String> getChoices() {
+    public Set<String> getChoices() {
         return choices;
     }
 
-    public void setChoices(List<String> choices) {
+    public void setChoices(Set<String> choices) {
         this.choices = choices;
     }
 
