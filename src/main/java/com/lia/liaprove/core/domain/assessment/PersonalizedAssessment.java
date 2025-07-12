@@ -1,6 +1,6 @@
 package com.lia.liaprove.core.domain.assessment;
 
-import com.lia.liaprove.core.domain.metrics.Feedback;
+import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
 
@@ -19,10 +19,11 @@ public class PersonalizedAssessment extends Assessment {
     private LocalDateTime expirationDate;
     // Total de vezes que a avaliação foi realizada
     private int totalAttempts;
+    private boolean allowsRetake;
     // Status da avaliação
     private AssessmentStatus status;
 
-    public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate, List<Question> questions, List<Feedback> feedbacks, Duration evaluationTimer) {
+    public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate, List<Question> questions, List<FeedbackAssessment> feedbacks, Duration evaluationTimer) {
         super(id, title, description, creationDate, questions, feedbacks, evaluationTimer);
     }
 
