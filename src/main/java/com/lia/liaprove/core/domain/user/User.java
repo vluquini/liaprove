@@ -3,7 +3,9 @@ package com.lia.liaprove.core.domain.user;
 import com.lia.liaprove.core.domain.assessment.Certificate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public abstract class User {
@@ -156,5 +158,109 @@ public abstract class User {
     public void setLastLogin(LocalDateTime lastLogin) {
         this.lastLogin = lastLogin;
     }
+
+    // Métodos de conveniência - Possivelmente necessários
+    public boolean isRecruiter() {
+        return this.role == UserRole.RECRUITER;
+    }
+
+    public boolean isProfessional() {
+        return this.role == UserRole.PROFESSIONAL;
+    }
+
+
+    // ---------- Métodos de domínio ----------
+
+    /**
+     * Registra um novo certificado no histórico do usuário (evita duplicatas por id).
+     */
+    public void addCertificate(Certificate certificate) {
+        Objects.requireNonNull(certificate, "certificate must not be null");
+        if (this.certificates == null) {
+            this.certificates = new ArrayList<>();
+        }
+        boolean exists = this.certificates.stream()
+                .anyMatch(c -> Objects.equals(c.getCertificateNumber(), certificate.getCertificateNumber()));
+        if (!exists) {
+            this.certificates.add(certificate);
+        }
+    }
+
+    /**
+     * Remove um certificado pelo seu identificador (certificateNumber).
+     */
+    public boolean removeCertificate(String certificateNumber) {
+        if (this.certificates == null || certificateNumber == null) return false;
+        return this.certificates.removeIf(c -> certificateNumber.equals(c.getCertificateNumber()));
+    }
+
+    /**
+     * Atualiza métricas do usuário após a conclusão de uma avaliação:
+     * - incrementa totalAssessmentsTaken
+     * - recalcula averageScore incrementalmente
+     *
+     * Fórmula numérica estável:
+     * newAvg = (oldAvg * n + newScore) / (n + 1)
+     */
+    public void recordAssessmentResult(float newScore) {
+        if (newScore < 0.0f) throw new IllegalArgumentException("score must be >= 0");
+        int n = (this.totalAssessmentsTaken == null) ? 0 : this.totalAssessmentsTaken;
+        float oldAvg = (this.averageScore == null) ? 0.0f : this.averageScore;
+        float newAvg = (oldAvg * n + newScore) / (n + 1);
+        this.totalAssessmentsTaken = n + 1;
+        this.averageScore = newAvg;
+    }
+
+    /**
+     * Incrementa apenas o contador de avaliações realizadas (util quando não há score, por ex. registro).
+     */
+    public void incrementAssessmentsTaken() {
+        int n = (this.totalAssessmentsTaken == null) ? 0 : this.totalAssessmentsTaken;
+        this.totalAssessmentsTaken = n + 1;
+    }
+
+    /**
+     * Atualiza lastLogin para o horário atual.
+     */
+    public void updateLastLogin() {
+        this.lastLogin = LocalDateTime.now();
+    }
+
+    /**
+     * Define a senha já hashada. A aplicação deve empregar hashing/algoritmos de password
+     * na camada de infra/security antes de chamar este setter.
+     */
+    public void setPasswordHash(String hashedPassword) {
+        if (hashedPassword == null || hashedPassword.isBlank()) {
+            throw new IllegalArgumentException("hashedPassword must not be null/blank");
+        }
+        this.password = hashedPassword;
+    }
+
+    /**
+     * Ajusta o peso de voto (voteWeight) de forma segura, com validação mínima.
+     * Mantém o valor entre limites razoáveis para evitar abusos.
+     */
+    public void setVoteWeightSafely(int newWeight) {
+        final int MIN = 0;
+        final int MAX = 100;
+        if (newWeight < MIN || newWeight > MAX) {
+            throw new IllegalArgumentException("voteWeight must be between " + MIN + " and " + MAX);
+        }
+        this.voteWeight = newWeight;
+    }
+
+    /**
+     * Ajusta incrementalmente o voteWeight (positivo ou negativo).
+     * Faz saturação nos limites definidos.
+     */
+    public void adjustVoteWeight(int delta) {
+        int current = (this.voteWeight == null) ? 0 : this.voteWeight;
+        int MIN = 0;
+        int MAX = 100;
+        int updated = Math.max(MIN, Math.min(MAX, current + delta));
+        this.voteWeight = updated;
+    }
+
 
 }
