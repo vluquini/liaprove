@@ -5,20 +5,13 @@ import java.util.UUID;
 
 public class Certificate {
     private UUID id;
+    // Número identificador do Certificado (será concatenado à URL)
+    private String certificateNumber;
     private String title;
     private String description;
     private String certificateUrl;
     private LocalDate issueDate;
     private Float score;
-
-    public Certificate(UUID id, String title, String description, String certificateUrl, LocalDate issueDate, Float score) {
-        this.id = UUID.randomUUID();
-        this.title = title;
-        this.description = description;
-        this.certificateUrl = certificateUrl;
-        this.issueDate = issueDate;
-        this.score = score;
-    }
 
     public UUID getId() {
         return id;
@@ -26,6 +19,14 @@ public class Certificate {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public String getCertificateNumber() {
+        return certificateNumber;
+    }
+
+    public void setCertificateNumber(String certificateNumber) {
+        this.certificateNumber = certificateNumber;
     }
 
     public String getTitle() {
