@@ -9,7 +9,7 @@ import java.util.UUID;
  * Registra um novo usuário (professional ou recruiter).
  * Retorna o id criado para o usuário.
  */
-public interface RegisterUserUseCase {
-    UUID register(String name, String email, String rawPassword, String occupation, ExperienceLevel experienceLevel,
+public interface CreateUserUseCase {
+    UUID create(String name, String email, String rawPassword, String occupation, ExperienceLevel experienceLevel,
                   UserRole role) throws InvalidUserDataException;
 }
