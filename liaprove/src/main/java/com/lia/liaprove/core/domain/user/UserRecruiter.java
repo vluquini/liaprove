@@ -15,6 +15,7 @@ public class UserRecruiter extends User {
     // Contador para cálculo incremental da média do recruiterRating
     private Integer recruiterRatingCount = 0;
 
+    public UserRecruiter() {}
 
     public UserRecruiter(UUID id, String name, String email, String password, String occupation, String bio, ExperienceLevel experienceLevel, UserRole role, Integer voteWeight, Integer totalAssessmentsTaken, List<Certificate> certificates, Float averageScore, LocalDateTime registrationDate, LocalDateTime lastLogin) {
         super(id, name, email, password, occupation, bio, experienceLevel, role, voteWeight, totalAssessmentsTaken, certificates, averageScore, registrationDate, lastLogin);

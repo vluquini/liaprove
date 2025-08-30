@@ -27,6 +27,8 @@ public abstract class User {
     private LocalDateTime registrationDate;
     private LocalDateTime lastLogin;
 
+    public User(){}
+
     public User(UUID id, String name, String email, String password, String occupation, String bio,
                 ExperienceLevel experienceLevel, UserRole role, Integer voteWeight, Integer totalAssessmentsTaken,
                 List<Certificate> certificates, Float averageScore, LocalDateTime registrationDate,
