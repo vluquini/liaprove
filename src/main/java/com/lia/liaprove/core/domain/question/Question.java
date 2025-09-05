@@ -21,6 +21,102 @@ public class Question {
     // Número de vezes que o recruiter usou essa questão. Será utilizada no cálculo de sugestão pelas RBs.
     private int recruiterUsageCount;
 
+    public Question(){}
+
+    public Question(UUID id, String title, String description, Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
+                    RelevanceLevel relevanceByCommunity, LocalDateTime submissionDate, QuestionStatus status, RelevanceLevel relevanceByLLM, int recruiterUsageCount) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.knowledgeAreas = knowledgeAreas;
+        this.difficultyLevel = difficultyLevel;
+        this.relevanceByCommunity = relevanceByCommunity;
+        this.submissionDate = submissionDate;
+        this.status = status;
+        this.relevanceByLLM = relevanceByLLM;
+        this.recruiterUsageCount = recruiterUsageCount;
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Set<KnowledgeArea> getKnowledgeAreas() {
+        return knowledgeAreas;
+    }
+
+    public void setKnowledgeAreas(Set<KnowledgeArea> knowledgeAreas) {
+        this.knowledgeAreas = knowledgeAreas;
+    }
+
+    public DifficultyLevel getDifficultyLevel() {
+        return difficultyLevel;
+    }
+
+    public void setDifficultyLevel(DifficultyLevel difficultyLevel) {
+        this.difficultyLevel = difficultyLevel;
+    }
+
+    public RelevanceLevel getRelevanceByCommunity() {
+        return relevanceByCommunity;
+    }
+
+    public void setRelevanceByCommunity(RelevanceLevel relevanceByCommunity) {
+        this.relevanceByCommunity = relevanceByCommunity;
+    }
+
+    public LocalDateTime getSubmissionDate() {
+        return submissionDate;
+    }
+
+    public void setSubmissionDate(LocalDateTime submissionDate) {
+        this.submissionDate = submissionDate;
+    }
+
+    public QuestionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(QuestionStatus status) {
+        this.status = status;
+    }
+
+    public RelevanceLevel getRelevanceByLLM() {
+        return relevanceByLLM;
+    }
+
+    public void setRelevanceByLLM(RelevanceLevel relevanceByLLM) {
+        this.relevanceByLLM = relevanceByLLM;
+    }
+
+    public int getRecruiterUsageCount() {
+        return recruiterUsageCount;
+    }
+
+    public void setRecruiterUsageCount(int recruiterUsageCount) {
+        this.recruiterUsageCount = recruiterUsageCount;
+    }
+
 
     //    public void addKnowledgeArea(KnowledgeArea area) {
 //        knowledgeAreas.add(area);
