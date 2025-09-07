@@ -229,6 +229,20 @@ public abstract class User {
     }
 
     /**
+     * Atualiza o nível de experiência do usuário.
+     * Mudança simples de estado — valida se nulo.
+     */
+    public void updateExperienceLevel(ExperienceLevel newLevel) {
+        if (newLevel == null) {
+            throw new IllegalArgumentException("newLevel must not be null");
+        }
+        // Só muda se diferente — evita gravações desnecessárias.
+        if (!Objects.equals(this.getExperienceLevel(), newLevel)) {
+            this.setExperienceLevel(newLevel);
+        }
+    }
+
+    /**
      * Define a senha já hashada. A aplicação deve empregar hashing/algoritmos de password
      * na camada de infra/security antes de chamar este setter.
      */

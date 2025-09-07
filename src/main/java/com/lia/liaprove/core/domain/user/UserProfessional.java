@@ -19,20 +19,6 @@ public class UserProfessional extends User{
     // ---------- Métodos de domínio  ----------
 
     /**
-     * Atualiza o nível de experiência do profissional.
-     * Mudança simples de estado — valida se nulo.
-     */
-    public void updateExperienceLevel(ExperienceLevel newLevel) {
-        if (newLevel == null) {
-            throw new IllegalArgumentException("newLevel must not be null");
-        }
-        // Só muda se diferente — evita gravações desnecessárias.
-        if (!Objects.equals(this.getExperienceLevel(), newLevel)) {
-            this.setExperienceLevel(newLevel);
-        }
-    }
-
-    /**
      * Aceita (anexa) um certificado ao usuário.
      * package-private para forçar que apenas usecases/services do mesmo módulo chamem.
      * A emissão/validação do certificado será feita no Use Case correspondente.
