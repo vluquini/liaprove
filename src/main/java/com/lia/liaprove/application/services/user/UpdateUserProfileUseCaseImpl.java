@@ -1,16 +1,20 @@
-package com.lia.liaprove.application.services;
+package com.lia.liaprove.application.services.user;
 
 import com.lia.liaprove.application.gateways.UserGateway;
 import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.User;
-import com.lia.liaprove.core.domain.user.UserProfessional;
 import com.lia.liaprove.core.exceptions.InvalidUserDataException;
 import com.lia.liaprove.core.exceptions.UserNotFoundException;
 import com.lia.liaprove.core.usecases.user.UpdateUserProfileUseCase;
 
 import java.util.Objects;
 import java.util.UUID;
-
+/**
+ * Implementação simples do caso de uso "UpdateUserProfileUseCase".
+ *
+ * Observação prática:
+ * - Esta implementação delega a lógica de consulta ao UserGateway.
+ */
 public class UpdateUserProfileUseCaseImpl implements UpdateUserProfileUseCase {
 
     private final UserGateway userGateway;
@@ -50,14 +54,9 @@ public class UpdateUserProfileUseCaseImpl implements UpdateUserProfileUseCase {
             user.setBio(bio == null ? null : bio.trim());
         }
 
-        // Se experienceLevel foi informado, só faz sentido para profissionais
-        if (hasExperience) {
-            if (user instanceof UserProfessional) {
-                ((UserProfessional) user).updateExperienceLevel(experienceLevel);
-            } else {
-                throw new InvalidUserDataException("ExperienceLevel can only be set for professional users");
-            }
-        }
+        // Se experienceLevel foi informado, atualiza
+        if (hasExperience)
+            user.updateExperienceLevel(experienceLevel);
 
         // Persistir alterações
         userGateway.save(user);

@@ -11,7 +11,7 @@ public class UserRecruiter extends User {
     private String companyEmail;
     private Integer totalAssessmentsCreated;
     // Pode ser usado pela comunidade para avaliar os Recruiters: questões publicadas, feedbacks, etc.
-    private Float recruiterRating;
+    private Float recruiterRating = 0.0f;
     // Contador para cálculo incremental da média do recruiterRating
     private Integer recruiterRatingCount = 0;
 
@@ -80,9 +80,10 @@ public class UserRecruiter extends User {
      * newRating deve estar no intervalo esperado (ex.: 0..5).
      */
     public void updateRecruiterRating(float newRating) {
-        if (newRating < 0f) {
-            throw new IllegalArgumentException("newRating must be >= 0");
+        if (newRating < 0.0f || newRating > 5.0f) {
+            throw new IllegalArgumentException("newRating must must be between 0.0 and 5.0.");
         }
+
         int count = (this.recruiterRatingCount == null) ? 0 : this.recruiterRatingCount;
         float oldAvg = (this.recruiterRating == null) ? 0f : this.recruiterRating;
         float newAvg = (oldAvg * count + newRating) / (count + 1);
