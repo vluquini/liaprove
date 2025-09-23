@@ -1,4 +1,4 @@
-package com.lia.liaprove.application.services;
+package com.lia.liaprove.application.services.user;
 
 import com.lia.liaprove.application.gateways.PasswordHasher;
 import com.lia.liaprove.application.gateways.UserGateway;
@@ -59,7 +59,7 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
             // Criando UserRecruiter
             user = createRecruiter(name, email, passwordHash, occupation);
         } else if (role == UserRole.ADMIN) {
-            // Tratar ADMIN como recruiter genérico (ou criar classe própria se existir)
+            // Tratar ADMIN como recruiter genérico
             user = createRecruiter(name, email, passwordHash, occupation);
             user.setRole(UserRole.ADMIN);
         } else {
@@ -92,9 +92,6 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
     }
 
     private User createProfessional(String name, String email, String passwordHash, String occupation, ExperienceLevel experienceLevel) {
-        // Tentativa 1: usar setters (assumindo construtor default existente).
-        // Caso sua entidade UserProfessional não possua construtor default,
-        // substitua esta lógica por chamada ao construtor disponível ou por uma UserFactory injetada.
         UserProfessional p = new UserProfessional();
         p.setId(UUID.randomUUID());
         p.setName(name.trim());

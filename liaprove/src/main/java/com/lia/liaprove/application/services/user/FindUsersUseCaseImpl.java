@@ -1,4 +1,4 @@
-package com.lia.liaprove.application.services;
+package com.lia.liaprove.application.services.user;
 
 import com.lia.liaprove.application.gateways.UserGateway;
 import com.lia.liaprove.core.domain.user.User;
@@ -34,7 +34,7 @@ public class FindUsersUseCaseImpl implements FindUsersUseCase {
 
         // Normaliza parâmetros simples (trim + empty -> empty optional)
         Optional<String> name = nameOpt
-                .filter(n -> n != null && !n.isBlank())
+                .filter(n -> !n.isBlank())
                 .map(String::trim);
 
         List<User> result = userGateway.search(name, roleOpt, p, s);
