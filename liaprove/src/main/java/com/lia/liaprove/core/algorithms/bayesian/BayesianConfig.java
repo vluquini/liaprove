@@ -6,15 +6,12 @@ package com.lia.liaprove.core.algorithms.bayesian;
  * Inclusão do atributo laplaceAlpha para suavização de Laplace.
  */
 public final class BayesianConfig {
-
-    private final double weightUsage;        // ex.: 0.35
-    private final double weightRelevanceLLM; // ex.: 0.30
-    private final double weightUpvoteRatio;  // ex.: 0.25
-    private final double weightRecruiter;    // ex.: 0.10
-
+    private final double weightUsage;           // ex.: 0.35
+    private final double weightRelevanceLLM;    // ex.: 0.30
+    private final double weightUpvoteRatio;     // ex.: 0.25
+    private final double weightRecruiter;       // ex.: 0.10
     private final int maxUsageForNormalization; // ex.: 100
     private final double maxRecruiterRating;    // ex.: 5.0
-
     // Laplace smoothing alpha (prior). Default = 1.0 (Laplace)
     private final double laplaceAlpha;
 

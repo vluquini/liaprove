@@ -12,15 +12,12 @@ import java.util.UUID;
  * Fornece as contagens que o motor bayesiano precisa (em vez de transferir listas inteiras).
  */
 public class QuestionFeedbackSummary {
-
     private final UUID questionId;
     private final int upCount;
     private final int downCount;
-
     // Somas ponderadas (calculadas na infra; se não existirem, serão 0.0)
     private final double weightedUp;
     private final double weightedDown;
-
     private final Map<RelevanceLevel, Integer> relevanceCounts;
     private final Map<DifficultyLevel, Integer> difficultyCounts;
     private final int totalFeedbacks;
@@ -48,6 +45,7 @@ public class QuestionFeedbackSummary {
     public int getDownCount() {
         return downCount;
     }
+
     /**
      * Soma dos pesos dos votos positivos (ex.: Σ voteWeight * roleMultiplier para votos UP).
      * Se a infra não calcular pesos, este campo pode ser 0.0.
@@ -55,6 +53,7 @@ public class QuestionFeedbackSummary {
     public double getWeightedUp() {
         return weightedUp;
     }
+
     /**
      * Soma dos pesos dos votos negativos (ex.: Σ voteWeight * roleMultiplier para votos DOWN).
      * Se a infra não calcular pesos, este campo pode ser 0.0.

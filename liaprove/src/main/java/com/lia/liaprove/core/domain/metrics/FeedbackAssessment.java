@@ -5,6 +5,7 @@ import com.lia.liaprove.core.domain.user.User;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+
 /*
 Classe que será utilizada para usuários avaliarem os Assessments
 personalizados.
