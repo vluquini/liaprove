@@ -1,12 +1,13 @@
 package com.lia.liaprove.application.services.user;
 
-import com.lia.liaprove.application.gateways.UserGateway;
+import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.exceptions.UserNotFoundException;
 import com.lia.liaprove.core.usecases.user.GetUserByIdUseCase;
 
 import java.util.Objects;
 import java.util.UUID;
+
 /**
  * Implementação simples do caso de uso "GetUserByIdUseCase".
  *
@@ -14,7 +15,6 @@ import java.util.UUID;
  * - Esta implementação delega a lógica de consulta ao UserGateway.
  */
 public class GetUserByIdUseCaseImpl implements GetUserByIdUseCase {
-
     private final UserGateway userGateway;
 
     public GetUserByIdUseCaseImpl(UserGateway userGateway) {

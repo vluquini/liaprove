@@ -1,5 +1,8 @@
 package com.lia.liaprove.core.usecases.algorithms.genetic;
 
+import com.lia.liaprove.core.algorithms.genetic.RecruiterMetrics;
+
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -8,8 +11,15 @@ import java.util.UUID;
  */
 public interface GeneticAlgorithmUseCase {
     /**
-     * Executa o processo de ajuste de pesos em batch e persiste/retorna o novo mapa id->weight.
-     * Normalmente será chamado por agendador ou manualmente.
+     * Executa o algoritmo usando os dados obtidos pela camada application (gateway).
+     * @return map de recruiterId -> novo voteWeight (0..10 por convenção)
      */
     Map<UUID, Integer> runAdjustVoteWeights();
+
+    /**
+     * Mesma operação, mas permitindo injetar os dados (útil para testes e dry-run locais,
+     * sem necessidade de mockar gateway).
+     * Implementação pode optar por persistir os valores ou apenas retornar o mapa.
+     */
+    Map<UUID, Integer> runAdjustVoteWeights(List<RecruiterMetrics> seedMetrics);
 }

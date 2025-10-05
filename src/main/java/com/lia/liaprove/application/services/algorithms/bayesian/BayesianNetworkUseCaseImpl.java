@@ -1,7 +1,7 @@
 package com.lia.liaprove.application.services.algorithms.bayesian;
 
 import com.lia.liaprove.core.algorithms.bayesian.BayesianConfig;
-import com.lia.liaprove.application.gateways.algorithms.bayesian.BayesianDataProvider;
+import com.lia.liaprove.application.gateways.algorithms.bayesian.BayesianGateway;
 import com.lia.liaprove.core.algorithms.bayesian.QuestionFeedbackSummary;
 import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
 import com.lia.liaprove.core.domain.question.Question;
@@ -33,10 +33,10 @@ import java.util.stream.Collectors;
  *  * - Normaliza corretamente RelevanceLevel (1..5 -> 0..1).
  */
 public class BayesianNetworkUseCaseImpl implements BayesianNetworkUseCase {
-    private final BayesianDataProvider provider;
+    private final BayesianGateway provider;
     private final BayesianConfig config;
 
-    public BayesianNetworkUseCaseImpl(BayesianDataProvider provider, BayesianConfig config) {
+    public BayesianNetworkUseCaseImpl(BayesianGateway provider, BayesianConfig config) {
         this.provider = Objects.requireNonNull(provider, "provider must not be null");
         this.config = Objects.requireNonNull(config, "config must not be null");
     }

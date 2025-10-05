@@ -1,7 +1,7 @@
 package com.lia.liaprove.application.services.user;
 
-import com.lia.liaprove.application.gateways.PasswordHasher;
-import com.lia.liaprove.application.gateways.UserGateway;
+import com.lia.liaprove.application.gateways.user.PasswordHasher;
+import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.assessment.Certificate;
 import com.lia.liaprove.core.domain.user.*;
 import com.lia.liaprove.core.exceptions.InvalidUserDataException;
@@ -20,7 +20,6 @@ import java.util.UUID;
  * - Validações básicas serão executadas aqui. Se necessário, validações mais complexas serão extraídas para helpers/validators.
  */
 public class CreateUserUseCaseImpl implements CreateUserUseCase {
-
     private static final int MIN_PASSWORD_LENGTH = 6;
 
     private final UserGateway userGateway;
@@ -72,9 +71,7 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
         return user.getId();
     }
 
-    // ------------------------
     // Helpers
-    // ------------------------
 
     private void validateBasic(String name, String email, String rawPassword, UserRole role) throws InvalidUserDataException {
         if (name == null || name.isBlank()) {

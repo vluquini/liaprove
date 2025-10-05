@@ -20,7 +20,7 @@ import java.util.UUID;
  *
  * Observação: as entidades retornadas são do domínio core (Question, FeedbackQuestion, UserRecruiter).
  */
-public interface BayesianDataProvider {
+public interface BayesianGateway {
 
     /**
      * Retorna resumo (up/down/distro) dos feedbacks para a questão solicitada.

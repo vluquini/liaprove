@@ -1,6 +1,6 @@
 package com.lia.liaprove.application.services.user;
 
-import com.lia.liaprove.application.gateways.UserGateway;
+import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.exceptions.InvalidUserDataException;

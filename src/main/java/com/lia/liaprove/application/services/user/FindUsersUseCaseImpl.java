@@ -1,6 +1,6 @@
 package com.lia.liaprove.application.services.user;
 
-import com.lia.liaprove.application.gateways.UserGateway;
+import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.usecases.user.FindUsersUseCase;
@@ -17,7 +17,6 @@ import java.util.Optional;
  * - Esta implementação delega a lógica de consulta ao UserGateway.
  */
 public class FindUsersUseCaseImpl implements FindUsersUseCase {
-
     private static final int DEFAULT_PAGE = 0;
     private static final int DEFAULT_SIZE = 20;
 
