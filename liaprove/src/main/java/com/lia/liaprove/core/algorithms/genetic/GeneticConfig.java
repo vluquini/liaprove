@@ -3,7 +3,7 @@ package com.lia.liaprove.core.algorithms.genetic;
 /**
  * Parâmetros configuráveis do GA.
  */
-public class GeneticConfig {
+public final class GeneticConfig {
     private final int populationSize;
     private final int generations;
     private final double mutationRate;    // ex.: 0.05
@@ -11,22 +11,19 @@ public class GeneticConfig {
     private final int minWeight;          // ex.: 0
     private final int maxWeight;          // ex.: 100
 
-    // Coeficientes para avaliação
-    private final double alphaUsage;   // ex: 0.6
-    private final double betaRating;   // ex: 0.3
-    private final double gammaCurrent; // ex: 0.1
+    // normalizadores / limites para features usadas no fitness
+    private final int maxRecentAssessments;   // ex: 50 (para janela semanal/mensal)
+    private final int maxQuestionsApproved;   // ex: 100
 
-    public GeneticConfig(int populationSize, int generations, double mutationRate, double crossoverRate, int minWeight,
-                         int maxWeight, double alphaUsage, double betaRating, double gammaCurrent) {
+    public GeneticConfig(int populationSize, int generations, double mutationRate, double crossoverRate, int minWeight, int maxWeight, int maxRecentAssessments, int maxQuestionsApproved) {
         this.populationSize = populationSize;
         this.generations = generations;
         this.mutationRate = mutationRate;
         this.crossoverRate = crossoverRate;
         this.minWeight = minWeight;
         this.maxWeight = maxWeight;
-        this.alphaUsage = alphaUsage;
-        this.betaRating = betaRating;
-        this.gammaCurrent = gammaCurrent;
+        this.maxRecentAssessments = maxRecentAssessments;
+        this.maxQuestionsApproved = maxQuestionsApproved;
     }
 
     public int getPopulationSize() { return populationSize; }
@@ -35,13 +32,23 @@ public class GeneticConfig {
     public double getCrossoverRate() { return crossoverRate; }
     public int getMinWeight() { return minWeight; }
     public int getMaxWeight() { return maxWeight; }
+    public int getMaxRecentAssessments() { return maxRecentAssessments; }
+    public int getMaxQuestionsApproved() { return maxQuestionsApproved; }
 
-    public double getAlphaUsage() { return alphaUsage; }
-    public double getBetaRating() { return betaRating; }
-    public double getGammaCurrent() { return gammaCurrent; }
-
-    // Factory with example defaults
+    /**
+     * Valores iniciais (ponto de partida para POC).
+     * - populationSize: razoável para média de ~50-200 recruiters; ajustes dependem do cenário.
+     * - generations: iterações do GA (10..50 é razoável para POC).
+     * - mutationRate: pequena (ex.: 0.05)
+     * - crossoverRate: alta o suficiente para exploração (ex.: 0.7)
+     * - min/max weight: 0..10 (convenção)
+     * - normalizadores: valores heurísticos para janelas.
+     */
     public static GeneticConfig defaults() {
-        return new GeneticConfig(50, 50, 0.05, 0.7, 0, 100, 0.6, 0.3, 0.1);
+        return new GeneticConfig(
+                50, 30, 0.05, 0.7,
+                0, 10, 20, 50
+        );
     }
+
 }

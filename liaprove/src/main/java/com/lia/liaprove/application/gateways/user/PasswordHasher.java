@@ -1,4 +1,4 @@
-package com.lia.liaprove.application.gateways;
+package com.lia.liaprove.application.gateways.user;
 
 public interface PasswordHasher {
     String hash(String raw);

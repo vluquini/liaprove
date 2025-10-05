@@ -1,7 +1,5 @@
 package com.lia.liaprove.core.algorithms.genetic;
 
-import com.lia.liaprove.core.domain.user.UserRecruiter;
-
 /**
  * Calcula fitness para um indivíduo dado o Recruiter.
  * Implementações podem usar: recruiterUsageCount, recruiterRating, current voteWeight, etc.
@@ -12,5 +10,13 @@ import com.lia.liaprove.core.domain.user.UserRecruiter;
  *  - UserRecruiter.getVoteWeight()               -> int
  */
 public interface FitnessEvaluator {
-    double evaluate(Individual individual, UserRecruiter recruiter);
+    /**
+     * Avalia o fitness do indivíduo associado a um recruiter.
+     * Deve retornar valor normalizado 0..1 (onde 1.0 é o melhor).
+     *
+     * @param individual cromossomo (representando weight normalizado)
+     * @param metrics métricas agregadas do recruiter (fonte: RecruiterGateway)
+     * @return fitness [0.0..1.0]
+     */
+    double evaluate(Individual individual, RecruiterMetrics metrics);
 }
