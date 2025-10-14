@@ -26,13 +26,14 @@ public abstract class User {
     private Float averageScore;
     private LocalDateTime registrationDate;
     private LocalDateTime lastLogin;
+    private UserStatus status = UserStatus.ACTIVE;
 
     public User(){}
 
     public User(UUID id, String name, String email, String password, String occupation, String bio,
                 ExperienceLevel experienceLevel, UserRole role, Integer voteWeight, Integer totalAssessmentsTaken,
                 List<Certificate> certificates, Float averageScore, LocalDateTime registrationDate,
-                LocalDateTime lastLogin) {
+                LocalDateTime lastLogin, UserStatus status) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.email = email;
@@ -47,6 +48,7 @@ public abstract class User {
         this.averageScore = averageScore;
         this.registrationDate = registrationDate;
         this.lastLogin = lastLogin;
+        this.status = UserStatus.ACTIVE;
     }
 
     public UUID getId() {
@@ -159,6 +161,14 @@ public abstract class User {
 
     public void setLastLogin(LocalDateTime lastLogin) {
         this.lastLogin = lastLogin;
+    }
+
+    public UserStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(UserStatus status) {
+        this.status = status;
     }
 
     // Métodos de conveniência - Possivelmente necessários
