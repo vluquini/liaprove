@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.usecases.user;
+package com.lia.liaprove.core.usecases.user.users;
 
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRole;

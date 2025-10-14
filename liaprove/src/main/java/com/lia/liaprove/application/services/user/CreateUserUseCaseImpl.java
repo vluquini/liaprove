@@ -5,7 +5,7 @@ import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.assessment.Certificate;
 import com.lia.liaprove.core.domain.user.*;
 import com.lia.liaprove.core.exceptions.InvalidUserDataException;
-import com.lia.liaprove.core.usecases.user.CreateUserUseCase;
+import com.lia.liaprove.core.usecases.user.users.CreateUserUseCase;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
