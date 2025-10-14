@@ -3,7 +3,7 @@ package com.lia.liaprove.application.services.user;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRole;
-import com.lia.liaprove.core.usecases.user.FindUsersUseCase;
+import com.lia.liaprove.core.usecases.user.users.FindUsersUseCase;
 
 import java.util.Collections;
 import java.util.List;
