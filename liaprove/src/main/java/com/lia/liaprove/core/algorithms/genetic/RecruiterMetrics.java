@@ -44,8 +44,8 @@ public final class RecruiterMetrics {
     public int getRecentAssessmentsCount() { return recentAssessmentsCount; }
     public double getAvgAssessmentRating() { return avgAssessmentRating; }
     public int getQuestionsApprovedCount() { return questionsApprovedCount; }
-    public long getFeedbackLikes() { return feedbackLikes; }
-    public long getFeedbackDislikes() { return feedbackDislikes; }
+    public int getFeedbackLikes() { return feedbackLikes; }
+    public int getFeedbackDislikes() { return feedbackDislikes; }
     public double getCommentLikeRatio() { return commentLikeRatio; }
     public double getRecruiterRating() { return recruiterRating; }
     public Map<String, Object> getExtras() { return extras; }
