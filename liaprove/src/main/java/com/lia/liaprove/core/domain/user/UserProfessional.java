@@ -5,15 +5,18 @@ import com.lia.liaprove.core.domain.assessment.Assessment;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 public class UserProfessional extends User{
 
     public UserProfessional() {}
 
-    public UserProfessional(UUID id, String name, String email, String password, String occupation, String bio, ExperienceLevel experienceLevel, UserRole role, Integer voteWeight, Integer totalAssessmentsTaken, List<Certificate> certificates, Float averageScore, LocalDateTime registrationDate, LocalDateTime lastLogin) {
-        super(id, name, email, password, occupation, bio, experienceLevel, role, voteWeight, totalAssessmentsTaken, certificates, averageScore, registrationDate, lastLogin);
+    public UserProfessional(UUID id, String name, String email, String password, String occupation, String bio,
+                            ExperienceLevel experienceLevel, UserRole role, Integer voteWeight, Integer totalAssessmentsTaken,
+                            List<Certificate> certificates, Float averageScore, LocalDateTime registrationDate,
+                            LocalDateTime lastLogin, UserStatus status) {
+        super(id, name, email, password, occupation, bio, experienceLevel, role, voteWeight, totalAssessmentsTaken,
+                certificates, averageScore, registrationDate, lastLogin, status);
     }
 
     // ---------- Métodos de domínio  ----------
