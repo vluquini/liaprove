@@ -12,16 +12,18 @@ public final class GeneticConfig {
     private final int maxWeight;          // ex.: 100
 
     // normalizadores / limites para features usadas no fitness
-    private final int maxRecentAssessments;   // ex: 50 (para janela semanal/mensal)
-    private final int maxQuestionsApproved;   // ex: 100
+    private final int maxRecentAssessments;   // ex: 10 (para janela semanal/mensal)
+    private final int maxQuestionsApproved;   // ex: 20
 
-    public GeneticConfig(int populationSize, int generations, double mutationRate, double crossoverRate, int minWeight, int maxWeight, int maxRecentAssessments, int maxQuestionsApproved) {
+    public GeneticConfig(int populationSize, int generations, double mutationRate, double crossoverRate, int minWeight,
+                         int maxWeight, int maxRecentAssessments, int maxQuestionsApproved) {
         if (populationSize <= 0) throw new IllegalArgumentException("populationSize must be > 0");
         if (generations <= 0) throw new IllegalArgumentException("generations must be > 0");
         if (!(mutationRate >= 0.0 && mutationRate <= 1.0)) throw new IllegalArgumentException("mutationRate must be in [0,1]");
         if (!(crossoverRate >= 0.0 && crossoverRate <= 1.0)) throw new IllegalArgumentException("crossoverRate must be in [0,1]");
-        if (minWeight < 0) throw new IllegalArgumentException("minWeight must be >= 0");
+        if (minWeight < 1) throw new IllegalArgumentException("minWeight must be >= 1");
         if (maxWeight < minWeight) throw new IllegalArgumentException("maxWeight must be >= minWeight");
+        if (maxWeight > 10) throw new IllegalArgumentException("maxWeight must be <= 10");
         if (maxRecentAssessments < 1) throw new IllegalArgumentException("maxRecentAssessments must be >= 1");
         if (maxQuestionsApproved < 1) throw new IllegalArgumentException("maxQuestionsApproved must be >= 1");
 
@@ -56,7 +58,7 @@ public final class GeneticConfig {
     public static GeneticConfig defaults() {
         return new GeneticConfig(
                 50, 30, 0.05, 0.7,
-                1, 10, 20, 50
+                1, 10, 10, 20
         );
     }
 
