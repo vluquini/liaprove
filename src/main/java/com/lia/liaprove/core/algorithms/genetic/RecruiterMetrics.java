@@ -1,6 +1,5 @@
 package com.lia.liaprove.core.algorithms.genetic;
 
-import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -19,11 +18,10 @@ public final class RecruiterMetrics {
     private final int feedbackDislikes;        // total dislikes em comentários
     private final double commentLikeRatio;     // 0..1 (likes/(likes+dislikes))
     private final double recruiterRating;      // rating agregado (0..5) se existir
-    private final Map<String, Object> extras;  // extensibilidade
 
     public RecruiterMetrics(UUID recruiterId, Integer currentVoteWeight, int totalAssessmentsCreated, int recentAssessmentsCount,
                             double avgAssessmentRating, int questionsApprovedCount, int feedbackLikes, int feedbackDislikes,
-                            double commentLikeRatio, double recruiterRating, Map<String, Object> extras) {
+                            double commentLikeRatio, double recruiterRating) {
         this.recruiterId = Objects.requireNonNull(recruiterId);
         this.currentVoteWeight = currentVoteWeight;
         this.totalAssessmentsCreated = Math.max(0, totalAssessmentsCreated);
@@ -35,7 +33,6 @@ public final class RecruiterMetrics {
         this.commentLikeRatio = (Double.isFinite(commentLikeRatio) && commentLikeRatio >= 0.0 && commentLikeRatio <= 1.0)
                                 ? commentLikeRatio : computeLikeRatioSafe(feedbackLikes, feedbackDislikes);
         this.recruiterRating = Double.isFinite(recruiterRating) ? recruiterRating : 0.0;
-        this.extras = extras == null ? Map.of() : Map.copyOf(extras);
     }
 
     public UUID getRecruiterId() { return recruiterId; }
@@ -48,7 +45,6 @@ public final class RecruiterMetrics {
     public int getFeedbackDislikes() { return feedbackDislikes; }
     public double getCommentLikeRatio() { return commentLikeRatio; }
     public double getRecruiterRating() { return recruiterRating; }
-    public Map<String, Object> getExtras() { return extras; }
 
     private static double computeLikeRatioSafe(int likes, int dislikes) {
         int total = likes + dislikes;
