@@ -264,29 +264,40 @@ public abstract class User {
     }
 
     /**
-     * Ajusta o peso de voto (voteWeight) de forma segura, com validação mínima.
-     * Mantém o valor entre limites razoáveis para evitar abusos.
+     * Define o voteWeight garantindo que o valor esteja entre os limites fornecidos.
+     *
+     * @param newWeight novo peso desejado
+     * @param min menor valor permitido (inclusivo)
+     * @param max maior valor permitido (inclusivo)
+     * @throws IllegalArgumentException se min > max ou newWeight fora do intervalo
      */
-    public void setVoteWeightSafely(int newWeight) {
-        final int MIN = 0;
-        final int MAX = 100;
-        if (newWeight < MIN || newWeight > MAX) {
-            throw new IllegalArgumentException("voteWeight must be between " + MIN + " and " + MAX);
+    public void setVoteWeightSafely(int newWeight, int min, int max) {
+        if (min > max) {
+            throw new IllegalArgumentException("min must be <= max");
+        }
+        if (newWeight < min || newWeight > max) {
+            throw new IllegalArgumentException("voteWeight must be between " + min + " and " + max);
         }
         this.voteWeight = newWeight;
     }
 
     /**
-     * Ajusta incrementalmente o voteWeight (positivo ou negativo).
-     * Faz saturação nos limites definidos.
+     * Ajusta incrementalmente o voteWeight (delta pode ser positivo ou negativo),
+     * saturando (clamping) entre os limites fornecidos.
+     *
+     * @param delta incremento (positivo) ou decremento (negativo)
+     * @param min menor valor permitido (inclusivo)
+     * @param max maior valor permitido (inclusivo)
      */
-    public void adjustVoteWeight(int delta) {
-        int current = (this.voteWeight == null) ? 0 : this.voteWeight;
-        int MIN = 0;
-        int MAX = 100;
-        int updated = Math.max(MIN, Math.min(MAX, current + delta));
+    public void adjustVoteWeight(int delta, int min, int max) {
+        if (min > max) {
+            throw new IllegalArgumentException("min must be <= max");
+        }
+        int current = (this.voteWeight == null) ? min : this.voteWeight;
+        int updated = Math.max(min, Math.min(max, current + delta));
         this.voteWeight = updated;
     }
+
 
 
 }

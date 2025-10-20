@@ -5,7 +5,6 @@ import com.lia.liaprove.core.algorithms.genetic.GeneticConfig;
 import com.lia.liaprove.core.algorithms.genetic.Individual;
 import com.lia.liaprove.core.algorithms.genetic.RecruiterMetrics;
 
-
 import java.util.Objects;
 
 /**
@@ -75,7 +74,7 @@ public class DefaultFitnessEvaluatorImpl implements FitnessEvaluator {
         double likeRatio = metrics.getCommentLikeRatio();
 
         // 5) current weight normalized
-        int current = metrics.getCurrentVoteWeight() == null ? 0 : metrics.getCurrentVoteWeight();
+        int current = metrics.getCurrentVoteWeight() == null ? config.getMinWeight() : metrics.getCurrentVoteWeight();
         double currentNorm = normalize(current, config.getMinWeight(), config.getMaxWeight());
 
         // combina pesos -> normaliza coeficientes para somar 1

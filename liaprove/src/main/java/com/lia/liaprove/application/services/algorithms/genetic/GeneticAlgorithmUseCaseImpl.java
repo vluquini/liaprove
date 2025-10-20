@@ -21,20 +21,21 @@ public class GeneticAlgorithmUseCaseImpl implements GeneticAlgorithmUseCase {
     private final GeneticConfig config;
     private final FitnessEvaluator evaluator;
     private final GeneticGateway geneticGateway;
-    private final Random random = new Random();
+    private final Random random;
 
-    public GeneticAlgorithmUseCaseImpl(GeneticConfig config, FitnessEvaluator evaluator, GeneticGateway geneticGateway) {
+    public GeneticAlgorithmUseCaseImpl(GeneticConfig config, FitnessEvaluator evaluator, GeneticGateway geneticGateway, Random random) {
         this.config = Objects.requireNonNull(config);
         this.evaluator = Objects.requireNonNull(evaluator);
         this.geneticGateway = Objects.requireNonNull(geneticGateway);
+        this.random =  Objects.requireNonNull(random);
     }
 
     @Override
     public Map<UUID, Integer> runAdjustVoteWeights() {
         List<RecruiterMetrics> metrics = geneticGateway.fetchAllRecruiterMetrics();
         Map<UUID, Integer> results = runAdjustVoteWeights(metrics);
-        // persistir resultados
-        geneticGateway.updateVoteWeightBulk(results);
+        // persistência é feito em AdjustVoteWeightUseCaseImpl
+        // geneticGateway.updateVoteWeightBulk(results);
         return results;
     }
 
@@ -54,7 +55,7 @@ public class GeneticAlgorithmUseCaseImpl implements GeneticAlgorithmUseCase {
         // ensure population size (pad/trim)
         if (population.size() < config.getPopulationSize()) {
             while (population.size() < config.getPopulationSize()) {
-                Individual base = population.get(random.nextInt(population.size()));
+                Individual base = population.get(this.random.nextInt(population.size()));
                 population.add(new Individual(base.getRecruiterId(), clamp(base.getGene() + noise())));
             }
         } else if (population.size() > config.getPopulationSize()) {
@@ -104,7 +105,7 @@ public class GeneticAlgorithmUseCaseImpl implements GeneticAlgorithmUseCase {
         while (next.size() < pop.size()) {
             Individual a = tournament(pop, 3);
             Individual b = tournament(pop, 3);
-            Individual child = (random.nextDouble() < config.getCrossoverRate()) ? crossover(a, b) : cloneIndividual(a);
+            Individual child = (this.random.nextDouble() < config.getCrossoverRate()) ? crossover(a, b) : cloneIndividual(a);
             mutate(child);
             next.add(child);
         }
@@ -114,7 +115,7 @@ public class GeneticAlgorithmUseCaseImpl implements GeneticAlgorithmUseCase {
     private Individual tournament(List<Individual> pop, int k) {
         Individual best = null;
         for (int i = 0; i < k; i++) {
-            Individual cand = pop.get(random.nextInt(pop.size()));
+            Individual cand = pop.get(this.random.nextInt(pop.size()));
             if (best == null || cand.getFitness() > best.getFitness()) best = cand;
         }
         return best;
@@ -130,13 +131,13 @@ public class GeneticAlgorithmUseCaseImpl implements GeneticAlgorithmUseCase {
     }
 
     private void mutate(Individual ind) {
-        if (random.nextDouble() < config.getMutationRate()) {
+        if (this.random.nextDouble() < config.getMutationRate()) {
             ind.setGene(clamp(ind.getGene() + noise()));
         }
     }
 
     private double noise() {
-        return (random.nextGaussian() * 0.03);
+        return (this.random.nextGaussian() * 0.03);
     }
 
     private double clamp(double v) { return Math.max(0.0, Math.min(1.0, v)); }
