@@ -14,6 +14,6 @@ public interface AdjustVoteWeightUseCase {
     // aplica manualmente um mapa de weights (override)
     void applyManualWeights(Map<UUID,Integer> weights, UUID adminId);
 
-    // reverte última execução
+    // reverte última execução (opcional, em caso de armazenar audit/history)
     void rollbackLastAdjustment(UUID adminId);
 }
