@@ -9,24 +9,25 @@ import com.lia.liaprove.core.domain.user.User;
 import java.time.LocalDateTime;
 import java.util.*;
 
-/*
-Entidade usada para registrar os votos dos usuários
-nas questões em fase de votação.
-*/
+/**
+ * Entidade usada para registrar os votos dos usuários
+ * nas questões em fase de votação, além das reações (likes/dislikes)
+ * nos comentários deixados.
+ */
 public class FeedbackQuestion extends Feedback{
     private Question question;
-    // A comunidade avaliará o nível de dificuldade da questão
     private DifficultyLevel difficultyLevel;
-    // A comunidade avaliará a área de conhecimento da questão
     private KnowledgeArea knowledgeArea;
     private RelevanceLevel relevanceLevel;
-    // Reações (likes/dislikes) — usamos um Map de id->user para evitar duplicidade; LinkedHashMap para preservar ordem de inserção
+    // Reações (userId -> reaction). LinkedHashMap preserva ordem de inserção
     private final Map<UUID, FeedbackReaction> reactionsByUser = new LinkedHashMap<>();
 
     public FeedbackQuestion() {}
 
-    public FeedbackQuestion(UUID id, User user, String comment, Vote vote, LocalDateTime submissionDate, Question question, DifficultyLevel difficultyLevel, KnowledgeArea knowledgeArea, RelevanceLevel relevanceLevel) {
-        super(id, user, comment, vote, submissionDate);
+    public FeedbackQuestion(UUID id, User user, String comment, Vote vote, LocalDateTime submissionDate,
+                            Question question, DifficultyLevel difficultyLevel, KnowledgeArea knowledgeArea,
+                            RelevanceLevel relevanceLevel) {
+        super(id, user, comment, vote, submissionDate, true);
         this.question = question;
         this.difficultyLevel = difficultyLevel;
         this.knowledgeArea = knowledgeArea;
@@ -37,16 +38,13 @@ public class FeedbackQuestion extends Feedback{
         return question;
     }
 
-    public void setQuestion(Question question) {
-        this.question = question;
-    }
-
     public DifficultyLevel getDifficultyLevel() {
         return difficultyLevel;
     }
 
     public void setDifficultyLevel(DifficultyLevel difficultyLevel) {
         this.difficultyLevel = difficultyLevel;
+        touchUpdatedAt();
     }
 
     public KnowledgeArea getKnowledgeArea() {
@@ -55,6 +53,7 @@ public class FeedbackQuestion extends Feedback{
 
     public void setKnowledgeArea(KnowledgeArea knowledgeArea) {
         this.knowledgeArea = knowledgeArea;
+        touchUpdatedAt();
     }
 
     public RelevanceLevel getRelevanceLevel() {
@@ -63,6 +62,7 @@ public class FeedbackQuestion extends Feedback{
 
     public void setRelevanceLevel(RelevanceLevel relevanceLevel) {
         this.relevanceLevel = relevanceLevel;
+        touchUpdatedAt();
     }
 
     /** Retorna as reações na ordem de inserção, como lista imutável. */
@@ -84,10 +84,12 @@ public class FeedbackQuestion extends Feedback{
         if (existing != null) {
             if (existing.getType() == type) return false; // sem mudança
             existing.setType(type);
+            touchUpdatedAt();
             return true;
         } else {
             FeedbackReaction reaction = new FeedbackReaction(user, type);
             reactionsByUser.put(userId, reaction);
+            touchUpdatedAt();
             return true;
         }
     }
@@ -95,7 +97,13 @@ public class FeedbackQuestion extends Feedback{
     /** Remove reação do usuário; retorna true se removida. */
     public boolean removeReaction(User user) {
         Objects.requireNonNull(user, "user");
-        return reactionsByUser.remove(user.getId()) != null;
+        UUID id = user.getId();
+        FeedbackReaction removed = reactionsByUser.remove(id);
+        if (removed != null){
+            touchUpdatedAt();
+            return true;
+        }
+        return false;
     }
 
     public long countLikes() {
