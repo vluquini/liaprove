@@ -17,14 +17,16 @@ public class AssessmentAttempt {
     private LocalDateTime startedAt;
     private LocalDateTime finishedAt;
     private Integer accuracyRate;
+    private Certificate certificate;
 
-    public AssessmentAttempt(UUID id, Assessment assessment, User user, LocalDateTime startedAt, LocalDateTime finishedAt, Integer accuracyRate) {
+    public AssessmentAttempt(UUID id, Assessment assessment, User user, LocalDateTime startedAt, LocalDateTime finishedAt, Integer accuracyRate, Certificate certificate) {
         this.id = UUID.randomUUID();
         this.assessment = assessment;
         this.user = user;
         this.startedAt = startedAt;
         this.finishedAt = finishedAt;
         this.accuracyRate = accuracyRate;
+        this.certificate = certificate;
     }
 
     public UUID getId() {
@@ -73,5 +75,13 @@ public class AssessmentAttempt {
 
     public void setAccuracyRate(Integer accuracyRate) {
         this.accuracyRate = accuracyRate;
+    }
+
+    public Certificate getCertificate() {
+        return certificate;
+    }
+
+    public void setCertificate(Certificate certificate) {
+        this.certificate = certificate;
     }
 }
