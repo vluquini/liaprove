@@ -3,33 +3,35 @@ package com.lia.liaprove.core.domain.question;
 import java.time.LocalDateTime;
 import java.util.*;
 
-public class Question {
+/**
+ * Classe abstrata base para todas as questões do sistema, contendo atributos comuns e informações de autoria.
+ */
+public abstract class Question {
     private UUID id;
+    // ID do usuário que criou a questão
+    private UUID authorId;
     private String title;
     private String description;
     private Set<KnowledgeArea> knowledgeAreas = new HashSet<>();
-    // Nível de dificuldade da Questão atribuído pela comunidade
-    private DifficultyLevel difficultyLevel;
-    // Nível de relevância da Questão atribuído pela comunidade
+    private DifficultyLevel difficultyByCommunity;
     private RelevanceLevel relevanceByCommunity;
     private LocalDateTime submissionDate;
-    // Status da questão na plataforma
     private QuestionStatus status;
-    // Nível de relevância, atribuído pela LLM - Este campo poderá ser utilizado pelas Redes Bayesianas ao sugerir questões
-    // aos Recruiters
     private RelevanceLevel relevanceByLLM;
-    // Número de vezes que o recruiter usou essa questão. Será utilizada no cálculo de sugestão pelas RBs.
+    // Número de vezes que o recruiter usou essa questão. É utilizada no cálculo de sugestão pelas RBs.
     private int recruiterUsageCount;
 
     public Question(){}
 
-    public Question(UUID id, String title, String description, Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
-                    RelevanceLevel relevanceByCommunity, LocalDateTime submissionDate, QuestionStatus status, RelevanceLevel relevanceByLLM, int recruiterUsageCount) {
+    public Question(UUID id, UUID authorId, String title, String description, Set<KnowledgeArea> knowledgeAreas,
+                    DifficultyLevel difficultyByCommunity, RelevanceLevel relevanceByCommunity, LocalDateTime submissionDate,
+                    QuestionStatus status, RelevanceLevel relevanceByLLM, int recruiterUsageCount) {
         this.id = id;
+        this.authorId = authorId;
         this.title = title;
         this.description = description;
         this.knowledgeAreas = knowledgeAreas;
-        this.difficultyLevel = difficultyLevel;
+        this.difficultyByCommunity = difficultyByCommunity;
         this.relevanceByCommunity = relevanceByCommunity;
         this.submissionDate = submissionDate;
         this.status = status;
@@ -43,6 +45,14 @@ public class Question {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public UUID getAuthorId() {
+        return authorId;
+    }
+
+    public void setAuthorId(UUID authorId) {
+        this.authorId = authorId;
     }
 
     public String getTitle() {
@@ -69,12 +79,12 @@ public class Question {
         this.knowledgeAreas = knowledgeAreas;
     }
 
-    public DifficultyLevel getDifficultyLevel() {
-        return difficultyLevel;
+    public DifficultyLevel getDifficultyByCommunity() {
+        return difficultyByCommunity;
     }
 
-    public void setDifficultyLevel(DifficultyLevel difficultyLevel) {
-        this.difficultyLevel = difficultyLevel;
+    public void setDifficultyByCommunity(DifficultyLevel difficultyByCommunity) {
+        this.difficultyByCommunity = difficultyByCommunity;
     }
 
     public RelevanceLevel getRelevanceByCommunity() {
@@ -116,28 +126,5 @@ public class Question {
     public void setRecruiterUsageCount(int recruiterUsageCount) {
         this.recruiterUsageCount = recruiterUsageCount;
     }
-
-
-    //    public void addKnowledgeArea(KnowledgeArea area) {
-//        knowledgeAreas.add(area);
-//    }
-//
-//    // Permitir votação em uma área de conhecimento específica
-//    public void voteKnowledgeArea(String areaName) {
-//        for (KnowledgeArea area : knowledgeAreas) {
-//            if (area.getName().equalsIgnoreCase(areaName)) {
-//                area.vote(); // Incrementa o contador de votos na área
-//                return;
-//            }
-//        }
-//        throw new IllegalArgumentException("Área de conhecimento não encontrada: " + areaName);
-//    }
-//
-//    // Exibir os votos para todas as áreas de conhecimento
-//    public void displayKnowledgeAreaVotes() {
-//        for (KnowledgeArea area : knowledgeAreas) {
-//            System.out.println(area);
-//        }
-//    }
 
 }

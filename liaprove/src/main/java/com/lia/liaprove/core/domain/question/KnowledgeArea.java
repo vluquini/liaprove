@@ -1,9 +1,23 @@
 package com.lia.liaprove.core.domain.question;
 
-import java.util.UUID;
+/**
+ * Enumeração que define as áreas de conhecimento às quais uma questão pode pertencer.
+ */
+public enum KnowledgeArea {
+    SOFTWARE_DEVELOPMENT("Software Development"),
+    DATABASE("Database"),
+    CYBERSECURITY("Cybersecurity"),
+    NETWORKS("Networks"),
+    AI("Artificial Intelligence");
 
-public class KnowledgeArea {
-    private UUID id;
-    private String name;
-    private String description;
+    private final String displayName;
+
+    KnowledgeArea(String displayName) {
+        this.displayName = displayName;
+    }
+
+    public String getDisplayName() {
+        return displayName;
+    }
+
 }

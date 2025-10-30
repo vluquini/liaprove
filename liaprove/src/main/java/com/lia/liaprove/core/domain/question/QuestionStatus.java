@@ -1,9 +1,13 @@
 package com.lia.liaprove.core.domain.question;
-/*
-Voting: a questão está sendo votada pelos usuários.
-Approved: questão aprovada pela comnidade, mas irá para o banco de dados 'privado'.
-Finished: questão aprovada pela comunidade e já poderá ser utilizada nas avaliações.
-Rejected: questão rejeitada na votação pela comunidade.
+
+/**
+ * Enumeração que controla o status de aprovação de uma questão na plataforma.
+ * <ul>
+ *     <li>{@code VOTING}: A questão está em processo de votação pela comunidade.</li>
+ *     <li>{@code APPROVED}: A questão foi aprovada pela comunidade, mas ainda não será usada nas avaliações.</li>
+ *     <li>{@code FINISHED}: A questão foi aprovada e já pode ser utilizada em avaliações.</li>
+ *     <li>{@code REJECTED}: A questão foi rejeitada na votação pela comunidade.</li>
+ * </ul>
  */
 public enum QuestionStatus {
     VOTING, APPROVED, FINISHED, REJECTED

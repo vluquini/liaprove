@@ -1,5 +1,8 @@
 package com.lia.liaprove.core.domain.question;
 
+/**
+ * Enumeração que representa o nível de relevância de uma questão, em uma escala de 1 a 5.
+ */
 public enum RelevanceLevel {
     ONE(1),
     TWO(2),
