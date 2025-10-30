@@ -1,5 +1,8 @@
 package com.lia.liaprove.core.domain.question;
 
+/**
+ * Enumeração que representa os níveis de dificuldade de uma questão.
+ */
 public enum DifficultyLevel {
     EASY("easy"), MEDIUM("medium"), HARD("hard");
 
@@ -12,8 +15,5 @@ public enum DifficultyLevel {
     public String getDifficultyLevel() {
         return difficultyLevel;
     }
-    // This method may not be necessary
-    public void setDifficultyLevel(String difficultyLevel) {
-        this.difficultyLevel = difficultyLevel;
-    }
+
 }
