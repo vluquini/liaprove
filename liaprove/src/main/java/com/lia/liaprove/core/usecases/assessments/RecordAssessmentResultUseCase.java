@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.usecases.user.assessments;
+package com.lia.liaprove.core.usecases.assessments;
 
 import com.lia.liaprove.core.exceptions.UserNotFoundException;
 
