@@ -2,14 +2,16 @@ package com.lia.liaprove.core.usecases.user.users;
 
 import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.UserRole;
-import com.lia.liaprove.core.exceptions.InvalidUserDataException;
 
 import java.util.UUID;
+
 /**
- * Registra um novo usuário (professional ou recruiter).
- * Retorna o id criado para o usuário.
+ * Caso de uso para registrar um novo usuário, seja ele Professional ou Recruiter.
+ * <p>
+ * Pode lançar as seguintes exceções (unchecked):
+ * - {@code InvalidUserDataException} se os dados fornecidos forem inválidos (ex: email duplicado, senha fraca).
  */
 public interface CreateUserUseCase {
-    UUID create(String name, String email, String rawPassword, String occupation, ExperienceLevel experienceLevel,
-                  UserRole role) throws InvalidUserDataException;
+    UUID create(String name, String email, String rawPassword, String occupation,
+                ExperienceLevel experienceLevel, UserRole role);
 }

@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.usecases.user.metrics;
+package com.lia.liaprove.core.usecases.metrics;
 
 import com.lia.liaprove.core.exceptions.AuthorizationException;
 import com.lia.liaprove.core.exceptions.InvalidUserDataException;

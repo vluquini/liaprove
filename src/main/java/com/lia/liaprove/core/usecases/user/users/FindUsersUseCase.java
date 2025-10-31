@@ -7,8 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Busca usuários por critérios simples.
- * Implementação pode suportar paginação; assinatura simples.
+ * Caso de uso para localizar usuários com base em filtros e paginação.
+ * Retorna uma lista de entidades {@code User}.
  */
 public interface FindUsersUseCase {
     List<User> findByName(Optional<String> name, Optional<UserRole> role, int page, int size);
