@@ -8,6 +8,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Representa a entidade base para todos os usuários do sistema, contendo atributos e comportamentos comuns.
+ * Esta classe abstrata é estendida por tipos de usuários específicos, como UserProfessional e UserRecruiter.
+ */
 public abstract class User {
     private UUID id;
     private String name;

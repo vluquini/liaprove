@@ -6,6 +6,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Representa um usuário do tipo Recrutador.
+ * Esta classe modela os recrutadores que podem criar avaliações personalizadas,
+ * avaliar candidatos e interagir com a comunidade de profissionais.
+ */
 public class UserRecruiter extends User {
     private String companyName;
     private String companyEmail;
@@ -141,4 +146,5 @@ public class UserRecruiter extends User {
         this.companyName = companyName.trim();
         this.companyEmail = companyEmail.trim().toLowerCase();
     }
+
 }

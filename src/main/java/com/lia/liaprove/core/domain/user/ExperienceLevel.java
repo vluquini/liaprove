@@ -3,6 +3,10 @@ package com.lia.liaprove.core.domain.user;
 import java.util.Locale;
 import java.util.Objects;
 
+/**
+ * Enum que define os níveis de experiência para um usuário.
+ * É utilizado para classificar e filtrar os profissionais com base em sua senioridade.
+ */
 public enum ExperienceLevel {
     JUNIOR(1, "junior"),
     PLENO(2, "pleno"),
@@ -54,4 +58,5 @@ public enum ExperienceLevel {
             return Objects.requireNonNull(fallback);
         }
     }
+
 }
