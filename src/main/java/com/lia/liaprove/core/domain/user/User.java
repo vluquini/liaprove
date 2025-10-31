@@ -12,7 +12,7 @@ public abstract class User {
     private UUID id;
     private String name;
     private String email;
-    private String password;
+    private String passwordHash;
     // Título da profissão que o usuário exerce
     private String occupation;
     private String bio;
@@ -30,14 +30,14 @@ public abstract class User {
 
     public User(){}
 
-    public User(UUID id, String name, String email, String password, String occupation, String bio,
+    public User(UUID id, String name, String email, String passwordHash, String occupation, String bio,
                 ExperienceLevel experienceLevel, UserRole role, Integer voteWeight, Integer totalAssessmentsTaken,
                 List<Certificate> certificates, Float averageScore, LocalDateTime registrationDate,
                 LocalDateTime lastLogin, UserStatus status) {
         this.id = UUID.randomUUID();
         this.name = name;
         this.email = email;
-        this.password = password;
+        this.passwordHash = passwordHash;
         this.occupation = occupation;
         this.bio = bio;
         this.experienceLevel = experienceLevel;
@@ -75,12 +75,19 @@ public abstract class User {
         this.email = email;
     }
 
-    public String getPassword() {
-        return password;
+    public String getPasswordHash() {
+        return passwordHash;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    /**
+     * Define a senha já hashada. A aplicação deve empregar hashing/algoritmos de password
+     * na camada de infra/security antes de chamar este setter.
+     */
+    public void setPasswordHash(String hashedPassword) {
+        if (hashedPassword == null || hashedPassword.isBlank()) {
+            throw new IllegalArgumentException("hashedPassword must not be null/blank");
+        }
+        this.passwordHash = hashedPassword;
     }
 
     public String getOccupation() {
@@ -253,17 +260,6 @@ public abstract class User {
     }
 
     /**
-     * Define a senha já hashada. A aplicação deve empregar hashing/algoritmos de password
-     * na camada de infra/security antes de chamar este setter.
-     */
-    public void setPasswordHash(String hashedPassword) {
-        if (hashedPassword == null || hashedPassword.isBlank()) {
-            throw new IllegalArgumentException("hashedPassword must not be null/blank");
-        }
-        this.password = hashedPassword;
-    }
-
-    /**
      * Define o voteWeight garantindo que o valor esteja entre os limites fornecidos.
      *
      * @param newWeight novo peso desejado
@@ -297,7 +293,5 @@ public abstract class User {
         int updated = Math.max(min, Math.min(max, current + delta));
         this.voteWeight = updated;
     }
-
-
 
 }
