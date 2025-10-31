@@ -7,6 +7,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Representa um usuário do tipo Profissional de TI.
+ * Esta classe modela os profissionais que podem realizar avaliações,
+ * submeter questões e interagir com a plataforma.
+ */
 public class UserProfessional extends User{
 
     public UserProfessional() {}
