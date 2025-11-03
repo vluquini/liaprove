@@ -2,14 +2,10 @@ package com.lia.liaprove.application.services.user;
 
 import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
-import com.lia.liaprove.core.domain.assessment.Certificate;
 import com.lia.liaprove.core.domain.user.*;
 import com.lia.liaprove.core.exceptions.InvalidUserDataException;
 import com.lia.liaprove.core.usecases.user.users.CreateUserUseCase;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -17,17 +13,19 @@ import java.util.UUID;
  *
  * Observações:
  * - Depende apenas de portas (gateways): UserGateway e PasswordHasher.
- * - Validações básicas serão executadas aqui. Se necessário, validações mais complexas serão extraídas para helpers/validators.
+ * - A lógica de criação de entidades User foi delegada para a UserFactory.
  */
 public class CreateUserUseCaseImpl implements CreateUserUseCase {
     private static final int MIN_PASSWORD_LENGTH = 6;
 
     private final UserGateway userGateway;
     private final PasswordHasher passwordHasher;
+    private final UserFactory userFactory; // nova dependência
 
-    public CreateUserUseCaseImpl(UserGateway userGateway, PasswordHasher passwordHasher) {
+    public CreateUserUseCaseImpl(UserGateway userGateway, PasswordHasher passwordHasher, UserFactory userFactory) {
         this.userGateway = userGateway;
         this.passwordHasher = passwordHasher;
+        this.userFactory = userFactory;
     }
 
     @Override
@@ -41,29 +39,16 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
         validateBasic(name, email, rawPassword, role);
 
         // Verificar unicidade do email
-        Optional<User> existing = userGateway.findByEmail(email);
-        if (existing.isPresent()) {
-            throw new InvalidUserDataException("Email already registered: " + email);
-        }
+        userGateway.findByEmail(email).ifPresent(existingUser -> {
+            throw new InvalidUserDataException("Email already registered: " + existingUser.getEmail());
+        });
 
-        // Hash da senha
+        // Hash da senha (infra)
         String passwordHash = passwordHasher.hash(rawPassword);
 
-        // Criar entidade de domínio (Professional ou Recruiter)
-        User user;
-        if (role == UserRole.PROFESSIONAL) {
-            // Criando UserProfessional
-            user = createProfessional(name, email, passwordHash, occupation, experienceLevel);
-        } else if (role == UserRole.RECRUITER) {
-            // Criando UserRecruiter
-            user = createRecruiter(name, email, passwordHash, occupation);
-        } else if (role == UserRole.ADMIN) {
-            // Tratar ADMIN como recruiter genérico
-            user = createRecruiter(name, email, passwordHash, occupation);
-            user.setRole(UserRole.ADMIN);
-        } else {
-            throw new InvalidUserDataException("Unsupported role: " + role);
-        }
+        // Criar comando e delegar para a factory (application cria a factory impl)
+        UserCreateDto dto = new UserCreateDto(name, email, passwordHash, occupation, experienceLevel, role);
+        User user = userFactory.create(dto);
 
         // Persistir via gateway
         userGateway.save(user);
@@ -71,7 +56,7 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
         return user.getId();
     }
 
-    // Helpers
+    // validateBasic permanece igual...
 
     private void validateBasic(String name, String email, String rawPassword, UserRole role) throws InvalidUserDataException {
         if (name == null || name.isBlank()) {
@@ -87,43 +72,4 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
             throw new InvalidUserDataException("Role must be provided");
         }
     }
-
-    private User createProfessional(String name, String email, String passwordHash, String occupation, ExperienceLevel experienceLevel) {
-        UserProfessional p = new UserProfessional();
-        p.setId(UUID.randomUUID());
-        p.setName(name.trim());
-        p.setEmail(email.trim().toLowerCase());
-        p.setPasswordHash(passwordHash);
-        p.setOccupation(occupation == null ? "" : occupation.trim());
-        p.setBio("");
-        p.setExperienceLevel(experienceLevel == null ? ExperienceLevel.JUNIOR : experienceLevel);
-        p.setRole(UserRole.PROFESSIONAL);
-        p.setVoteWeight(0);
-        p.setTotalAssessmentsTaken(0);
-        p.setCertificates(new ArrayList<Certificate>());
-        p.setAverageScore(0f);
-        p.setRegistrationDate(LocalDateTime.now());
-        p.setLastLogin(null);
-        return p;
-    }
-
-    private User createRecruiter(String name, String email, String passwordHash, String occupation) {
-        UserRecruiter r = new UserRecruiter();
-        r.setId(UUID.randomUUID());
-        r.setName(name.trim());
-        r.setEmail(email.trim().toLowerCase());
-        r.setPasswordHash(passwordHash);
-        r.setOccupation(occupation == null ? "" : occupation.trim());
-        r.setBio("");
-        r.setRole(UserRole.RECRUITER);
-        r.setVoteWeight(0);
-        r.setTotalAssessmentsTaken(0);
-        r.setCertificates(new ArrayList<Certificate>());
-        r.setAverageScore(0f);
-        r.setRegistrationDate(LocalDateTime.now());
-        r.setLastLogin(null);
-        // campos específicos de recruiter (companyName/companyEmail) podem ser atualizados depois
-        return r;
-    }
-
 }
