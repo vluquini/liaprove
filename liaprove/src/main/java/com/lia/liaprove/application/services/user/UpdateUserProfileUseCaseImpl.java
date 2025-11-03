@@ -24,11 +24,8 @@ public class UpdateUserProfileUseCaseImpl implements UpdateUserProfileUseCase {
     }
 
     @Override
-    public void updateProfile(UUID userId,
-                              String occupation,
-                              String bio,
-                              ExperienceLevel experienceLevel)
-            throws UserNotFoundException, InvalidUserDataException {
+    public void updateProfile(UUID userId, String occupation, String bio,
+                              ExperienceLevel experienceLevel) throws UserNotFoundException, InvalidUserDataException {
 
         Objects.requireNonNull(userId, "userId must not be null");
 
@@ -42,23 +39,11 @@ public class UpdateUserProfileUseCaseImpl implements UpdateUserProfileUseCase {
         }
 
         User user = userGateway.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+                    .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
 
-        // Atualiza occupation se fornecido
-        if (hasOccupation) {
-            user.setOccupation(occupation.trim());
-        }
+        // Delega a lógica de atualização para a entidade User
+        user.updateProfile(occupation, bio, experienceLevel);
 
-        // Atualiza bio (aceita vazio para limpar)
-        if (hasBio) {
-            user.setBio(bio == null ? null : bio.trim());
-        }
-
-        // Se experienceLevel foi informado, atualiza
-        if (hasExperience)
-            user.updateExperienceLevel(experienceLevel);
-
-        // Persistir alterações
         userGateway.save(user);
     }
 }
