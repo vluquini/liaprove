@@ -298,4 +298,24 @@ public abstract class User {
         this.voteWeight = updated;
     }
 
+    /**
+     * Atualiza os campos do perfil do usuário de uma só vez.
+     * Apenas os campos não nulos serão considerados para atualização.
+     *
+     * @param occupation A nova ocupação (se não for nulo).
+     * @param bio A nova biografia (se não for nulo).
+     * @param experienceLevel O novo nível de experiência (se não for nulo).
+     */
+    public void updateProfile(String occupation, String bio, ExperienceLevel experienceLevel) {
+        if (occupation != null && !occupation.isBlank()) {
+            this.setOccupation(occupation.trim());
+        }
+        if (bio != null) {
+            this.setBio(bio.trim());
+        }
+        if (experienceLevel != null) {
+            this.updateExperienceLevel(experienceLevel);
+        }
+    }
+
 }
