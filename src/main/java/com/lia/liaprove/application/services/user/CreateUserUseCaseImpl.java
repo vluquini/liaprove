@@ -5,6 +5,7 @@ import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.user.*;
 import com.lia.liaprove.core.exceptions.InvalidUserDataException;
 import com.lia.liaprove.core.usecases.user.users.CreateUserUseCase;
+import com.lia.liaprove.core.usecases.user.users.UserFactory;
 
 import java.util.UUID;
 

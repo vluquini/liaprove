@@ -1,4 +1,7 @@
-package com.lia.liaprove.core.domain.user;
+package com.lia.liaprove.core.usecases.user.users;
+
+import com.lia.liaprove.core.domain.user.User;
+import com.lia.liaprove.core.domain.user.UserCreateDto;
 
 /**
  * Interface Factory para a criação de diferentes tipos de usuários.
