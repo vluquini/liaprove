@@ -17,9 +17,9 @@ import java.util.UUID;
 public class FeedbackAssessment extends Feedback {
     private Assessment assessment;
 
-    public FeedbackAssessment(UUID id, User user, Assessment assessment, String comment, Vote vote,
+    public FeedbackAssessment(UUID id, User user, Assessment assessment, String comment,
                               LocalDateTime submissionDate, boolean visible) {
-        super(id, user, comment, vote, submissionDate, visible);
+        super(id, user, comment, submissionDate, visible);
         this.assessment = assessment;
     }
 

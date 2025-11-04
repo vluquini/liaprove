@@ -10,9 +10,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 /**
- * Entidade usada para registrar os votos dos usuários
- * nas questões em fase de votação, além das reações (likes/dislikes)
- * nos comentários deixados.
+ * Entidade que representa um feedback (comentário) detalhado sobre uma questão,
+ * incluindo sugestões de dificuldade, área de conhecimento e relevância.
+ * Também gerencia as reações (likes/dislikes) a este feedback.
  */
 public class FeedbackQuestion extends Feedback{
     private Question question;
@@ -24,10 +24,10 @@ public class FeedbackQuestion extends Feedback{
 
     public FeedbackQuestion() {}
 
-    public FeedbackQuestion(UUID id, User user, String comment, Vote vote, LocalDateTime submissionDate,
+    public FeedbackQuestion(UUID id, User user, String comment, LocalDateTime submissionDate,
                             Question question, DifficultyLevel difficultyLevel, KnowledgeArea knowledgeArea,
                             RelevanceLevel relevanceLevel) {
-        super(id, user, comment, vote, submissionDate, true);
+        super(id, user, comment, submissionDate, true);
         this.question = question;
         this.difficultyLevel = difficultyLevel;
         this.knowledgeArea = knowledgeArea;
@@ -84,14 +84,12 @@ public class FeedbackQuestion extends Feedback{
         if (existing != null) {
             if (existing.getType() == type) return false; // sem mudança
             existing.setType(type);
-            touchUpdatedAt();
-            return true;
         } else {
             FeedbackReaction reaction = new FeedbackReaction(user, type);
             reactionsByUser.put(userId, reaction);
-            touchUpdatedAt();
-            return true;
         }
+        touchUpdatedAt();
+        return true;
     }
 
     /** Remove reação do usuário; retorna true se removida. */
