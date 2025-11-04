@@ -6,22 +6,25 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
+/**
+ * Classe abstrata que representa um feedback textual deixado por um usuário.
+ * Um feedback pode ser associado a diferentes entidades do sistema, como Questões ou Assessments.
+ * Esta classe contém os atributos e comportamentos comuns a todos os tipos de feedback.
+ */
 public abstract class Feedback {
     private UUID id;
     private User user;
     private String comment;
-    private Vote vote;
     private LocalDateTime submissionDate;
     private LocalDateTime updatedAt;
     private boolean visible;
 
     public Feedback() {}
 
-    public Feedback(UUID id, User user, String comment, Vote vote, LocalDateTime submissionDate, boolean visible) {
+    public Feedback(UUID id, User user, String comment, LocalDateTime submissionDate, boolean visible) {
         this.id = id;
         this.user = user;
         this.comment = comment;
-        this.vote = vote;
         this.submissionDate = submissionDate;
         this.visible = true;
     }
@@ -48,14 +51,6 @@ public abstract class Feedback {
 
     public void setComment(String comment) {
         this.comment = comment;
-    }
-
-    public Vote getVote() {
-        return vote;
-    }
-
-    public void setVote(Vote vote) {
-        this.vote = vote;
     }
 
     public LocalDateTime getSubmissionDate() {
