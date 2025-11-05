@@ -38,7 +38,7 @@ public abstract class User {
                 ExperienceLevel experienceLevel, UserRole role, Integer voteWeight, Integer totalAssessmentsTaken,
                 List<Certificate> certificates, Float averageScore, LocalDateTime registrationDate,
                 LocalDateTime lastLogin, UserStatus status) {
-        this.id = UUID.randomUUID();
+        this.id = id;
         this.name = name;
         this.email = email;
         this.passwordHash = passwordHash;
