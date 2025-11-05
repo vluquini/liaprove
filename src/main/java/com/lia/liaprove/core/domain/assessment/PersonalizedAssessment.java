@@ -9,9 +9,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-/*
-Esta entidade representa Assessments personalizados
-criados por um Recruiter.
+/**
+ * Representa uma avaliação personalizada criada por um recrutador.
+ * Estende a classe base Assessment e adiciona propriedades específicas
+ * como o criador, data de expiração e status da avaliação personalizada.
  */
 public class PersonalizedAssessment extends Assessment {
     private UserRecruiter createdBy;
@@ -21,10 +22,15 @@ public class PersonalizedAssessment extends Assessment {
     private int totalAttempts;
     private boolean allowsRetake;
     // Status da avaliação
-    private AssessmentStatus status;
+    private PersonalizedAssessmentStatus status;
 
-    public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate, List<Question> questions, List<FeedbackAssessment> feedbacks, Duration evaluationTimer) {
+    public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate, List<Question> questions, List<FeedbackAssessment> feedbacks, Duration evaluationTimer, UserRecruiter createdBy, LocalDateTime expirationDate, int totalAttempts, boolean allowsRetake, PersonalizedAssessmentStatus status) {
         super(id, title, description, creationDate, questions, feedbacks, evaluationTimer);
+        this.createdBy = createdBy;
+        this.expirationDate = expirationDate;
+        this.totalAttempts = totalAttempts;
+        this.allowsRetake = allowsRetake;
+        this.status = status;
     }
 
     public UserRecruiter getCreatedBy() {
@@ -51,11 +57,11 @@ public class PersonalizedAssessment extends Assessment {
         this.totalAttempts = totalAttempts;
     }
 
-    public AssessmentStatus getStatus() {
+    public PersonalizedAssessmentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(AssessmentStatus status) {
+    public void setStatus(PersonalizedAssessmentStatus status) {
         this.status = status;
     }
 }

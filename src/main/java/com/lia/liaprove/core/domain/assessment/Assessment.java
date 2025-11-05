@@ -8,6 +8,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+/**
+ * Representa a base abstrata para todos os tipos de avaliações no sistema.
+ * Define as propriedades e comportamentos comuns a avaliações como testes de múltipla escolha
+ * e mini-projetos, sejam eles gerados pelo sistema ou personalizados por recrutadores.
+ */
 public abstract class Assessment {
     private UUID id;
     private String title;
@@ -21,7 +26,7 @@ public abstract class Assessment {
 
     public Assessment(UUID id, String title, String description, LocalDateTime creationDate, List<Question> questions,
                       List<FeedbackAssessment> feedbacks, Duration evaluationTimer) {
-        this.id = UUID.randomUUID();
+        this.id = id;
         this.title = title;
         this.description = description;
         this.creationDate = creationDate;
@@ -32,10 +37,6 @@ public abstract class Assessment {
 
     public UUID getId() {
         return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     public String getTitle() {
