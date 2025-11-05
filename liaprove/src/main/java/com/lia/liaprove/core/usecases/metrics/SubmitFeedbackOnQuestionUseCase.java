@@ -3,6 +3,8 @@ package com.lia.liaprove.core.usecases.metrics;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
+import com.lia.liaprove.core.exceptions.QuestionNotFoundException;
+import com.lia.liaprove.core.exceptions.UserNotFoundException;
 
 import java.util.UUID;
 
@@ -21,8 +23,8 @@ public interface SubmitFeedbackOnQuestionUseCase {
      * @param difficultyLevel Sugestão de nível de dificuldade para a questão.
      * @param knowledgeArea Sugestão de área de conhecimento para a questão.
      * @param relevanceLevel Sugestão de nível de relevância para a questão.
-     * @throws com.lia.liaprove.core.exceptions.UserNotFoundException se o usuário não for encontrado.
-     * @throws com.lia.liaprove.core.exceptions.QuestionNotFoundException se a questão não for encontrada.
+     * @throws UserNotFoundException se o usuário não for encontrado.
+     * @throws QuestionNotFoundException se a questão não for encontrada.
      */
     void submitFeedback(UUID userId, UUID questionId, String comment, DifficultyLevel difficultyLevel,
                         KnowledgeArea knowledgeArea, RelevanceLevel relevanceLevel);
