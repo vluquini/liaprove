@@ -5,10 +5,9 @@ import com.lia.liaprove.core.domain.user.User;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-/*
-Esta entidade representa uma avaliação feita por um Usuário.
-Isto pois: um SystemAssessment pode ser feita por apenas um User
-e uma PersonalizedAssessment pode ser feita por N Users.
+/**
+ * Representa uma tentativa específica de um usuário ao realizar uma avaliação (Assessment).
+ * Armazena informações sobre o progresso, resultados e o status da tentativa.
  */
 public class AssessmentAttempt {
     private UUID id;
@@ -18,23 +17,22 @@ public class AssessmentAttempt {
     private LocalDateTime finishedAt;
     private Integer accuracyRate;
     private Certificate certificate;
+    private AssessmentAttemptStatus status;
 
-    public AssessmentAttempt(UUID id, Assessment assessment, User user, LocalDateTime startedAt, LocalDateTime finishedAt, Integer accuracyRate, Certificate certificate) {
-        this.id = UUID.randomUUID();
+    public AssessmentAttempt(UUID id, Assessment assessment, User user, LocalDateTime startedAt, LocalDateTime finishedAt,
+                             Integer accuracyRate, Certificate certificate, AssessmentAttemptStatus status) {
+        this.id = id;
         this.assessment = assessment;
         this.user = user;
         this.startedAt = startedAt;
         this.finishedAt = finishedAt;
         this.accuracyRate = accuracyRate;
         this.certificate = certificate;
+        this.status = status;
     }
 
     public UUID getId() {
         return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
     }
 
     public Assessment getAssessment() {
@@ -83,5 +81,13 @@ public class AssessmentAttempt {
 
     public void setCertificate(Certificate certificate) {
         this.certificate = certificate;
+    }
+
+    public AssessmentAttemptStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(AssessmentAttemptStatus status) {
+        this.status = status;
     }
 }
