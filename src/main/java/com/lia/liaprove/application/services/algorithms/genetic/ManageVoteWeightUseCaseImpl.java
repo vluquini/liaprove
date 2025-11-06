@@ -1,11 +1,13 @@
 package com.lia.liaprove.application.services.algorithms.genetic;
 
+import com.lia.liaprove.application.gateways.algorithms.genetic.VoteMultiplierGateway;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.algorithms.genetic.GeneticConfig;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
+import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.usecases.algorithms.genetic.GeneticAlgorithmUseCase;
-import com.lia.liaprove.core.usecases.user.admin.AdjustVoteWeightUseCase;
+import com.lia.liaprove.core.usecases.user.admin.ManageVoteWeightUseCase;
 
 import java.util.*;
 
@@ -15,16 +17,19 @@ import java.util.*;
  *  - carrega os recruiters via UserGateway,
  *  - aplica o novo voteWeight via método de domínio (setVoteWeightSafely(min,max)),
  *  - persiste em lote via UserGateway.saveAll(...).
+ *  - Gerencia pesos e multiplicadores de voto.
  */
-public class AdjustVoteWeightUseCaseImpl implements AdjustVoteWeightUseCase {
+public class ManageVoteWeightUseCaseImpl implements ManageVoteWeightUseCase {
 
     private final GeneticAlgorithmUseCase geneticUseCase;
     private final UserGateway userGateway;
+    private final VoteMultiplierGateway voteMultiplierGateway;
     private final GeneticConfig config;
 
-    public AdjustVoteWeightUseCaseImpl(GeneticAlgorithmUseCase geneticUseCase, UserGateway userGateway, GeneticConfig config) {
+    public ManageVoteWeightUseCaseImpl(GeneticAlgorithmUseCase geneticUseCase, UserGateway userGateway, VoteMultiplierGateway voteMultiplierGateway, GeneticConfig config) {
         this.geneticUseCase = Objects.requireNonNull(geneticUseCase);
         this.userGateway = Objects.requireNonNull(userGateway);
+        this.voteMultiplierGateway = Objects.requireNonNull(voteMultiplierGateway);
         this.config = Objects.requireNonNull(config);
     }
 
@@ -40,58 +45,60 @@ public class AdjustVoteWeightUseCaseImpl implements AdjustVoteWeightUseCase {
             return Map.copyOf(newWeights);
         }
 
-        // aplica e persiste; captura recrutadores persistidos (pode ser usado para logs)
-        List<UserRecruiter> saved = applyAndPersistWeights(newWeights);
-
-        // opcional: log info sobre quantos foram atualizados
-        // logger.info("Adjusted vote weights for {} recruiters (triggeredBy={})", saved.size(), triggeredByAdminId);
-
+        applyAndPersistWeights(newWeights);
         return Map.copyOf(newWeights);
     }
 
     @Override
     public void applyManualWeights(Map<UUID, Integer> weights, UUID adminId) {
         if (weights == null || weights.isEmpty()) return;
-
-        List<UserRecruiter> saved = applyAndPersistWeights(weights);
-    }
-
-    /**
-     * Carrega usuários em batch, aplica os weights via domínio e persiste em lote.
-     * Retorna a lista de UserRecruiter persistidos (padrão: imutável).
-     */
-    private List<UserRecruiter> applyAndPersistWeights(Map<UUID, Integer> weights) {
-        if (weights == null || weights.isEmpty()) return List.of();
-
-        // 1) load users as map
-        Map<UUID, User> usersMap = userGateway.findByIdsAsMap(weights.keySet());
-        if (usersMap == null || usersMap.isEmpty()) return List.of();
-
-        // 2) apply weights (reutiliza método que já existe)
-        List<UserRecruiter> toSave = applyWeightsAndCollect(weights, usersMap);
-        if (toSave.isEmpty()) return List.of();
-
-        // 3) persist and capture returned entities
-        List<User> saved = userGateway.saveAll(new ArrayList<>(toSave));
-
-        // 4) convert returned Users to UserRecruiter where applicable
-        List<UserRecruiter> savedRecruiters = saved.stream()
-                .filter(u -> u instanceof UserRecruiter)
-                .map(u -> (UserRecruiter) u)
-                .toList(); // Java 21 -> returns unmodifiable list
-
-        return savedRecruiters;
+        applyAndPersistWeights(weights);
     }
 
     @Override
-    public void rollbackLastAdjustment(UUID adminId) {
-        throw new UnsupportedOperationException("Rollback não implementado; requer historização (audit).");
+    public void setRecruiterVoteWeight(UUID recruiterId, int newWeight, UUID adminId) {
+        applyAndPersistWeights(Map.of(recruiterId, newWeight));
     }
 
-    /**
-     * Aplica os weights (map id->targetWeight) sobre os usuários fornecidos no usersMap.
-     * Retorna a lista de UserRecruiter alterados (prontos para persistência).
-     */
+    @Override
+    public void setRoleMultiplier(UserRole role, double multiplier, UUID adminId) {
+        voteMultiplierGateway.setRoleMultiplier(role, multiplier);
+    }
+
+    @Override
+    public double getRoleMultiplier(UserRole role) {
+        // Retorna o multiplicador específico da role ou 1.0 como um padrão seguro.
+        return voteMultiplierGateway.getRoleMultiplier(role).orElse(1.0);
+    }
+
+    @Override
+    public void setRecruiterMultiplier(UUID recruiterId, double multiplier, UUID adminId) {
+        voteMultiplierGateway.setRecruiterMultiplier(recruiterId, multiplier);
+    }
+
+    @Override
+    public Double getRecruiterMultiplier(UUID recruiterId) {
+        // Retorna o multiplicador de override do recrutador ou null se não houver.
+        return voteMultiplierGateway.getRecruiterMultiplier(recruiterId).orElse(null);
+    }
+
+    private List<UserRecruiter> applyAndPersistWeights(Map<UUID, Integer> weights) {
+        if (weights == null || weights.isEmpty()) return List.of();
+
+        Map<UUID, User> usersMap = userGateway.findByIdsAsMap(weights.keySet());
+        if (usersMap == null || usersMap.isEmpty()) return List.of();
+
+        List<UserRecruiter> toSave = applyWeightsAndCollect(weights, usersMap);
+        if (toSave.isEmpty()) return List.of();
+
+        List<User> saved = userGateway.saveAll(new ArrayList<>(toSave));
+
+        return saved.stream()
+                .filter(u -> u instanceof UserRecruiter)
+                .map(u -> (UserRecruiter) u)
+                .toList();
+    }
+
     private List<UserRecruiter> applyWeightsAndCollect(Map<UUID, Integer> weights, Map<UUID, User> usersMap) {
         if (weights == null || weights.isEmpty() || usersMap == null || usersMap.isEmpty()) {
             return Collections.emptyList();
@@ -109,7 +116,6 @@ public class AdjustVoteWeightUseCaseImpl implements AdjustVoteWeightUseCase {
 
             User u = usersMap.get(id);
             if (!(u instanceof UserRecruiter)) {
-                // não é recruiter (ou não encontrado) — ignorar
                 continue;
             }
 
@@ -122,4 +128,3 @@ public class AdjustVoteWeightUseCaseImpl implements AdjustVoteWeightUseCase {
         return result;
     }
 }
-
