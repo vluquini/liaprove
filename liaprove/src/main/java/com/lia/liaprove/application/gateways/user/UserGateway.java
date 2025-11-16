@@ -9,11 +9,15 @@ import java.util.*;
  * Porta (gateway) para operações de persistência/consulta da entidade User.
  */
 public interface UserGateway {
-    // Persiste (insere/atualiza) o usuário.
-    void save(User user);
+    // Persiste (insere/atualiza) o usuário e retorna o usuário salvo.
+    User save(User user);
+
     Optional<User> findByEmail(String email);
+
     Optional<User> findById(UUID id);
+
     void deleteById(UUID id);
+
     List<User> search(Optional<String> name, Optional<UserRole> role, int page, int size);
 
     /**
