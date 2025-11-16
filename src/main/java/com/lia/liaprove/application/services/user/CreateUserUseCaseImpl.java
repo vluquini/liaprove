@@ -7,8 +7,6 @@ import com.lia.liaprove.core.exceptions.InvalidUserDataException;
 import com.lia.liaprove.core.usecases.user.users.CreateUserUseCase;
 import com.lia.liaprove.core.usecases.user.users.UserFactory;
 
-import java.util.UUID;
-
 /**
  * Implementação do caso de uso "CreateUser".
  *
@@ -21,7 +19,7 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
 
     private final UserGateway userGateway;
     private final PasswordHasher passwordHasher;
-    private final UserFactory userFactory; // nova dependência
+    private final UserFactory userFactory;
 
     public CreateUserUseCaseImpl(UserGateway userGateway, PasswordHasher passwordHasher, UserFactory userFactory) {
         this.userGateway = userGateway;
@@ -30,14 +28,10 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
     }
 
     @Override
-    public UUID create(String name,
-                       String email,
-                       String rawPassword,
-                       String occupation,
-                       ExperienceLevel experienceLevel,
-                       UserRole role) throws InvalidUserDataException {
+    public User create(String name, String email, String rawPassword,
+                       String occupation, ExperienceLevel experienceLevel, UserRole role) {
 
-        validateBasic(name, email, rawPassword, role);
+        validatePassword(rawPassword);
 
         // Verificar unicidade do email
         userGateway.findByEmail(email).ifPresent(existingUser -> {
@@ -51,26 +45,13 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
         UserCreateDto dto = new UserCreateDto(name, email, passwordHash, occupation, experienceLevel, role);
         User user = userFactory.create(dto);
 
-        // Persistir via gateway
-        userGateway.save(user);
-
-        return user.getId();
+        // Persistir via gateway e retornar o usuário salvo
+        return userGateway.save(user);
     }
 
-    // validateBasic permanece igual...
-
-    private void validateBasic(String name, String email, String rawPassword, UserRole role) throws InvalidUserDataException {
-        if (name == null || name.isBlank()) {
-            throw new InvalidUserDataException("Name must not be empty");
-        }
-        if (email == null || email.isBlank() || !email.contains("@")) {
-            throw new InvalidUserDataException("Invalid email");
-        }
+    private void validatePassword(String rawPassword) {
         if (rawPassword == null || rawPassword.length() < MIN_PASSWORD_LENGTH) {
             throw new InvalidUserDataException("Password must have at least " + MIN_PASSWORD_LENGTH + " characters");
-        }
-        if (role == null) {
-            throw new InvalidUserDataException("Role must be provided");
         }
     }
 }
