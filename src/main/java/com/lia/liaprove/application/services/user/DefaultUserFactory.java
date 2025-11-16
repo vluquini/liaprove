@@ -3,10 +3,10 @@ package com.lia.liaprove.application.services.user;
 import com.lia.liaprove.core.domain.user.*;
 import com.lia.liaprove.core.usecases.user.users.UserFactory;
 
+import com.lia.liaprove.core.exceptions.InvalidUserDataException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Implementação da Factory para a criação de diferentes tipos de usuários.
@@ -30,15 +30,22 @@ public class DefaultUserFactory implements UserFactory {
     }
 
     private void validateCommand(UserCreateDto dto) {
-        Objects.requireNonNull(dto, "command");
-        if (dto.name() == null || dto.name().isBlank()) throw new IllegalArgumentException("name is required");
-        if (dto.email() == null || dto.email().isBlank() || !dto.email().contains("@")) throw new IllegalArgumentException("invalid email");
-        if (dto.passwordHash() == null || dto.passwordHash().isBlank()) throw new IllegalArgumentException("passwordHash is required");
-        if (dto.role() == null) throw new IllegalArgumentException("role is required");
+        Objects.requireNonNull(dto, "User creation data cannot be null");
+        if (dto.name() == null || dto.name().isBlank()) {
+            throw new InvalidUserDataException("Name must not be empty");
+        }
+        if (dto.email() == null || dto.email().isBlank() || !dto.email().contains("@")) {
+            throw new InvalidUserDataException("Invalid email");
+        }
+        if (dto.passwordHash() == null || dto.passwordHash().isBlank()) {
+            throw new InvalidUserDataException("Password hash must not be empty");
+        }
+        if (dto.role() == null) {
+            throw new InvalidUserDataException("Role must be provided");
+        }
     }
 
     private void initCommonFields(User user, UserCreateDto dto) {
-        user.setId(UUID.randomUUID());
         user.setName(trimOrNull(dto.name()));
         user.setEmail(normalizeEmail(dto.email()));
         user.setPasswordHash(dto.passwordHash()); // hash vem da infra
