@@ -9,6 +9,7 @@ import com.lia.liaprove.core.usecases.user.users.UpdateUserProfileUseCase;
 
 import java.util.Objects;
 import java.util.UUID;
+
 /**
  * Implementação simples do caso de uso "UpdateUserProfileUseCase".
  *
