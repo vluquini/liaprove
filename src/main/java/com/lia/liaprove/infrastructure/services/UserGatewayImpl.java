@@ -3,10 +3,15 @@ package com.lia.liaprove.infrastructure.services;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRole;
+import com.lia.liaprove.infrastructure.entities.UserEntity;
 import com.lia.liaprove.infrastructure.mappers.UserMapper;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class UserGatewayImpl implements UserGateway {
 
@@ -30,26 +35,48 @@ public class UserGatewayImpl implements UserGateway {
 
     @Override
     public Optional<User> findById(UUID id) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return userRepository.findById(id).map(userMapper::toDomain);
     }
 
     @Override
     public void deleteById(UUID id) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        userRepository.deleteById(id);
     }
 
     @Override
     public List<User> search(Optional<String> name, Optional<UserRole> role, int page, int size) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Pageable pageable = PageRequest.of(page, size);
+        Specification<UserEntity> spec = Specification.where(null);
+
+        if (name.isPresent() && !name.get().isEmpty()) {
+            spec = spec.and((root, query, cb) ->
+                    cb.like(cb.lower(root.get("name")), "%" + name.get().toLowerCase() + "%"));
+        }
+
+        if (role.isPresent()) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("role"), role.get()));
+        }
+
+        return userRepository.findAll(spec, pageable).getContent().stream()
+                .map(userMapper::toDomain)
+                .collect(Collectors.toList());
     }
 
     @Override
     public Map<UUID, User> findByIdsAsMap(Collection<UUID> ids) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        return userRepository.findAllById(ids).stream()
+                .map(userMapper::toDomain)
+                .collect(Collectors.toMap(User::getId, user -> user));
     }
 
     @Override
     public List<User> saveAll(Collection<User> users) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        List<UserEntity> userEntities = users.stream()
+                .map(userMapper::toEntity)
+                .collect(Collectors.toList());
+
+        return userRepository.saveAll(userEntities).stream()
+                .map(userMapper::toDomain)
+                .collect(Collectors.toList());
     }
 }
