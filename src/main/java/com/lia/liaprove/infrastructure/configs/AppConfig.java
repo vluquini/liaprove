@@ -4,7 +4,11 @@ import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.application.services.user.CreateUserUseCaseImpl;
 import com.lia.liaprove.application.services.user.DefaultUserFactory;
+import com.lia.liaprove.application.services.user.FindUsersUseCaseImpl;
+import com.lia.liaprove.application.services.user.GetUserByIdUseCaseImpl;
 import com.lia.liaprove.core.usecases.user.users.CreateUserUseCase;
+import com.lia.liaprove.core.usecases.user.users.FindUsersUseCase;
+import com.lia.liaprove.core.usecases.user.users.GetUserByIdUseCase;
 import com.lia.liaprove.core.usecases.user.users.UserFactory;
 import com.lia.liaprove.infrastructure.mappers.UserMapper;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
@@ -46,5 +50,15 @@ public class AppConfig {
     @Bean
     public CreateUserUseCase createUserUseCase(UserGateway userGateway, PasswordHasher passwordHasher, UserFactory userFactory) {
         return new CreateUserUseCaseImpl(userGateway, passwordHasher, userFactory);
+    }
+
+    @Bean
+    public GetUserByIdUseCase getUserByIdUseCase(UserGateway userGateway) {
+        return new GetUserByIdUseCaseImpl(userGateway);
+    }
+
+    @Bean
+    public FindUsersUseCase findUsersUseCase(UserGateway userGateway) {
+        return new FindUsersUseCaseImpl(userGateway);
     }
 }
