@@ -25,26 +25,37 @@ public class UpdateUserProfileUseCaseImpl implements UpdateUserProfileUseCase {
     }
 
     @Override
-    public void updateProfile(UUID userId, String occupation, String bio,
+    public User updateProfile(UUID userId, String name, String email, String occupation, String bio,
                               ExperienceLevel experienceLevel) throws UserNotFoundException, InvalidUserDataException {
 
         Objects.requireNonNull(userId, "userId must not be null");
 
         // Pelo menos um campo deve ser informado para atualizar
+        boolean hasName = name != null && !name.isBlank();
+        boolean hasEmail = email != null && !email.isBlank();
         boolean hasOccupation = occupation != null && !occupation.isBlank();
         boolean hasBio = bio != null; // Bio pode ser uma string vazia para limpar
         boolean hasExperience = experienceLevel != null;
 
-        if (!hasOccupation && !hasBio && !hasExperience) {
+        if (!hasName && !hasEmail && !hasOccupation && !hasBio && !hasExperience) {
             throw new InvalidUserDataException("At least one field must be provided to update the profile");
         }
 
         User user = userGateway.findById(userId)
-                    .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+        // Se o email for fornecido, verifique se já não está em uso por OUTRO usuário
+        if (hasEmail && !user.getEmail().equalsIgnoreCase(email)) {
+            userGateway.findByEmail(email).ifPresent(existingUser -> {
+                if (!existingUser.getId().equals(userId)) {
+                    throw new InvalidUserDataException("Email already registered by another user.");
+                }
+            });
+        }
 
         // Delega a lógica de atualização para a entidade User
-        user.updateProfile(occupation, bio, experienceLevel);
+        user.updateProfile(name, email, occupation, bio, experienceLevel);
 
-        userGateway.save(user);
+        return userGateway.save(user);
     }
 }

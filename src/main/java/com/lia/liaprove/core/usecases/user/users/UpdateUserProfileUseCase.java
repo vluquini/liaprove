@@ -1,6 +1,7 @@
 package com.lia.liaprove.core.usecases.user.users;
 
 import com.lia.liaprove.core.domain.user.ExperienceLevel;
+import com.lia.liaprove.core.domain.user.User;
 
 import java.util.UUID;
 
@@ -12,5 +13,5 @@ import java.util.UUID;
  * - {@code InvalidUserDataException} se os dados fornecidos forem inválidos.
  */
 public interface UpdateUserProfileUseCase {
-    void updateProfile(UUID userId, String occupation, String bio, ExperienceLevel experienceLevel);
+    User updateProfile(UUID userId, String name, String email, String occupation, String bio, ExperienceLevel experienceLevel);
 }

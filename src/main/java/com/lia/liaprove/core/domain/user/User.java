@@ -306,7 +306,13 @@ public abstract class User {
      * @param bio A nova biografia (se não for nulo).
      * @param experienceLevel O novo nível de experiência (se não for nulo).
      */
-    public void updateProfile(String occupation, String bio, ExperienceLevel experienceLevel) {
+    public void updateProfile(String name, String email, String occupation, String bio, ExperienceLevel experienceLevel) {
+        if (name != null && !name.isBlank()) {
+            this.setName(name.trim());
+        }
+        if (email != null && !email.isBlank()) {
+            this.setEmail(email.trim());
+        }
         if (occupation != null && !occupation.isBlank()) {
             this.setOccupation(occupation.trim());
         }
@@ -317,5 +323,4 @@ public abstract class User {
             this.updateExperienceLevel(experienceLevel);
         }
     }
-
 }
