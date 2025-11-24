@@ -3,12 +3,28 @@ package com.lia.liaprove.infrastructure.mappers;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserProfessional;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
+import com.lia.liaprove.infrastructure.dtos.UserResponseDto;
 import com.lia.liaprove.infrastructure.entities.UserEntity;
 import com.lia.liaprove.infrastructure.entities.UserProfessionalEntity;
 import com.lia.liaprove.infrastructure.entities.UserRecruiterEntity;
 
 public class UserMapper {
 
+    public UserResponseDto toResponseDto(User user) {
+        if (user == null) {
+            return null;
+        }
+        return new UserResponseDto(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getOccupation(),
+                user.getBio(),
+                user.getExperienceLevel(),
+                user.getRole()
+        );
+    }
+    
     public UserEntity toEntity(User user) {
         if (user == null) return null;
 

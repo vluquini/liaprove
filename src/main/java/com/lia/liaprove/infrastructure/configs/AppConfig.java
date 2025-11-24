@@ -2,14 +2,8 @@ package com.lia.liaprove.infrastructure.configs;
 
 import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
-import com.lia.liaprove.application.services.user.CreateUserUseCaseImpl;
-import com.lia.liaprove.application.services.user.DefaultUserFactory;
-import com.lia.liaprove.application.services.user.FindUsersUseCaseImpl;
-import com.lia.liaprove.application.services.user.GetUserByIdUseCaseImpl;
-import com.lia.liaprove.core.usecases.user.users.CreateUserUseCase;
-import com.lia.liaprove.core.usecases.user.users.FindUsersUseCase;
-import com.lia.liaprove.core.usecases.user.users.GetUserByIdUseCase;
-import com.lia.liaprove.core.usecases.user.users.UserFactory;
+import com.lia.liaprove.application.services.user.*;
+import com.lia.liaprove.core.usecases.user.users.*;
 import com.lia.liaprove.infrastructure.mappers.UserMapper;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
 import com.lia.liaprove.infrastructure.services.PasswordHasherImpl;
@@ -60,5 +54,20 @@ public class AppConfig {
     @Bean
     public FindUsersUseCase findUsersUseCase(UserGateway userGateway) {
         return new FindUsersUseCaseImpl(userGateway);
+    }
+
+    @Bean
+    public UpdateUserProfileUseCase updateUserProfileUseCase(UserGateway userGateway) {
+        return new UpdateUserProfileUseCaseImpl(userGateway);
+    }
+
+    @Bean
+    public ChangePasswordUseCase changePasswordUseCase(UserGateway userGateway, PasswordHasher passwordHasher) {
+        return new ChangePasswordUseCaseImpl(userGateway, passwordHasher);
+    }
+
+    @Bean
+    public DeleteUserUseCase deleteUserUseCase(UserGateway userGateway) {
+        return new DeleteUserUseCaseImpl(userGateway);
     }
 }
