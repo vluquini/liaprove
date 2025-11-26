@@ -9,5 +9,5 @@ import java.util.UUID;
  * - {@code UserNotFoundException} se o usuário não for encontrado.
  */
 public interface DeleteUserUseCase {
-    void delete(UUID userId);
+    void delete(UUID targetUserId, UUID actorUserId);
 }

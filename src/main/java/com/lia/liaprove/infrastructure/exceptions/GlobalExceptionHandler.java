@@ -1,5 +1,7 @@
 package com.lia.liaprove.infrastructure.exceptions;
 
+import com.lia.liaprove.core.exceptions.AuthorizationException;
+import com.lia.liaprove.core.exceptions.InvalidCredentialsException;
 import com.lia.liaprove.core.exceptions.InvalidUserDataException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -30,6 +32,16 @@ public class GlobalExceptionHandler {
         return body;
     }
 
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, Object>> handleInvalidCredentialsException(
+            InvalidCredentialsException ex, HttpServletRequest req) {
+        log.warn("InvalidCredentialsException: {}", ex.getMessage());
+
+        Map<String, Object> body = createErrorBody(HttpStatus.UNAUTHORIZED, "Unauthorized: " + ex.getMessage(), req.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
+    }
+
     @ExceptionHandler(InvalidUserDataException.class)
     public ResponseEntity<Map<String, Object>> handleInvalidUserDataException(
             InvalidUserDataException ex, HttpServletRequest req) {
@@ -38,6 +50,16 @@ public class GlobalExceptionHandler {
         Map<String, Object> body = createErrorBody(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
 
         return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(AuthorizationException.class)
+    public ResponseEntity<Map<String, Object>> handleAuthorizationException(
+            AuthorizationException ex, HttpServletRequest req) {
+        log.warn("AuthorizationException: {}", ex.getMessage());
+
+        Map<String, Object> body = createErrorBody(HttpStatus.FORBIDDEN, "Forbidden: " + ex.getMessage(), req.getRequestURI());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

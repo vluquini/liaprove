@@ -8,9 +8,12 @@ import com.lia.liaprove.infrastructure.dtos.CreateUserRequest;
 import com.lia.liaprove.infrastructure.dtos.UpdateUserRequest;
 import com.lia.liaprove.infrastructure.dtos.UserResponseDto;
 import com.lia.liaprove.infrastructure.mappers.UserMapper;
+import com.lia.liaprove.infrastructure.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -91,7 +94,12 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
-        deleteUserUseCase.delete(id);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
+        UUID actorUserId = principal.user().getId();
+
+        deleteUserUseCase.delete(id, actorUserId);
+
         return ResponseEntity.noContent().build();
     }
 }
