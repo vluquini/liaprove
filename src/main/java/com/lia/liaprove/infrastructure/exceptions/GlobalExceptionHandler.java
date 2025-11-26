@@ -3,6 +3,7 @@ package com.lia.liaprove.infrastructure.exceptions;
 import com.lia.liaprove.core.exceptions.AuthorizationException;
 import com.lia.liaprove.core.exceptions.InvalidCredentialsException;
 import com.lia.liaprove.core.exceptions.InvalidUserDataException;
+import com.lia.liaprove.core.exceptions.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,6 +61,14 @@ public class GlobalExceptionHandler {
         Map<String, Object> body = createErrorBody(HttpStatus.FORBIDDEN, "Forbidden: " + ex.getMessage(), req.getRequestURI());
 
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleUserNotFoundException(
+        UserNotFoundException ex, HttpServletRequest req) {
+        log.warn("UserNotFoundException: {}", ex.getMessage());
+        Map<String, Object> body = createErrorBody(HttpStatus.NOT_FOUND, "Not Found: " + ex.getMessage(), req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

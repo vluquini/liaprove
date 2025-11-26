@@ -39,19 +39,8 @@ public class UserControllerIntegrationTest {
     @Autowired
     private UserJpaRepository userJpaRepository;
 
-    private String registerAndLogin(String email, String password) throws Exception {
-        CreateUserRequest createUserRequest = new CreateUserRequest();
-        createUserRequest.setName("Test User");
-        createUserRequest.setEmail(email);
-        createUserRequest.setPassword(password);
-        createUserRequest.setOccupation("Software Engineer");
-        createUserRequest.setExperienceLevel(ExperienceLevel.JUNIOR);
-        createUserRequest.setRole(UserRole.PROFESSIONAL);
-
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createUserRequest)))
-                .andExpect(status().isOk());
+    private String registerAndLogin(String email, String password, UserRole role) throws Exception {
+        registerUser(email, password, role);
 
         AuthenticationRequest authenticationRequest = new AuthenticationRequest(email, password);
 
@@ -65,11 +54,27 @@ public class UserControllerIntegrationTest {
         return new ObjectMapper().readTree(response).get("token").asText();
     }
 
+    private UUID registerUser(String email, String password, UserRole role) throws Exception {
+        CreateUserRequest createUserRequest = new CreateUserRequest();
+        createUserRequest.setName("Test " + role.name());
+        createUserRequest.setEmail(email);
+        createUserRequest.setPassword(password);
+        createUserRequest.setOccupation("Software Engineer");
+        createUserRequest.setExperienceLevel(ExperienceLevel.JUNIOR);
+        createUserRequest.setRole(role);
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createUserRequest)))
+                .andExpect(status().isOk());
+        return userJpaRepository.findByEmail(email).get().getId();
+    }
+
 
     @Test
     @DisplayName("Should update user profile successfully")
     void shouldUpdateUserProfileSuccessfully() throws Exception {
-        String token = registerAndLogin("update-test@example.com", "password123");
+        String token = registerAndLogin("update-test@example.com", "password123", UserRole.PROFESSIONAL);
         UUID userId = userJpaRepository.findByEmail("update-test@example.com").get().getId();
 
         UpdateUserRequest updateUserRequest = new UpdateUserRequest();
@@ -99,7 +104,7 @@ public class UserControllerIntegrationTest {
         String oldPassword = "oldPassword123";
         String newPassword = "newPassword456";
 
-        String token = registerAndLogin(email, oldPassword);
+        String token = registerAndLogin(email, oldPassword, UserRole.PROFESSIONAL);
         UUID userId = userJpaRepository.findByEmail(email).get().getId();
 
         ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
@@ -136,7 +141,7 @@ public class UserControllerIntegrationTest {
         String wrongPassword = "wrongPassword";
         String newPassword = "newPassword";
 
-        String token = registerAndLogin(email, correctPassword);
+        String token = registerAndLogin(email, correctPassword, UserRole.PROFESSIONAL);
         UUID userId = userJpaRepository.findByEmail(email).get().getId();
 
         ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
@@ -151,5 +156,108 @@ public class UserControllerIntegrationTest {
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.error").value("Unauthorized: Invalid old password."))
                 .andExpect(jsonPath("$.path").value("/users/" + userId + "/password"));
+    }
+
+    @Test
+    @DisplayName("Should delete user successfully when user deletes self")
+    void shouldDeleteUserSuccessfully_WhenUserDeletesSelf() throws Exception {
+        String email = "delete-self@example.com";
+        String password = "password123";
+        String token = registerAndLogin(email, password, UserRole.PROFESSIONAL);
+        UUID userId = userJpaRepository.findByEmail(email).get().getId();
+
+        mockMvc.perform(delete("/users/" + userId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + token))
+                .andExpect(status().isNoContent());
+
+        AuthenticationRequest authRequest = new AuthenticationRequest(email, password);
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authRequest)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Should delete user successfully when admin deletes user")
+    void shouldDeleteUserSuccessfully_WhenAdminDeletesUser() throws Exception {
+        String adminEmail = "admin-delete@example.com";
+        String adminPassword = "adminPassword";
+        String adminToken = registerAndLogin(adminEmail, adminPassword, UserRole.ADMIN);
+
+        String userEmail = "user-to-delete@example.com";
+        String userPassword = "userPassword";
+        UUID userId = registerUser(userEmail, userPassword, UserRole.PROFESSIONAL);
+
+        mockMvc.perform(delete("/users/" + userId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
+                .andExpect(status().isNoContent());
+
+        AuthenticationRequest authRequest = new AuthenticationRequest(userEmail, userPassword);
+        mockMvc.perform(post("/api/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(authRequest)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Should return Forbidden when user deletes another user")
+    void shouldReturnForbidden_WhenUserDeletesAnotherUser() throws Exception {
+        String userAEmail = "user-a@example.com";
+        UUID userAId = registerUser(userAEmail, "passwordA", UserRole.PROFESSIONAL);
+
+        String userBEmail = "user-b@example.com";
+        String userBToken = registerAndLogin(userBEmail, "passwordB", UserRole.PROFESSIONAL);
+
+        mockMvc.perform(delete("/users/" + userAId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + userBToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Should return Unauthorized when unauthenticated user deletes user")
+    void shouldReturnUnauthorized_WhenUnauthenticatedUserDeletesUser() throws Exception {
+        String userEmail = "unauth-delete@example.com";
+        UUID userId = registerUser(userEmail, "password123", UserRole.PROFESSIONAL);
+
+        mockMvc.perform(delete("/users/" + userId))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Should return Not Found when deleting non-existent user")
+    void shouldReturnNotFound_WhenDeletingNonExistentUser() throws Exception {
+        String adminToken = registerAndLogin("admin-nonexistent@example.com", "password", UserRole.ADMIN);
+        UUID nonExistentUserId = UUID.randomUUID();
+
+        mockMvc.perform(delete("/users/" + nonExistentUserId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should return Forbidden when admin deletes self")
+    void shouldReturnForbidden_WhenAdminDeletesSelf() throws Exception {
+        String adminEmail = "admin-selfdelete@example.com";
+        String adminPassword = "password";
+        String adminToken = registerAndLogin(adminEmail, adminPassword, UserRole.ADMIN);
+        UUID adminId = userJpaRepository.findByEmail(adminEmail).get().getId();
+
+        mockMvc.perform(delete("/users/" + adminId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Should return Forbidden when admin deletes another admin")
+    void shouldReturnForbidden_WhenAdminDeletesAnotherAdmin() throws Exception {
+        String admin1Email = "admin1@example.com";
+        String admin1Token = registerAndLogin(admin1Email, "password", UserRole.ADMIN);
+
+        String admin2Email = "admin2@example.com";
+        UUID admin2Id = registerUser(admin2Email, "password", UserRole.ADMIN);
+
+        mockMvc.perform(delete("/users/" + admin2Id)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + admin1Token))
+                .andExpect(status().isForbidden());
     }
 }
