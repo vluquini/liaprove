@@ -4,6 +4,7 @@ import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
 import com.lia.liaprove.core.domain.question.ProjectQuestion;
 import com.lia.liaprove.core.domain.question.Question;
+import com.lia.liaprove.core.exceptions.InvalidUserDataException;
 import com.lia.liaprove.core.usecases.question.SubmitQuestionUseCase;
 
 import java.util.UUID;
@@ -21,15 +22,20 @@ public class SubmitQuestionUseCaseImpl implements SubmitQuestionUseCase {
 
     @Override
     public Question execute(SubmitQuestionCommand command) {
-        Question newQuestion;
-        UUID questionId = UUID.randomUUID(); // Gera um novo ID para a Question
+        // Check for existing question by description BEFORE creating the new question object
+        if (questionGateway.existsByDescription(command.description())) {
+            throw new InvalidUserDataException("Unable to process question submission with the provided details.");
+        }
 
-        switch (command.questionType()) {
-            case MULTIPLE_CHOICE:
+        Question newQuestion;
+        UUID questionId = UUID.randomUUID();
+
+        newQuestion = switch (command.questionType()) {
+            case MULTIPLE_CHOICE -> {
                 if (command.alternatives() == null || command.alternatives().isEmpty()) {
                     throw new IllegalArgumentException("Multiple choice question must have alternatives.");
                 }
-                newQuestion = new MultipleChoiceQuestion(
+                yield new MultipleChoiceQuestion(
                         questionId,
                         command.authorId(),
                         command.title(),
@@ -43,12 +49,12 @@ public class SubmitQuestionUseCaseImpl implements SubmitQuestionUseCase {
                         command.recruiterUsageCount(),
                         command.alternatives()
                 );
-                break;
-            case PROJECT:
+            }
+            case PROJECT -> {
                 if (command.projectUrl() == null || command.projectUrl().isBlank()) {
                     throw new IllegalArgumentException("Project question must have a project URL.");
                 }
-                newQuestion = new ProjectQuestion(
+                yield new ProjectQuestion(
                         questionId,
                         command.authorId(),
                         command.title(),
@@ -62,12 +68,9 @@ public class SubmitQuestionUseCaseImpl implements SubmitQuestionUseCase {
                         command.recruiterUsageCount(),
                         command.projectUrl()
                 );
-                break;
-            default:
-                throw new IllegalArgumentException("Unknown question type: " + command.questionType());
-        }
+            }
+        };
 
         return questionGateway.save(newQuestion);
     }
-
 }

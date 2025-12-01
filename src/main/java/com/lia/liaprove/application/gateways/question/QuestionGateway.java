@@ -52,4 +52,12 @@ public interface QuestionGateway {
      * @return A questão atualizada.
      */
     Question update(Question question);
+
+    /**
+     * Verifica se uma questão com a descrição fornecida já existe.
+     *
+     * @param description A descrição da questão a ser verificada.
+     * @return true se uma questão com a descrição já existe, false caso contrário.
+     */
+    boolean existsByDescription(String description);
 }
