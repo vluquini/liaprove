@@ -12,10 +12,10 @@ public class ProjectQuestion extends Question {
     private String projectUrl;
 
     public ProjectQuestion(UUID id, UUID authorId, String title, String description, Set<KnowledgeArea> knowledgeAreas,
-                           DifficultyLevel difficultyLevel, RelevanceLevel relevanceByCommunity,
+                           DifficultyLevel difficultyByCommunity, RelevanceLevel relevanceByCommunity,
                            LocalDateTime submissionDate, QuestionStatus status, RelevanceLevel relevanceByLLM,
                            int recruiterUsageCount, String projectUrl) {
-        super(id, authorId, title, description, knowledgeAreas, difficultyLevel, relevanceByCommunity,
+        super(id, authorId, title, description, knowledgeAreas, difficultyByCommunity, relevanceByCommunity,
               submissionDate, status, relevanceByLLM, recruiterUsageCount);
         this.projectUrl = projectUrl;
     }
@@ -27,5 +27,4 @@ public class ProjectQuestion extends Question {
     public void setProjectUrl(String projectUrl) {
         this.projectUrl = projectUrl;
     }
-
 }
