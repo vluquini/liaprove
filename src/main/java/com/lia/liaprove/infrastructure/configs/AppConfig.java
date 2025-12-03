@@ -22,11 +22,6 @@ public class AppConfig {
     }
 
     @Bean
-    public UserMapper userMapper() {
-        return new UserMapper();
-    }
-
-    @Bean
     public PasswordHasher passwordHasher(PasswordEncoder passwordEncoder) {
         return new PasswordHasherImpl(passwordEncoder);
     }

@@ -7,95 +7,37 @@ import com.lia.liaprove.infrastructure.dtos.UserResponseDto;
 import com.lia.liaprove.infrastructure.entities.users.UserEntity;
 import com.lia.liaprove.infrastructure.entities.users.UserProfessionalEntity;
 import com.lia.liaprove.infrastructure.entities.users.UserRecruiterEntity;
+import org.mapstruct.Mapper;
+import org.mapstruct.ReportingPolicy;
 
-public class UserMapper {
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
+public interface UserMapper {
 
-    public UserResponseDto toResponseDto(User user) {
-        if (user == null) {
-            return null;
-        }
-        return new UserResponseDto(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getOccupation(),
-                user.getBio(),
-                user.getExperienceLevel(),
-                user.getRole()
-        );
-    }
-    
-    public UserEntity toEntity(User user) {
-        if (user == null) return null;
+    UserResponseDto toResponseDto(User user);
 
-        UserEntity entity;
-        if (user instanceof UserRecruiter recruiter) {
-            UserRecruiterEntity recruiterEntity = new UserRecruiterEntity();
-            recruiterEntity.setCompanyName(recruiter.getCompanyName());
-            recruiterEntity.setCompanyEmail(recruiter.getCompanyEmail());
-            recruiterEntity.setTotalAssessmentsCreated(recruiter.getTotalAssessmentsCreated());
-            recruiterEntity.setRecruiterRating(recruiter.getRecruiterRating());
-            recruiterEntity.setRecruiterRatingCount(recruiter.getRecruiterRatingCount());
-            entity = recruiterEntity;
-        } else {
-            entity = new UserProfessionalEntity();
-        }
-
-        mapCommonFieldsToEntity(entity, user);
-        return entity;
+    default UserEntity toEntity(User domain) {
+        return switch (domain) {
+            case null -> null;
+            case UserRecruiter ur -> toEntity(ur);
+            case UserProfessional up -> toEntity(up);
+            default -> throw new IllegalArgumentException("Unknown User subtype: " + domain.getClass());
+        };
     }
 
-    public User toDomain(UserEntity entity) {
-        if (entity == null) return null;
+    UserRecruiterEntity toEntity(UserRecruiter domain);
 
-        User user;
-        if (entity instanceof UserRecruiterEntity recruiterEntity) {
-            UserRecruiter recruiter = new UserRecruiter();
-            recruiter.setCompanyName(recruiterEntity.getCompanyName());
-            recruiter.setCompanyEmail(recruiterEntity.getCompanyEmail());
-            recruiter.setTotalAssessmentsCreated(recruiterEntity.getTotalAssessmentsCreated());
-            recruiter.setRecruiterRating(recruiterEntity.getRecruiterRating());
-            recruiter.setRecruiterRatingCount(recruiterEntity.getRecruiterRatingCount());
-            user = recruiter;
-        } else {
-            user = new UserProfessional();
-        }
+    UserProfessionalEntity toEntity(UserProfessional domain);
 
-        mapCommonFieldsToDomain(user, entity);
-        return user;
+    default User toDomain(UserEntity entity) {
+        return switch (entity) {
+            case null -> null;
+            case UserRecruiterEntity ure -> toDomain(ure);
+            case UserProfessionalEntity upe -> toDomain(upe);
+            default -> throw new IllegalArgumentException("Unknown UserEntity subtype: " + entity.getClass());
+        };
     }
 
-    private void mapCommonFieldsToEntity(UserEntity entity, User user) {
-        entity.setId(user.getId());
-        entity.setName(user.getName());
-        entity.setEmail(user.getEmail());
-        entity.setPasswordHash(user.getPasswordHash());
-        entity.setOccupation(user.getOccupation());
-        entity.setBio(user.getBio());
-        entity.setExperienceLevel(user.getExperienceLevel());
-        entity.setRole(user.getRole());
-        entity.setVoteWeight(user.getVoteWeight());
-        entity.setTotalAssessmentsTaken(user.getTotalAssessmentsTaken());
-        entity.setAverageScore(user.getAverageScore());
-        entity.setRegistrationDate(user.getRegistrationDate());
-        entity.setLastLogin(user.getLastLogin());
-        entity.setStatus(user.getStatus());
-    }
+    UserRecruiter toDomain(UserRecruiterEntity entity);
 
-    private void mapCommonFieldsToDomain(User user, UserEntity entity) {
-        user.setId(entity.getId());
-        user.setName(entity.getName());
-        user.setEmail(entity.getEmail());
-        user.setPasswordHash(entity.getPasswordHash());
-        user.setOccupation(entity.getOccupation());
-        user.setBio(entity.getBio());
-        user.setExperienceLevel(entity.getExperienceLevel());
-        user.setRole(entity.getRole());
-        user.setVoteWeight(entity.getVoteWeight());
-        user.setTotalAssessmentsTaken(entity.getTotalAssessmentsTaken());
-        user.setAverageScore(entity.getAverageScore());
-        user.setRegistrationDate(entity.getRegistrationDate());
-        user.setLastLogin(entity.getLastLogin());
-        user.setStatus(entity.getStatus());
-    }
+    UserProfessional toDomain(UserProfessionalEntity entity);
 }
