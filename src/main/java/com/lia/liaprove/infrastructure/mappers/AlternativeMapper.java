@@ -1,7 +1,7 @@
 package com.lia.liaprove.infrastructure.mappers;
 
 import com.lia.liaprove.core.domain.question.Alternative;
-import com.lia.liaprove.infrastructure.entities.AlternativeEmbeddable;
+import com.lia.liaprove.infrastructure.entities.question.AlternativeEmbeddable;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 

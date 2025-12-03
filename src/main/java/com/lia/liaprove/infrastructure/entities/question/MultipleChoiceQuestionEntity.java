@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.entities;
+package com.lia.liaprove.infrastructure.entities.question;
 
 import jakarta.persistence.*;
 import lombok.Getter;

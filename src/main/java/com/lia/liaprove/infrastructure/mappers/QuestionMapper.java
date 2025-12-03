@@ -4,10 +4,10 @@ import com.lia.liaprove.core.domain.question.Alternative;
 import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
 import com.lia.liaprove.core.domain.question.ProjectQuestion;
 import com.lia.liaprove.core.domain.question.Question;
-import com.lia.liaprove.infrastructure.entities.AlternativeEmbeddable;
-import com.lia.liaprove.infrastructure.entities.MultipleChoiceQuestionEntity;
-import com.lia.liaprove.infrastructure.entities.ProjectQuestionEntity;
-import com.lia.liaprove.infrastructure.entities.QuestionEntity;
+import com.lia.liaprove.infrastructure.entities.question.AlternativeEmbeddable;
+import com.lia.liaprove.infrastructure.entities.question.MultipleChoiceQuestionEntity;
+import com.lia.liaprove.infrastructure.entities.question.ProjectQuestionEntity;
+import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import org.mapstruct.*;
 
 import java.util.List;

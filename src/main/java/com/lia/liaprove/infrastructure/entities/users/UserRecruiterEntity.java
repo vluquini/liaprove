@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.entities;
+package com.lia.liaprove.infrastructure.entities.users;
 
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;

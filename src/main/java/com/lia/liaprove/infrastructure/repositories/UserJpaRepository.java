@@ -1,6 +1,6 @@
 package com.lia.liaprove.infrastructure.repositories;
 
-import com.lia.liaprove.infrastructure.entities.UserEntity;
+import com.lia.liaprove.infrastructure.entities.users.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;

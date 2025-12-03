@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.entities;
+package com.lia.liaprove.infrastructure.entities.users;
 
 import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.UserRole;
