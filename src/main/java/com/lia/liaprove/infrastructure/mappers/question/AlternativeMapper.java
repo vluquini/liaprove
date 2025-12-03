@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.mappers;
+package com.lia.liaprove.infrastructure.mappers.question;
 
 import com.lia.liaprove.core.domain.question.Alternative;
 import com.lia.liaprove.infrastructure.entities.question.AlternativeEmbeddable;

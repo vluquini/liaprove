@@ -6,7 +6,7 @@ import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
-import com.lia.liaprove.infrastructure.mappers.QuestionMapper;
+import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.repositories.QuestionJpaRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;

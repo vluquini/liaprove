@@ -4,7 +4,7 @@ import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.application.services.user.*;
 import com.lia.liaprove.core.usecases.user.users.*;
-import com.lia.liaprove.infrastructure.mappers.UserMapper;
+import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
 import com.lia.liaprove.infrastructure.services.PasswordHasherImpl;
 import com.lia.liaprove.infrastructure.services.UserGatewayImpl;

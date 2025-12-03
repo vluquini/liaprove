@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.mappers;
+package com.lia.liaprove.infrastructure.mappers.users;
 
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserProfessional;

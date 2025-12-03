@@ -7,7 +7,7 @@ import com.lia.liaprove.infrastructure.dtos.ChangePasswordRequest;
 import com.lia.liaprove.infrastructure.dtos.CreateUserRequest;
 import com.lia.liaprove.infrastructure.dtos.UpdateUserRequest;
 import com.lia.liaprove.infrastructure.dtos.UserResponseDto;
-import com.lia.liaprove.infrastructure.mappers.UserMapper;
+import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
 import com.lia.liaprove.infrastructure.security.CustomUserDetails;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;

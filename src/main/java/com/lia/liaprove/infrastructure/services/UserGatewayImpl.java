@@ -4,7 +4,7 @@ import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.infrastructure.entities.users.UserEntity;
-import com.lia.liaprove.infrastructure.mappers.UserMapper;
+import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
