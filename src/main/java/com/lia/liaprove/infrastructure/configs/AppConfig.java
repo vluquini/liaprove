@@ -1,8 +1,13 @@
 package com.lia.liaprove.infrastructure.configs;
 
+import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
+import com.lia.liaprove.application.services.question.DefaultQuestionFactory;
+import com.lia.liaprove.application.services.question.SubmitQuestionUseCaseImpl;
 import com.lia.liaprove.application.services.user.*;
+import com.lia.liaprove.core.usecases.question.QuestionFactory;
+import com.lia.liaprove.core.usecases.question.SubmitQuestionUseCase;
 import com.lia.liaprove.core.usecases.user.users.*;
 import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
@@ -16,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Configuration
 public class AppConfig {
 
+    // Auth
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -26,6 +32,7 @@ public class AppConfig {
         return new PasswordHasherImpl(passwordEncoder);
     }
 
+    // User Domain
     @Bean
     public UserGateway userGateway(UserJpaRepository userJpaRepository, UserMapper userMapper) {
         return new UserGatewayImpl(userJpaRepository, userMapper);
@@ -64,5 +71,16 @@ public class AppConfig {
     @Bean
     public DeleteUserUseCase deleteUserUseCase(UserGateway userGateway) {
         return new DeleteUserUseCaseImpl(userGateway);
+    }
+
+    // Question Domain
+    @Bean
+    public QuestionFactory questionFactory() {
+        return new DefaultQuestionFactory();
+    }
+
+    @Bean
+    public SubmitQuestionUseCase submitQuestionUseCase(QuestionGateway questionGateway, QuestionFactory factory) {
+        return new SubmitQuestionUseCaseImpl(questionGateway, factory);
     }
 }
