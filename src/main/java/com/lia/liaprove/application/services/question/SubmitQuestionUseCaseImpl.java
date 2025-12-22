@@ -1,13 +1,13 @@
 package com.lia.liaprove.application.services.question;
 
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
-import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
-import com.lia.liaprove.core.domain.question.ProjectQuestion;
-import com.lia.liaprove.core.domain.question.Question;
+import com.lia.liaprove.core.domain.question.*;
 import com.lia.liaprove.core.exceptions.InvalidUserDataException;
+import com.lia.liaprove.core.usecases.question.QuestionFactory;
 import com.lia.liaprove.core.usecases.question.SubmitQuestionUseCase;
 
-import java.util.UUID;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Implementação do caso de uso para submissão de uma nova questão.
@@ -15,62 +15,61 @@ import java.util.UUID;
 public class SubmitQuestionUseCaseImpl implements SubmitQuestionUseCase {
 
     private final QuestionGateway questionGateway;
+    private final QuestionFactory questionFactory;
 
-    public SubmitQuestionUseCaseImpl(QuestionGateway questionGateway) {
+    public SubmitQuestionUseCaseImpl(QuestionGateway questionGateway, QuestionFactory questionFactory) {
         this.questionGateway = questionGateway;
+        this.questionFactory = questionFactory;
     }
 
     @Override
-    public Question execute(SubmitQuestionCommand command) {
+    public Question createMultipleChoice(QuestionCreateDto dto) {
+        Objects.requireNonNull(dto, "dto must not be null");
+
         // Check for existing question by description BEFORE creating the new question object
-        if (questionGateway.existsByDescription(command.description())) {
+        if (questionGateway.existsByDescription(dto.description())) {
             throw new InvalidUserDataException("Unable to process question submission with the provided details.");
         }
 
-        Question newQuestion;
-        UUID questionId = UUID.randomUUID();
+        // Business rules specific to multiple choice
+        List<Alternative> alternatives = dto.alternatives();
 
-        newQuestion = switch (command.questionType()) {
-            case MULTIPLE_CHOICE -> {
-                if (command.alternatives() == null || command.alternatives().isEmpty()) {
-                    throw new IllegalArgumentException("Multiple choice question must have alternatives.");
-                }
-                yield new MultipleChoiceQuestion(
-                        questionId,
-                        command.authorId(),
-                        command.title(),
-                        command.description(),
-                        command.knowledgeAreas(),
-                        command.difficultyLevel(),
-                        command.relevanceByCommunity(),
-                        command.submissionDate(),
-                        command.status(),
-                        command.relevanceByLLM(),
-                        command.recruiterUsageCount(),
-                        command.alternatives()
-                );
-            }
-            case PROJECT -> {
-                if (command.projectUrl() == null || command.projectUrl().isBlank()) {
-                    throw new IllegalArgumentException("Project question must have a project URL.");
-                }
-                yield new ProjectQuestion(
-                        questionId,
-                        command.authorId(),
-                        command.title(),
-                        command.description(),
-                        command.knowledgeAreas(),
-                        command.difficultyLevel(),
-                        command.relevanceByCommunity(),
-                        command.submissionDate(),
-                        command.status(),
-                        command.relevanceByLLM(),
-                        command.recruiterUsageCount(),
-                        command.projectUrl()
-                );
-            }
-        };
+        if (alternatives == null || alternatives.size() < 3 || alternatives.size() > 5) {
+            throw new InvalidUserDataException("Multiple choice question must have between 3 and 5 alternatives.");
+        }
 
-        return questionGateway.save(newQuestion);
+        long correctCount = alternatives.stream().filter(Alternative::correct).count();
+
+        if (correctCount != 1) {
+            throw new InvalidUserDataException("Exactly one alternative must be marked as correct. Found: " + correctCount);
+        }
+
+        // Delegate entity construction to factory (factory is responsible for defaults like submissionDate/status)
+        MultipleChoiceQuestion question = questionFactory.createMultipleChoice(dto);
+
+        // Persist and return
+        return questionGateway.save(question);
+    }
+
+    @Override
+    public Question createProject(QuestionCreateDto dto) {
+        Objects.requireNonNull(dto, "dto must not be null");
+
+        // Check for existing question by description BEFORE creating the new question object
+        if (questionGateway.existsByDescription(dto.description())) {
+            throw new InvalidUserDataException("Unable to process question submission with the provided details.");
+        }
+
+        // Sanity: project creation should not carry alternatives
+        List<Alternative> alternatives = dto.alternatives();
+        if (alternatives != null && !alternatives.isEmpty()) {
+            throw new InvalidUserDataException("Project question must not include alternatives at creation time.");
+        }
+
+        // Factory will create ProjectQuestion with defaults (projectUrl remains null)
+        ProjectQuestion question = questionFactory.createProject(dto);
+
+        // Persist and return
+        return questionGateway.save(question);
     }
 }
