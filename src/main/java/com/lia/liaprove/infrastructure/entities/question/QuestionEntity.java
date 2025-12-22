@@ -5,8 +5,7 @@ import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
@@ -18,8 +17,7 @@ import java.util.UUID;
 @Table(name = "questions")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @DiscriminatorColumn(name = "question_type", discriminatorType = DiscriminatorType.STRING)
-@Getter
-@Setter
+@Data
 public abstract class QuestionEntity {
     @Id
     @GeneratedValue

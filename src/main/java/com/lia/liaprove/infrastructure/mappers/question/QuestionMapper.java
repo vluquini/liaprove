@@ -1,16 +1,20 @@
 package com.lia.liaprove.infrastructure.mappers.question;
 
-import com.lia.liaprove.core.domain.question.Alternative;
-import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
-import com.lia.liaprove.core.domain.question.ProjectQuestion;
-import com.lia.liaprove.core.domain.question.Question;
-import com.lia.liaprove.infrastructure.entities.question.AlternativeEmbeddable;
+import com.lia.liaprove.core.domain.question.*;
+import com.lia.liaprove.infrastructure.dtos.question.MultipleChoiceQuestionRequest;
+import com.lia.liaprove.infrastructure.dtos.question.ProjectQuestionRequest;
+import com.lia.liaprove.infrastructure.dtos.question.QuestionRequest;
+import com.lia.liaprove.infrastructure.dtos.question.MultipleChoiceQuestionResponse;
+import com.lia.liaprove.infrastructure.dtos.question.ProjectQuestionResponse;
+import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
+import com.lia.liaprove.infrastructure.entities.question.AlternativeEntity;
 import com.lia.liaprove.infrastructure.entities.question.MultipleChoiceQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.ProjectQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import org.mapstruct.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR, uses = {AlternativeMapper.class})
 public interface QuestionMapper {
@@ -46,8 +50,8 @@ public interface QuestionMapper {
     }
 
     // Helpers for mapping lists of alternatives (MapStruct will generate implementations)
-    List<AlternativeEmbeddable> alternativeListToEntity(List<Alternative> domainList);
-    List<Alternative> alternativeListToDomain(List<AlternativeEmbeddable> embList);
+    List<AlternativeEntity> alternativeListToEntity(List<Alternative> domainList);
+    List<Alternative> alternativeListToDomain(List<AlternativeEntity> embList);
 
     // Update methods using @MappingTarget
     // Ignore fields that must be preserved by JPA (id, submissionDate, etc.)
@@ -96,7 +100,7 @@ public interface QuestionMapper {
 
                 if (sourceAlternatives != null) {
                     // convert via generated mapper method and replace
-                    List<AlternativeEmbeddable> converted = alternativeListToEntity(sourceAlternatives);
+                    List<AlternativeEntity> converted = alternativeListToEntity(sourceAlternatives);
                     mce.getAlternatives().clear();
                     if (converted != null) mce.getAlternatives().addAll(converted);
                 }
@@ -110,5 +114,48 @@ public interface QuestionMapper {
             }
             default -> throw new IllegalArgumentException("Unsupported QuestionEntity subtype: " + entity.getClass());
         }
+    }
+
+    @AfterMapping
+    default void linkAlternativesToQuestion(@MappingTarget MultipleChoiceQuestionEntity entity) {
+        if (entity.getAlternatives() != null) {
+            entity.getAlternatives().forEach(alternative -> alternative.setQuestion(entity));
+        }
+    }
+
+    // MultipleChoice: mapeia alternativas
+    @Mapping(target = "authorId", expression = "java(authorId)")
+    QuestionCreateDto toQuestionCreateDto(MultipleChoiceQuestionRequest req, UUID authorId);
+
+    // Project: não possui alternatives — ignorar esse target
+    @Mapping(target = "authorId", expression = "java(authorId)")
+    @Mapping(target = "alternatives", ignore = true)
+    QuestionCreateDto toQuestionCreateDto(ProjectQuestionRequest req, UUID authorId);
+
+
+    // Dispatcher genérico
+    default QuestionCreateDto toQuestionCreateDto(QuestionRequest req, UUID authorId) {
+        if (req instanceof MultipleChoiceQuestionRequest mc) return toQuestionCreateDto(mc, authorId);
+        if (req instanceof ProjectQuestionRequest p) return toQuestionCreateDto(p, authorId);
+        throw new IllegalArgumentException("Unknown CreateQuestionRequest subtype: " + req.getClass());
+    }
+
+    // ####################################################################################################
+    // ############################# MAPPINGS FROM DOMAIN TO DTO RESPONSE (NEW) ###########################
+    // ####################################################################################################
+
+    @Mapping(target = "correctAlternativeId", expression = "java(domain.getAlternatives() != null ? domain.getAlternatives().stream().filter(Alternative::correct).map(Alternative::id).findFirst().orElse(null) : null)")
+    MultipleChoiceQuestionResponse toResponseDto(MultipleChoiceQuestion domain);
+
+    ProjectQuestionResponse toResponseDto(ProjectQuestion domain);
+
+    default QuestionResponse toResponseDto(Question domain) {
+        return switch (domain) {
+            case null -> null;
+            case MultipleChoiceQuestion mc -> toResponseDto(mc);
+            case ProjectQuestion pq -> toResponseDto(pq);
+            default -> throw new IllegalArgumentException("Unknown Question subtype: " + domain.getClass().getName());
+        };
+
     }
 }
