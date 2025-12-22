@@ -7,7 +7,9 @@ import java.util.*;
  * Representa uma questão de múltipla escolha, estendendo a classe Question e incluindo uma lista de alternativas.
  */
 public class MultipleChoiceQuestion extends Question {
-    private final List<Alternative> alternatives;
+    private List<Alternative> alternatives;
+
+    public MultipleChoiceQuestion(){}
 
     public MultipleChoiceQuestion(UUID id, UUID authorId, String title, String description, Set<KnowledgeArea> knowledgeAreas,
                                   DifficultyLevel difficultyByCommunity, RelevanceLevel relevanceByCommunity,
@@ -52,6 +54,13 @@ public class MultipleChoiceQuestion extends Question {
 
     public List<Alternative> getAlternatives() {
         return alternatives;
+    }
+
+    public void setAlternatives(List<Alternative> alternatives) {
+        if (this.alternatives != null) {
+            throw new IllegalStateException("Alternatives already set and cannot be changed.");
+        }
+        this.alternatives = List.copyOf(alternatives); // cópia defensiva + imutabilidade
     }
 
     /**

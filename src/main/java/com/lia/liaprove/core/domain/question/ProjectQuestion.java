@@ -9,15 +9,17 @@ import java.util.UUID;
  */
 public class ProjectQuestion extends Question {
     // Link do projeto desenvolvido pelo Usuário
+    // Só será preenchido quando o usuário responder, por isto não é preenchido pelo construtor
     private String projectUrl;
+
+    public ProjectQuestion(){}
 
     public ProjectQuestion(UUID id, UUID authorId, String title, String description, Set<KnowledgeArea> knowledgeAreas,
                            DifficultyLevel difficultyByCommunity, RelevanceLevel relevanceByCommunity,
                            LocalDateTime submissionDate, QuestionStatus status, RelevanceLevel relevanceByLLM,
-                           int recruiterUsageCount, String projectUrl) {
+                           int recruiterUsageCount) {
         super(id, authorId, title, description, knowledgeAreas, difficultyByCommunity, relevanceByCommunity,
               submissionDate, status, relevanceByLLM, recruiterUsageCount);
-        this.projectUrl = projectUrl;
     }
 
     public String getProjectUrl() {
