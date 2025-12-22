@@ -8,7 +8,6 @@ import java.util.*;
  */
 public abstract class Question {
     private UUID id;
-    // ID do usuário que criou a questão
     private UUID authorId;
     private String title;
     private String description;
