@@ -32,6 +32,18 @@ public class QuestionGatewayImpl implements QuestionGateway {
 
     @Override
     @Transactional(readOnly = true)
+    public boolean existsByDescription(String description) {
+        return questionJpaRepository.existsByDescription(description);
+    }
+
+    @Override
+    @Transactional
+    public Question save(Question question) {
+        return questionMapper.toDomain(questionJpaRepository.save(questionMapper.toEntity(question)));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public Optional<Question> findById(UUID id) {
         return questionJpaRepository.findById(id).map(questionMapper::toDomain);
     }
@@ -47,11 +59,7 @@ public class QuestionGatewayImpl implements QuestionGateway {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    @Transactional
-    public Question save(Question question) {
-        return questionMapper.toDomain(questionJpaRepository.save(questionMapper.toEntity(question)));
-    }
+
 
     @Override
     @Transactional
@@ -71,9 +79,4 @@ public class QuestionGatewayImpl implements QuestionGateway {
         return questionMapper.toDomain(questionJpaRepository.save(existingEntity));
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    public boolean existsByDescription(String description) {
-        return questionJpaRepository.existsByDescription(description);
-    }
 }

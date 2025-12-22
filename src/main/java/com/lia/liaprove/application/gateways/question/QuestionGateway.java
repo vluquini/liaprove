@@ -17,6 +17,22 @@ import java.util.UUID;
 public interface QuestionGateway {
 
     /**
+     * Verifica se uma questão com a descrição fornecida já existe.
+     *
+     * @param description A descrição da questão a ser verificada.
+     * @return true se uma questão com a descrição já existe, false caso contrário.
+     */
+    boolean existsByDescription(String description);
+
+    /**
+     * Salva uma nova questão ou atualiza uma existente.
+     *
+     * @param question A questão a ser salva ou atualizada.
+     * @return A questão salva/atualizada.
+     */
+    Question save(Question question);
+
+    /**
      * Encontra uma questão pelo seu ID.
      *
      * @param id O ID da questão.
@@ -38,26 +54,10 @@ public interface QuestionGateway {
     List<Question> findAll(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, QuestionStatus status, UUID authorId, int page, int size);
 
     /**
-     * Salva uma nova questão ou atualiza uma existente.
-     *
-     * @param question A questão a ser salva ou atualizada.
-     * @return A questão salva/atualizada.
-     */
-    Question save(Question question);
-
-    /**
      * Atualiza uma questão existente.
      *
      * @param question A questão a ser atualizada.
      * @return A questão atualizada.
      */
     Question update(Question question);
-
-    /**
-     * Verifica se uma questão com a descrição fornecida já existe.
-     *
-     * @param description A descrição da questão a ser verificada.
-     * @return true se uma questão com a descrição já existe, false caso contrário.
-     */
-    boolean existsByDescription(String description);
 }
