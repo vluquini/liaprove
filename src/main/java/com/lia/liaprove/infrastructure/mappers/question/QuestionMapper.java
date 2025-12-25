@@ -1,5 +1,6 @@
 package com.lia.liaprove.infrastructure.mappers.question;
 
+import com.lia.liaprove.application.services.question.QuestionCreateDto;
 import com.lia.liaprove.core.domain.question.*;
 import com.lia.liaprove.infrastructure.dtos.question.MultipleChoiceQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.ProjectQuestionRequest;

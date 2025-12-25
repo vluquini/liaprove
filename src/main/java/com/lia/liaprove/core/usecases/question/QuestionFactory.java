@@ -1,5 +1,6 @@
 package com.lia.liaprove.core.usecases.question;
 
+import com.lia.liaprove.application.services.question.QuestionCreateDto;
 import com.lia.liaprove.core.domain.question.*;
 
 /**

@@ -1,4 +1,9 @@
-package com.lia.liaprove.core.domain.question;
+package com.lia.liaprove.application.services.question;
+
+import com.lia.liaprove.core.domain.question.Alternative;
+import com.lia.liaprove.core.domain.question.DifficultyLevel;
+import com.lia.liaprove.core.domain.question.KnowledgeArea;
+import com.lia.liaprove.core.domain.question.RelevanceLevel;
 
 import java.util.List;
 import java.util.Set;

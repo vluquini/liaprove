@@ -1,7 +1,7 @@
 package com.lia.liaprove.infrastructure.controllers;
 
 import com.lia.liaprove.core.domain.question.Question;
-import com.lia.liaprove.core.domain.question.QuestionCreateDto;
+import com.lia.liaprove.application.services.question.QuestionCreateDto;
 import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.infrastructure.dtos.question.MultipleChoiceQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.ProjectQuestionRequest;
