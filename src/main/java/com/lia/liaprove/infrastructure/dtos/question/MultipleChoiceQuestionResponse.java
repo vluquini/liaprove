@@ -4,7 +4,6 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -12,6 +11,5 @@ import java.util.UUID;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class MultipleChoiceQuestionResponse extends QuestionResponse {
-    private UUID correctAlternativeId;
     private List<AlternativeResponseDto> alternatives;
 }

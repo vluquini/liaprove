@@ -145,7 +145,6 @@ public interface QuestionMapper {
     // ############################# MAPPINGS FROM DOMAIN TO DTO RESPONSE (NEW) ###########################
     // ####################################################################################################
 
-    @Mapping(target = "correctAlternativeId", expression = "java(domain.getAlternatives() != null ? domain.getAlternatives().stream().filter(Alternative::correct).map(Alternative::id).findFirst().orElse(null) : null)")
     MultipleChoiceQuestionResponse toResponseDto(MultipleChoiceQuestion domain);
 
     ProjectQuestionResponse toResponseDto(ProjectQuestion domain);

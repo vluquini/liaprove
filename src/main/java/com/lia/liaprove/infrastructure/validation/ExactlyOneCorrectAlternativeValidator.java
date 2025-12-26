@@ -21,7 +21,7 @@ public class ExactlyOneCorrectAlternativeValidator implements ConstraintValidato
         }
 
         long correctCount = alternatives.stream()
-                .filter(AlternativeRequestDto::isCorrect)
+                .filter(AlternativeRequestDto::correct)
                 .count();
 
         if (correctCount != 1) {

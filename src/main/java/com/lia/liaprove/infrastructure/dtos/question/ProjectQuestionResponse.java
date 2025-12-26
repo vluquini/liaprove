@@ -8,6 +8,4 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class ProjectQuestionResponse extends QuestionResponse {
-    private String projectUrl;
-}
+public class ProjectQuestionResponse extends QuestionResponse {}
