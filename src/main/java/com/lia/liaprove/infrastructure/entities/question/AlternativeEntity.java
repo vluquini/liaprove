@@ -12,7 +12,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AlternativeEntity {
-    // Mesmas anotações de ID e tipo de ID para consistência entre entidades
     @Id
     @GeneratedValue
     @UuidGenerator(style = UuidGenerator.Style.RANDOM)
@@ -27,7 +26,4 @@ public class AlternativeEntity {
 
     @Column(nullable = false)
     private boolean correct;
-
-//    @Column(name = "ord_index") // Vale a pena este atributo?
-//    private Integer orderIndex;
 }
