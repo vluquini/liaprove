@@ -8,6 +8,5 @@ import com.lia.liaprove.core.domain.question.*;
  * Define o contrato para a criação de questões no sistema.
  */
 public interface SubmitQuestionUseCase {
-    Question createMultipleChoice(QuestionCreateDto dto);
-    Question createProject(QuestionCreateDto dto);
+    Question submit(QuestionCreateDto dto);
 }

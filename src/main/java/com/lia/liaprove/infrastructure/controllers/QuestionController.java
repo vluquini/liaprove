@@ -3,8 +3,6 @@ package com.lia.liaprove.infrastructure.controllers;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.application.services.question.QuestionCreateDto;
 import com.lia.liaprove.core.usecases.question.*;
-import com.lia.liaprove.infrastructure.dtos.question.MultipleChoiceQuestionRequest;
-import com.lia.liaprove.infrastructure.dtos.question.ProjectQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
@@ -33,20 +31,8 @@ public class QuestionController {
         CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
         UUID authorId = principal.user().getId();
 
-        // Dispatch pela subclasse do DTO de request
-        Question submitted;
-
-        if (request instanceof MultipleChoiceQuestionRequest mcReq) {
-            // mapear CreateMultipleChoiceQuestionRequest -> QuestionCreateDto
-            QuestionCreateDto dto = questionMapper.toQuestionCreateDto(mcReq, authorId);
-            // validação adicional de negócio pode acontecer no use case
-            submitted = submitQuestionUseCase.createMultipleChoice(dto);
-        } else if (request instanceof ProjectQuestionRequest pReq) {
-            QuestionCreateDto dto = questionMapper.toQuestionCreateDto(pReq, authorId);
-            submitted = submitQuestionUseCase.createProject(dto);
-        } else {
-            return ResponseEntity.badRequest().build(); // ou lançar IllegalArgumentException
-        }
+        QuestionCreateDto dto = questionMapper.toQuestionCreateDto(request, authorId);
+        Question submitted = submitQuestionUseCase.submit(dto);
 
         QuestionResponse responseDto = questionMapper.toResponseDto(submitted);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);

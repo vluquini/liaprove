@@ -6,7 +6,6 @@ import com.lia.liaprove.core.exceptions.InvalidUserDataException;
 import com.lia.liaprove.core.usecases.question.QuestionFactory;
 import com.lia.liaprove.core.usecases.question.SubmitQuestionUseCase;
 
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -23,53 +22,21 @@ public class SubmitQuestionUseCaseImpl implements SubmitQuestionUseCase {
     }
 
     @Override
-    public Question createMultipleChoice(QuestionCreateDto dto) {
-        Objects.requireNonNull(dto, "dto must not be null");
+    public Question submit(QuestionCreateDto dto) {
+        Objects.requireNonNull(dto, "Data must not be null");
 
         // Check for existing question by description BEFORE creating the new question object
         if (questionGateway.existsByDescription(dto.description())) {
             throw new InvalidUserDataException("Unable to process question submission with the provided details.");
         }
 
-        // Business rules specific to multiple choice
-        List<Alternative> alternatives = dto.alternatives();
+        Question newQuestion;
 
-        if (alternatives == null || alternatives.size() < 3 || alternatives.size() > 5) {
-            throw new InvalidUserDataException("Multiple choice question must have between 3 and 5 alternatives.");
-        }
+        if (dto.alternatives() != null && !dto.alternatives().isEmpty()) {
+            newQuestion = questionFactory.createMultipleChoice(dto);
+        }else
+            newQuestion = questionFactory.createProject(dto);
 
-        long correctCount = alternatives.stream().filter(Alternative::correct).count();
-
-        if (correctCount != 1) {
-            throw new InvalidUserDataException("Exactly one alternative must be marked as correct. Found: " + correctCount);
-        }
-
-        // Delegate entity construction to factory (factory is responsible for defaults like submissionDate/status)
-        MultipleChoiceQuestion question = questionFactory.createMultipleChoice(dto);
-
-        // Persist and return
-        return questionGateway.save(question);
-    }
-
-    @Override
-    public Question createProject(QuestionCreateDto dto) {
-        Objects.requireNonNull(dto, "dto must not be null");
-
-        // Check for existing question by description BEFORE creating the new question object
-        if (questionGateway.existsByDescription(dto.description())) {
-            throw new InvalidUserDataException("Unable to process question submission with the provided details.");
-        }
-
-        // Sanity: project creation should not carry alternatives
-        List<Alternative> alternatives = dto.alternatives();
-        if (alternatives != null && !alternatives.isEmpty()) {
-            throw new InvalidUserDataException("Project question must not include alternatives at creation time.");
-        }
-
-        // Factory will create ProjectQuestion with defaults (projectUrl remains null)
-        ProjectQuestion question = questionFactory.createProject(dto);
-
-        // Persist and return
-        return questionGateway.save(question);
+        return questionGateway.save(newQuestion);
     }
 }

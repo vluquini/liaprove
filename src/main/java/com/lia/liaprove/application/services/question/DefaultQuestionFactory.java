@@ -15,10 +15,10 @@ import java.util.*;
 public class DefaultQuestionFactory implements QuestionFactory {
 
     @Override
-    public MultipleChoiceQuestion createMultipleChoice(QuestionCreateDto dto) {
+    public Question createMultipleChoice(QuestionCreateDto dto) {
         validateFields(dto);
 
-        // Mapear DTO alternatives -> domain Alternative (sem id, JPA gerará na persistência)
+        // Map DTO alternatives -> domain Alternative (JPA will generate id)
         List<Alternative> domainAlternatives = dto.alternatives() == null ? List.of()
                 : dto.alternatives().stream()
                 .map(req -> new Alternative(null, req.text(), req.correct()))
@@ -37,7 +37,7 @@ public class DefaultQuestionFactory implements QuestionFactory {
     }
 
     @Override
-    public ProjectQuestion createProject(QuestionCreateDto dto) {
+    public Question createProject(QuestionCreateDto dto) {
         validateFields(dto);
 
         ProjectQuestion question = new ProjectQuestion();
