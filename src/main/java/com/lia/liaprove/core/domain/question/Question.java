@@ -15,6 +15,7 @@ public abstract class Question {
     private DifficultyLevel difficultyByCommunity;
     private RelevanceLevel relevanceByCommunity;
     private LocalDateTime submissionDate;
+    private LocalDateTime votingEndDate;
     private QuestionStatus status;
     private RelevanceLevel relevanceByLLM;
     // Número de vezes que o recruiter usou essa questão. É utilizada no cálculo de sugestão pelas RBs.
@@ -24,7 +25,7 @@ public abstract class Question {
 
     public Question(UUID id, UUID authorId, String title, String description, Set<KnowledgeArea> knowledgeAreas,
                     DifficultyLevel difficultyByCommunity, RelevanceLevel relevanceByCommunity, LocalDateTime submissionDate,
-                    QuestionStatus status, RelevanceLevel relevanceByLLM, int recruiterUsageCount) {
+                    LocalDateTime votingEndDate, QuestionStatus status, RelevanceLevel relevanceByLLM, int recruiterUsageCount) {
         this.id = id;
         this.authorId = authorId;
         this.title = title;
@@ -33,6 +34,7 @@ public abstract class Question {
         this.difficultyByCommunity = difficultyByCommunity;
         this.relevanceByCommunity = relevanceByCommunity;
         this.submissionDate = submissionDate;
+        this.votingEndDate = votingEndDate;
         this.status = status;
         this.relevanceByLLM = relevanceByLLM;
         this.recruiterUsageCount = recruiterUsageCount;
@@ -100,6 +102,14 @@ public abstract class Question {
 
     public void setSubmissionDate(LocalDateTime submissionDate) {
         this.submissionDate = submissionDate;
+    }
+
+    public LocalDateTime getVotingEndDate() {
+        return votingEndDate;
+    }
+
+    public void setVotingEndDate(LocalDateTime votingEndDate) {
+        this.votingEndDate = votingEndDate;
     }
 
     public QuestionStatus getStatus() {

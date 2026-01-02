@@ -18,10 +18,10 @@ public class ProjectQuestion extends Question {
 
     public ProjectQuestion(UUID id, UUID authorId, String title, String description, Set<KnowledgeArea> knowledgeAreas,
                            DifficultyLevel difficultyByCommunity, RelevanceLevel relevanceByCommunity,
-                           LocalDateTime submissionDate, QuestionStatus status, RelevanceLevel relevanceByLLM,
+                           LocalDateTime submissionDate, LocalDateTime votingEndDate, QuestionStatus status, RelevanceLevel relevanceByLLM,
                            int recruiterUsageCount) {
         super(id, authorId, title, description, knowledgeAreas, difficultyByCommunity, relevanceByCommunity,
-              submissionDate, status, relevanceByLLM, recruiterUsageCount);
+              submissionDate, votingEndDate, status, relevanceByLLM, recruiterUsageCount);
     }
 
     public String getProjectUrl() {

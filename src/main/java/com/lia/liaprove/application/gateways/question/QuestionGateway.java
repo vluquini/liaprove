@@ -60,4 +60,13 @@ public interface QuestionGateway {
      * @return A questão atualizada.
      */
     Question update(Question question);
+
+    /**
+     * Encontra questões com um status específico e cuja data de término da votação é anterior à data e hora especificadas.
+     *
+     * @param status O status das questões a serem encontradas (ex: VOTING).
+     * @param dateTime A data e hora de corte. Questões com votingEndDate anterior a este valor serão retornadas.
+     * @return Uma lista de questões que correspondem aos critérios.
+     */
+    List<Question> findByStatusAndVotingEndDateBefore(QuestionStatus status, java.time.LocalDateTime dateTime);
 }

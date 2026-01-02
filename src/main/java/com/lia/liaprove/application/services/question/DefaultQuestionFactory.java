@@ -177,6 +177,7 @@ public class DefaultQuestionFactory implements QuestionFactory {
         question.setDifficultyByCommunity(dto.difficultyByCommunity());
         question.setRelevanceByCommunity(dto.relevanceByCommunity());
         question.setSubmissionDate(LocalDateTime.now());
+        question.setVotingEndDate(LocalDateTime.now().plusDays(7));
         question.setStatus(QuestionStatus.VOTING);
         question.setRelevanceByLLM(RelevanceLevel.FIVE); // temporário
         question.setRecruiterUsageCount(0);

@@ -59,8 +59,6 @@ public class QuestionGatewayImpl implements QuestionGateway {
                 .collect(Collectors.toList());
     }
 
-
-
     @Override
     @Transactional
     public Question update(Question question) {
@@ -77,6 +75,14 @@ public class QuestionGatewayImpl implements QuestionGateway {
         // but calling save() explicitly here ensures the entity is returned and its state is synchronized
         // (and it works even if existingEntity wasn't strictly managed, although findById makes it managed).
         return questionMapper.toDomain(questionJpaRepository.save(existingEntity));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Question> findByStatusAndVotingEndDateBefore(QuestionStatus status, java.time.LocalDateTime dateTime) {
+        return questionJpaRepository.findByStatusAndVotingEndDateBefore(status, dateTime).stream()
+                .map(questionMapper::toDomain)
+                .collect(Collectors.toList());
     }
 
 }

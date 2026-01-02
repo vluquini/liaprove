@@ -25,9 +25,11 @@ public interface QuestionJpaRepository extends JpaRepository<QuestionEntity, UUI
            "AND (:authorId IS NULL OR q.authorId = :authorId)")
     List<QuestionEntity> findAllWithFilters(
             @Param("knowledgeAreas") Set<KnowledgeArea> knowledgeAreas,
-            @Param("difficultyLevel") DifficultyLevel difficultyLevel,
+            @Param("difficultyLevelByCommunity") DifficultyLevel difficultyLevel,
             @Param("status") QuestionStatus status,
             @Param("authorId") UUID authorId,
             Pageable pageable
     );
+
+    List<QuestionEntity> findByStatusAndVotingEndDateBefore(QuestionStatus status, java.time.LocalDateTime votingEndDate);
 }

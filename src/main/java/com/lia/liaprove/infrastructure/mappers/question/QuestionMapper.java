@@ -60,6 +60,7 @@ public interface QuestionMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "submissionDate", ignore = true)
+    @Mapping(target = "votingEndDate", ignore = true)
     @Mapping(target = "recruiterUsageCount", ignore = true)
     @Mapping(target = "alternatives", ignore = true)
     void updateEntityFromDomain(MultipleChoiceQuestion domain, @MappingTarget MultipleChoiceQuestionEntity entity);
@@ -67,6 +68,7 @@ public interface QuestionMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "submissionDate", ignore = true)
+    @Mapping(target = "votingEndDate", ignore = true)
     @Mapping(target = "recruiterUsageCount", ignore = true)
     void updateEntityFromDomain(ProjectQuestion domain, @MappingTarget ProjectQuestionEntity entity);
 

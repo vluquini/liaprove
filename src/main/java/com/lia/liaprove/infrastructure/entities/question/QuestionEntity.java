@@ -51,6 +51,9 @@ public abstract class QuestionEntity {
     @Column(nullable = false)
     private LocalDateTime submissionDate;
 
+    @Column(nullable = false)
+    private LocalDateTime votingEndDate;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private QuestionStatus status;
