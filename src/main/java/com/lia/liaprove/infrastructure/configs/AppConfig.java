@@ -5,9 +5,11 @@ import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.application.services.question.DefaultQuestionFactory;
 import com.lia.liaprove.application.services.question.SubmitQuestionUseCaseImpl;
+import com.lia.liaprove.application.services.question.UpdateQuestionUseCaseImpl;
 import com.lia.liaprove.application.services.user.*;
 import com.lia.liaprove.core.usecases.question.QuestionFactory;
 import com.lia.liaprove.core.usecases.question.SubmitQuestionUseCase;
+import com.lia.liaprove.core.usecases.question.UpdateQuestionUseCase;
 import com.lia.liaprove.core.usecases.user.users.*;
 import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
@@ -84,5 +86,10 @@ public class AppConfig {
     @Bean
     public SubmitQuestionUseCase submitQuestionUseCase(QuestionGateway questionGateway, QuestionFactory factory) {
         return new SubmitQuestionUseCaseImpl(questionGateway, factory);
+    }
+
+    @Bean
+    public UpdateQuestionUseCase updateQuestionUseCase(QuestionGateway questionGateway, UserGateway userGateway) {
+        return new UpdateQuestionUseCaseImpl(questionGateway, userGateway);
     }
 }

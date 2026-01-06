@@ -26,4 +26,16 @@ public class MultipleChoiceQuestion extends Question {
         return alternatives;
     }
 
+    /**
+     * Atualiza a lista de alternativas de forma controlada.
+     * Garante que a nova lista seja imutável.
+     * @param newAlternatives A nova lista de alternativas.
+     */
+    public void updateAlternatives(List<Alternative> newAlternatives) {
+        if (newAlternatives == null) {
+            throw new IllegalArgumentException("Alternatives must not be null.");
+        }
+        this.alternatives = List.copyOf(newAlternatives);
+    }
+
 }

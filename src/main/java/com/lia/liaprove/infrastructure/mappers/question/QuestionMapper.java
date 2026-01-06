@@ -2,12 +2,8 @@ package com.lia.liaprove.infrastructure.mappers.question;
 
 import com.lia.liaprove.application.services.question.QuestionCreateDto;
 import com.lia.liaprove.core.domain.question.*;
-import com.lia.liaprove.infrastructure.dtos.question.MultipleChoiceQuestionRequest;
-import com.lia.liaprove.infrastructure.dtos.question.ProjectQuestionRequest;
-import com.lia.liaprove.infrastructure.dtos.question.QuestionRequest;
-import com.lia.liaprove.infrastructure.dtos.question.MultipleChoiceQuestionResponse;
-import com.lia.liaprove.infrastructure.dtos.question.ProjectQuestionResponse;
-import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
+import com.lia.liaprove.core.usecases.question.UpdateQuestionUseCase;
+import com.lia.liaprove.infrastructure.dtos.question.*;
 import com.lia.liaprove.infrastructure.entities.question.AlternativeEntity;
 import com.lia.liaprove.infrastructure.entities.question.MultipleChoiceQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.ProjectQuestionEntity;
@@ -15,6 +11,7 @@ import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import org.mapstruct.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR, uses = {AlternativeMapper.class})
@@ -124,6 +121,20 @@ public interface QuestionMapper {
         if (entity.getAlternatives() != null) {
             entity.getAlternatives().forEach(alternative -> alternative.setQuestion(entity));
         }
+    }
+
+    default UpdateQuestionUseCase.UpdateQuestionCommand toUpdateCommand(UpdateQuestionRequest request) {
+        if (request == null) {
+            // If the whole request is null, return a command with all fields empty.
+            return new UpdateQuestionUseCase.UpdateQuestionCommand(Optional.empty(), Optional.empty(),
+                                                    Optional.empty(), Optional.empty());
+        }
+        return new UpdateQuestionUseCase.UpdateQuestionCommand(
+                Optional.ofNullable(request.title()),
+                Optional.ofNullable(request.description()),
+                Optional.ofNullable(request.knowledgeAreas()),
+                Optional.ofNullable(request.alternatives())
+        );
     }
 
     // MultipleChoice: mapeia alternativas
