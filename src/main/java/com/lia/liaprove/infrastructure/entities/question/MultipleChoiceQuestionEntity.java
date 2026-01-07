@@ -17,7 +17,6 @@ public class MultipleChoiceQuestionEntity extends QuestionEntity {
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL,
                orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderColumn(name = "ord_index") // JPA armazena index
-    @CollectionTable(name = "question_alternatives", joinColumns = @JoinColumn(name = "question_id"))
     private List<AlternativeEntity> alternatives = new ArrayList<>();
 
     // Helper methods to keep both sides of the relationship in sync
