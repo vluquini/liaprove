@@ -10,6 +10,7 @@ import com.lia.liaprove.infrastructure.entities.question.ProjectQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import org.mapstruct.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -90,19 +91,18 @@ public interface QuestionMapper {
                 // First let MapStruct copy scalar properties (ignoring collections as configured)
                 updateEntityFromDomain(mc, mce);
 
-                // Handle alternatives (ElementCollection) explicitly:
-                // - if source provides null -> do nothing (preserve existing list)
-                // - if source provides a list -> we replace contents (clear + addAll) so Hibernate does the minimal required work
-                List<Alternative> sourceAlternatives = null;
-                try {
-                    sourceAlternatives = mc.getAlternatives();
-                } catch (ClassCastException ignored) {}
+                // Handle alternatives using the entity's own helper methods for safety
+                List<Alternative> sourceAlternatives = mc.getAlternatives();
 
                 if (sourceAlternatives != null) {
-                    // convert via generated mapper method and replace
-                    List<AlternativeEntity> converted = alternativeListToEntity(sourceAlternatives);
-                    mce.getAlternatives().clear();
-                    if (converted != null) mce.getAlternatives().addAll(converted);
+                    List<AlternativeEntity> convertedAlternatives = alternativeListToEntity(sourceAlternatives);
+
+                    // Use a copy to avoid ConcurrentModificationException while iterating
+                    new ArrayList<>(mce.getAlternatives()).forEach(mce::removeAlternative);
+
+                    if (convertedAlternatives != null) {
+                        convertedAlternatives.forEach(mce::addAlternative);
+                    }
                 }
             }
 

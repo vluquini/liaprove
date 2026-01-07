@@ -38,4 +38,18 @@ public class MultipleChoiceQuestion extends Question {
         this.alternatives = List.copyOf(newAlternatives);
     }
 
+    public void setAlternatives(List<Alternative> alternatives) {
+        /*
+         * Este setter é intencionalmente fornecido para uso pelo MapStruct durante o mapeamento
+         * de entidades JPA para objetos de domínio. MapStruct necessita de um setter público
+         * para preencher coleções. A implementação garante uma cópia defensiva para manter
+         * a imutabilidade da lista interna, alinhando-se ao design da classe.
+         */
+        if (alternatives == null) {
+            this.alternatives = null;
+            return;
+        }
+        this.alternatives = List.copyOf(alternatives);
+    }
+
 }
