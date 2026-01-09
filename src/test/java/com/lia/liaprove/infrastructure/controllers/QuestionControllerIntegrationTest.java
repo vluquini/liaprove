@@ -28,6 +28,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -83,7 +84,7 @@ public class QuestionControllerIntegrationTest {
         return new ObjectMapper().readTree(response).get("token").asText();
     }
 
-    private QuestionEntity createTestQuestion() {
+    private QuestionEntity createTestQuestion(QuestionStatus status) {
         MultipleChoiceQuestion questionDomain = new MultipleChoiceQuestion(
                 List.of(
                         new Alternative(null, "Alternative A", false),
@@ -91,11 +92,11 @@ public class QuestionControllerIntegrationTest {
                 )
         );
         questionDomain.setAuthorId(UUID.randomUUID());
-        questionDomain.setTitle("Original Title");
-        questionDomain.setDescription("Original description.");
+        questionDomain.setTitle("Test Question Title - " + UUID.randomUUID()); // Ensure unique title
+        questionDomain.setDescription("Test question description. - " + UUID.randomUUID()); // Ensure unique description
         questionDomain.setKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
         questionDomain.setDifficultyByCommunity(DifficultyLevel.MEDIUM);
-        questionDomain.setStatus(QuestionStatus.APPROVED);
+        questionDomain.setStatus(status);
         questionDomain.setSubmissionDate(LocalDateTime.now());
         questionDomain.setVotingEndDate(LocalDateTime.now().plusDays(7));
         questionDomain.setRelevanceByCommunity(RelevanceLevel.THREE);
@@ -112,7 +113,7 @@ public class QuestionControllerIntegrationTest {
     void shouldUpdateQuestionSuccessfully_WhenUserIsAdmin() throws Exception {
         // Setup
         String adminToken = registerAndLogin("admin.update@example.com", "password123", UserRole.ADMIN);
-        QuestionEntity question = createTestQuestion();
+        QuestionEntity question = createTestQuestion(QuestionStatus.APPROVED);
         UUID questionId = question.getId();
 
         List<Alternative> newAlternatives = List.of(
@@ -147,7 +148,7 @@ public class QuestionControllerIntegrationTest {
     void shouldReturnForbidden_WhenUserIsNotAdmin() throws Exception {
         // Setup
         String professionalToken = registerAndLogin("professional.update@example.com", "password123", UserRole.PROFESSIONAL);
-        QuestionEntity question = createTestQuestion();
+        QuestionEntity question = createTestQuestion(QuestionStatus.APPROVED);
         UUID questionId = question.getId();
 
         UpdateQuestionRequest updateRequest = new UpdateQuestionRequest(
@@ -180,4 +181,138 @@ public class QuestionControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isNotFound());
     }
-}
+
+    @Test
+    @DisplayName("Should list voting questions successfully when authenticated")
+    void shouldListVotingQuestionsSuccessfullyWhenAuthenticated() throws Exception {
+        // Setup
+        String professionalToken = registerAndLogin("professional.list@example.com", "password123", UserRole.PROFESSIONAL);
+
+        // Create questions with different statuses
+        createTestQuestion(QuestionStatus.APPROVED);
+        createTestQuestion(QuestionStatus.APPROVED);
+        QuestionEntity votingQuestion1 = createTestQuestion(QuestionStatus.VOTING);
+        QuestionEntity votingQuestion2 = createTestQuestion(QuestionStatus.VOTING);
+        createTestQuestion(QuestionStatus.REJECTED);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/questions/voting")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2))) // Expecting only VOTING questions
+                .andExpect(jsonPath("$[*].id", containsInAnyOrder(
+                        votingQuestion1.getId().toString(),
+                        votingQuestion2.getId().toString()
+                )))
+                .andExpect(jsonPath("$[*].status", everyItem(is(QuestionStatus.VOTING.name()))));
+    }
+
+        @Test
+
+        @DisplayName("Should return unauthorized when listing voting questions without authentication")
+
+        void shouldReturnUnauthorizedWhenNotAuthenticated() throws Exception {
+
+            // Act & Assert
+
+            mockMvc.perform(get("/api/v1/questions/voting"))
+
+                    .andExpect(status().isUnauthorized());
+
+        }
+
+    
+
+        @Test
+
+        @DisplayName("Should allow ADMIN to list all questions without filters")
+
+        void shouldAllowAdminToListAllQuestions() throws Exception {
+
+            // Setup
+
+            String adminToken = registerAndLogin("admin.listall@example.com", "password123", UserRole.ADMIN);
+
+            createTestQuestion(QuestionStatus.VOTING);
+
+            createTestQuestion(QuestionStatus.APPROVED);
+
+            createTestQuestion(QuestionStatus.REJECTED);
+
+    
+
+            // Act & Assert
+
+            mockMvc.perform(get("/api/v1/questions")
+
+                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
+
+                    .andExpect(status().isOk())
+
+                    .andExpect(jsonPath("$", hasSize(3)));
+
+        }
+
+    
+
+        @Test
+
+        @DisplayName("Should forbid non-ADMIN user from listing all questions")
+
+        void shouldForbidNonAdminFromListingAllQuestions() throws Exception {
+
+            // Setup
+
+            String professionalToken = registerAndLogin("professional.listall.forbidden@example.com", "password123", UserRole.PROFESSIONAL);
+
+    
+
+            // Act & Assert
+
+            mockMvc.perform(get("/api/v1/questions")
+
+                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken))
+
+                    .andExpect(status().isForbidden());
+
+        }
+
+    
+
+        @Test
+
+        @DisplayName("Should allow ADMIN to filter questions by status")
+
+        void shouldAllowAdminToFilterByStatus() throws Exception {
+
+            // Setup
+
+            String adminToken = registerAndLogin("admin.filter@example.com", "password123", UserRole.ADMIN);
+
+            createTestQuestion(QuestionStatus.VOTING);
+
+            createTestQuestion(QuestionStatus.APPROVED);
+
+            createTestQuestion(QuestionStatus.APPROVED);
+
+    
+
+            // Act & Assert
+
+            mockMvc.perform(get("/api/v1/questions")
+
+                            .param("status", "APPROVED")
+
+                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
+
+                    .andExpect(status().isOk())
+
+                    .andExpect(jsonPath("$", hasSize(2)))
+
+                    .andExpect(jsonPath("$[*].status", everyItem(is("APPROVED"))));
+
+        }
+
+    }
+
+    
