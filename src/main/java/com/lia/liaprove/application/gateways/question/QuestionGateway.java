@@ -51,7 +51,8 @@ public interface QuestionGateway {
      * @param size Tamanho da página para paginação.
      * @return Uma lista de questões que correspondem aos critérios.
      */
-    List<Question> findAll(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, QuestionStatus status, UUID authorId, int page, int size);
+    List<Question> findAll(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
+                           QuestionStatus status, UUID authorId, int page, int size);
 
     /**
      * Atualiza uma questão existente.
