@@ -20,12 +20,12 @@ public interface QuestionJpaRepository extends JpaRepository<QuestionEntity, UUI
 
     @Query("SELECT DISTINCT q FROM QuestionEntity q LEFT JOIN q.knowledgeAreas ka " +
            "WHERE ( (:#{#knowledgeAreas == null || #knowledgeAreas.isEmpty()} = true) OR (ka IN (:knowledgeAreas)) ) " +
-           "AND (:difficultyLevel IS NULL OR q.difficultyByCommunity = :difficultyLevel) " +
+           "AND (:difficultyByCommunity IS NULL OR q.difficultyByCommunity = :difficultyByCommunity) " +
            "AND (:status IS NULL OR q.status = :status) " +
            "AND (:authorId IS NULL OR q.authorId = :authorId)")
     List<QuestionEntity> findAllWithFilters(
             @Param("knowledgeAreas") Set<KnowledgeArea> knowledgeAreas,
-            @Param("difficultyLevelByCommunity") DifficultyLevel difficultyLevel,
+            @Param("difficultyByCommunity") DifficultyLevel difficultyByCommunity,
             @Param("status") QuestionStatus status,
             @Param("authorId") UUID authorId,
             Pageable pageable
