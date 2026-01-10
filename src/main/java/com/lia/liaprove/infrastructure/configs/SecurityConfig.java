@@ -1,6 +1,7 @@
 package com.lia.liaprove.infrastructure.configs;
 
 import com.lia.liaprove.infrastructure.security.CustomAuthenticationEntryPoint;
+import com.lia.liaprove.infrastructure.security.CustomAccessDeniedHandler;
 import com.lia.liaprove.infrastructure.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -27,12 +28,14 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .exceptionHandling(e -> e.authenticationEntryPoint(customAuthenticationEntryPoint))
+                .exceptionHandling(e -> e.authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .anyRequest().authenticated()
