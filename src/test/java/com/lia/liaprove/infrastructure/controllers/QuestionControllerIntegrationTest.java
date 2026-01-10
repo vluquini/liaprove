@@ -207,112 +207,58 @@ public class QuestionControllerIntegrationTest {
                 .andExpect(jsonPath("$[*].status", everyItem(is(QuestionStatus.VOTING.name()))));
     }
 
-        @Test
-
-        @DisplayName("Should return unauthorized when listing voting questions without authentication")
-
-        void shouldReturnUnauthorizedWhenNotAuthenticated() throws Exception {
-
-            // Act & Assert
-
-            mockMvc.perform(get("/api/v1/questions/voting"))
-
-                    .andExpect(status().isUnauthorized());
-
-        }
-
-    
-
-        @Test
-
-        @DisplayName("Should allow ADMIN to list all questions without filters")
-
-        void shouldAllowAdminToListAllQuestions() throws Exception {
-
-            // Setup
-
-            String adminToken = registerAndLogin("admin.listall@example.com", "password123", UserRole.ADMIN);
-
-            createTestQuestion(QuestionStatus.VOTING);
-
-            createTestQuestion(QuestionStatus.APPROVED);
-
-            createTestQuestion(QuestionStatus.REJECTED);
-
-    
-
-            // Act & Assert
-
-            mockMvc.perform(get("/api/v1/questions")
-
-                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
-
-                    .andExpect(status().isOk())
-
-                    .andExpect(jsonPath("$", hasSize(3)));
-
-        }
-
-    
-
-        @Test
-
-        @DisplayName("Should forbid non-ADMIN user from listing all questions")
-
-        void shouldForbidNonAdminFromListingAllQuestions() throws Exception {
-
-            // Setup
-
-            String professionalToken = registerAndLogin("professional.listall.forbidden@example.com", "password123", UserRole.PROFESSIONAL);
-
-    
-
-            // Act & Assert
-
-            mockMvc.perform(get("/api/v1/questions")
-
-                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken))
-
-                    .andExpect(status().isForbidden());
-
-        }
-
-    
-
-        @Test
-
-        @DisplayName("Should allow ADMIN to filter questions by status")
-
-        void shouldAllowAdminToFilterByStatus() throws Exception {
-
-            // Setup
-
-            String adminToken = registerAndLogin("admin.filter@example.com", "password123", UserRole.ADMIN);
-
-            createTestQuestion(QuestionStatus.VOTING);
-
-            createTestQuestion(QuestionStatus.APPROVED);
-
-            createTestQuestion(QuestionStatus.APPROVED);
-
-    
-
-            // Act & Assert
-
-            mockMvc.perform(get("/api/v1/questions")
-
-                            .param("status", "APPROVED")
-
-                            .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
-
-                    .andExpect(status().isOk())
-
-                    .andExpect(jsonPath("$", hasSize(2)))
-
-                    .andExpect(jsonPath("$[*].status", everyItem(is("APPROVED"))));
-
-        }
-
+    @Test
+    @DisplayName("Should return unauthorized when listing voting questions without authentication")
+    void shouldReturnUnauthorizedWhenNotAuthenticated() throws Exception {
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/questions/voting"))
+                .andExpect(status().isUnauthorized());
     }
 
+    @Test
+    @DisplayName("Should allow ADMIN to list all questions without filters")
+    void shouldAllowAdminToListAllQuestions() throws Exception {
+        // Setup
+        String adminToken = registerAndLogin("admin.listall@example.com", "password123", UserRole.ADMIN);
+        createTestQuestion(QuestionStatus.VOTING);
+        createTestQuestion(QuestionStatus.APPROVED);
+        createTestQuestion(QuestionStatus.REJECTED);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/questions")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(3)));
+    }
+
+    @Test
+    @DisplayName("Should forbid non-ADMIN user from listing all questions")
+    void shouldForbidNonAdminFromListingAllQuestions() throws Exception {
+        // Setup
+        String professionalToken = registerAndLogin("professional.listall.forbidden@example.com", "password123", UserRole.PROFESSIONAL);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/questions")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Should allow ADMIN to filter questions by status")
+    void shouldAllowAdminToFilterByStatus() throws Exception {
+        // Setup
+        String adminToken = registerAndLogin("admin.filter@example.com", "password123", UserRole.ADMIN);
+        createTestQuestion(QuestionStatus.VOTING);
+        createTestQuestion(QuestionStatus.APPROVED);
+        createTestQuestion(QuestionStatus.APPROVED);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/questions")
+                        .param("status", "APPROVED")
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[*].status", everyItem(is("APPROVED"))));
+    }
+}
     
