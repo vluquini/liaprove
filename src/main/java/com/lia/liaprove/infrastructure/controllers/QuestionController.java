@@ -5,6 +5,7 @@ import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
+import com.lia.liaprove.core.usecases.question.GetQuestionByIdUseCase;
 import com.lia.liaprove.core.usecases.question.ListQuestionsUseCase;
 import com.lia.liaprove.core.usecases.question.SubmitQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.UpdateQuestionUseCase;
@@ -36,6 +37,7 @@ public class QuestionController {
     private final SubmitQuestionUseCase submitQuestionUseCase;
     private final UpdateQuestionUseCase updateQuestionUseCase;
     private final ListQuestionsUseCase listQuestionsUseCase;
+    private final GetQuestionByIdUseCase getQuestionByIdUseCase;
     private final QuestionMapper questionMapper;
 
     @PostMapping
@@ -110,6 +112,16 @@ public class QuestionController {
         .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{questionId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<QuestionResponse> getQuestionById(@PathVariable UUID questionId) {
+        Question question = getQuestionByIdUseCase.execute(questionId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found"));
+
+        QuestionResponse responseDto = questionMapper.toResponseDto(question);
+        return ResponseEntity.ok(responseDto);
     }
 
 }

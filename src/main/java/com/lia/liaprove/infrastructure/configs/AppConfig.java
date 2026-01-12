@@ -7,8 +7,10 @@ import com.lia.liaprove.application.services.question.DefaultQuestionFactory;
 import com.lia.liaprove.application.services.question.SubmitQuestionUseCaseImpl;
 import com.lia.liaprove.application.services.question.UpdateQuestionUseCaseImpl;
 import com.lia.liaprove.application.services.question.ListQuestionsUseCaseImpl;
+import com.lia.liaprove.application.services.question.GetQuestionByIdUseCaseImpl;
 import com.lia.liaprove.application.services.user.*;
 import com.lia.liaprove.core.usecases.question.QuestionFactory;
+import com.lia.liaprove.core.usecases.question.GetQuestionByIdUseCase;
 import com.lia.liaprove.core.usecases.question.SubmitQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.UpdateQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.ListQuestionsUseCase;
@@ -98,5 +100,10 @@ public class AppConfig {
     @Bean
     public ListQuestionsUseCase listQuestionsUseCase(QuestionGateway questionGateway) {
         return new ListQuestionsUseCaseImpl(questionGateway);
+    }
+
+    @Bean
+    public GetQuestionByIdUseCase getQuestionByIdUseCase(QuestionGateway questionGateway) {
+        return new GetQuestionByIdUseCaseImpl(questionGateway);
     }
 }
