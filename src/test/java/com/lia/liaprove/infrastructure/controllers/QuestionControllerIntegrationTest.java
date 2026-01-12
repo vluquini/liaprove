@@ -260,5 +260,45 @@ public class QuestionControllerIntegrationTest {
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[*].status", everyItem(is("APPROVED"))));
     }
+
+    @Test
+    @DisplayName("Should retrieve a question by ID successfully when authenticated")
+    void shouldRetrieveQuestionByIdSuccessfullyWhenAuthenticated() throws Exception {
+        // Setup
+        String professionalToken = registerAndLogin("professional.getbyid@example.com", "password123", UserRole.PROFESSIONAL);
+        QuestionEntity existingQuestion = createTestQuestion(QuestionStatus.APPROVED);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/questions/{questionId}", existingQuestion.getId())
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(existingQuestion.getId().toString())))
+                .andExpect(jsonPath("$.title", is(existingQuestion.getTitle())))
+                .andExpect(jsonPath("$.status", is(existingQuestion.getStatus().name())));
+    }
+
+    @Test
+    @DisplayName("Should return Not Found when retrieving a non-existent question by ID")
+    void shouldReturnNotFoundWhenRetrievingNonExistentQuestionById() throws Exception {
+        // Setup
+        String professionalToken = registerAndLogin("professional.getbyid.notfound@example.com", "password123", UserRole.PROFESSIONAL);
+        UUID nonExistentId = UUID.randomUUID();
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/questions/{questionId}", nonExistentId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should return Unauthorized when retrieving a question by ID without authentication")
+    void shouldReturnUnauthorizedWhenRetrievingQuestionByIdWithoutAuthentication() throws Exception {
+        // Setup
+        QuestionEntity existingQuestion = createTestQuestion(QuestionStatus.APPROVED);
+
+        // Act & Assert
+        mockMvc.perform(get("/api/v1/questions/{questionId}", existingQuestion.getId()))
+                .andExpect(status().isUnauthorized());
+    }
 }
     
