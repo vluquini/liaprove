@@ -9,8 +9,9 @@ import com.lia.liaprove.core.domain.user.UserRole;
  * <p>
  * Pode lançar as seguintes exceções (unchecked):
  * - {@code InvalidUserDataException} se os dados fornecidos forem inválidos (ex: email duplicado, senha fraca).
+ * </p>
  */
 public interface CreateUserUseCase {
     User create(String name, String email, String rawPassword, String occupation,
-                ExperienceLevel experienceLevel, UserRole role);
+                ExperienceLevel experienceLevel, UserRole role, String companyName, String companyEmail);
 }

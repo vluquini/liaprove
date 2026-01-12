@@ -21,7 +21,11 @@ public class DefaultUserFactory implements UserFactory {
         User user;
         switch (dto.role()) {
             case PROFESSIONAL -> user = new UserProfessional();
-            case RECRUITER, ADMIN -> user = new UserRecruiter();
+            case RECRUITER, ADMIN -> {
+                UserRecruiter recruiter = new UserRecruiter();
+                initRecruiterFields(recruiter, dto);
+                user = recruiter;
+            }
             default -> throw new IllegalArgumentException("Unsupported role: " + dto.role());
         }
 
@@ -48,7 +52,7 @@ public class DefaultUserFactory implements UserFactory {
     private void initCommonFields(User user, UserCreateDto dto) {
         user.setName(trimOrNull(dto.name()));
         user.setEmail(normalizeEmail(dto.email()));
-        user.setPasswordHash(dto.passwordHash()); // hash vem da infra
+        user.setPasswordHash(dto.passwordHash());
         user.setOccupation(trimOrEmpty(dto.occupation()));
         user.setBio("");
         user.setExperienceLevel(dto.experienceLevel() == null ? ExperienceLevel.JUNIOR : dto.experienceLevel());
@@ -62,6 +66,18 @@ public class DefaultUserFactory implements UserFactory {
         user.setStatus(UserStatus.ACTIVE);
     }
 
+    private void initRecruiterFields(UserRecruiter recruiter, UserCreateDto dto) {
+        // Para o tipo RECRUITER, os campos da empresa são relevantes
+        if (dto.role() == UserRole.RECRUITER) {
+            recruiter.setCompanyName(trimOrEmpty(dto.companyName()));
+            recruiter.setCompanyEmail(normalizeEmail(dto.companyEmail()));
+        }
+        // Inicializa outros campos específicos do Recruiter
+        recruiter.setTotalAssessmentsCreated(0);
+        recruiter.setRecruiterRating(0.0f);
+        recruiter.setRecruiterRatingCount(0);
+    }
+
     private static String trimOrNull(String s) {
         return s == null ? null : s.trim();
     }
@@ -73,5 +89,7 @@ public class DefaultUserFactory implements UserFactory {
     private static String normalizeEmail(String e) {
         return e == null ? null : e.trim().toLowerCase();
     }
+
+
 
 }

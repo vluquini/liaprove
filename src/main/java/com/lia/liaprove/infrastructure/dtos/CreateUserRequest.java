@@ -6,9 +6,11 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import com.lia.liaprove.infrastructure.validation.RecruiterFieldsRequired;
 import lombok.Data;
 
 @Data
+@RecruiterFieldsRequired
 public class CreateUserRequest {
     @NotBlank
     private String name;
@@ -31,4 +33,7 @@ public class CreateUserRequest {
     private UserRole role;
 
     private String companyName;
+
+    @Email(message = "Company email must be a valid email address.")
+    private String companyEmail;
 }

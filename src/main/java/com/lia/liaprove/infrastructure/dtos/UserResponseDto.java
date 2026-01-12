@@ -12,5 +12,7 @@ public record UserResponseDto(
         String occupation,
         String bio,
         ExperienceLevel experienceLevel,
-        UserRole role
+        UserRole role,
+        String companyName,
+        String companyEmail
 ) {}

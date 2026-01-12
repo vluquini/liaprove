@@ -13,7 +13,18 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
-    UserResponseDto toResponseDto(User user);
+    UserResponseDto toResponseDto(UserRecruiter user);
+
+    UserResponseDto toResponseDto(UserProfessional user);
+
+    default UserResponseDto toResponseDto(User user) {
+        return switch (user) {
+            case null -> null;
+            case UserRecruiter ur -> toResponseDto(ur);
+            case UserProfessional up -> toResponseDto(up);
+            default -> throw new IllegalArgumentException("Unknown User subtype: " + user.getClass());
+        };
+    }
 
     default UserEntity toEntity(User domain) {
         return switch (domain) {

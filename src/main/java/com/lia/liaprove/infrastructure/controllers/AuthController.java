@@ -36,7 +36,9 @@ public class AuthController {
                 request.getPassword(),
                 request.getOccupation(),
                 request.getExperienceLevel(),
-                request.getRole()
+                request.getRole(),
+                request.getCompanyName(),
+                request.getCompanyEmail()
         );
 
         UserDetails userDetails = new CustomUserDetails(newUser);

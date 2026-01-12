@@ -29,7 +29,8 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
 
     @Override
     public User create(String name, String email, String rawPassword,
-                       String occupation, ExperienceLevel experienceLevel, UserRole role) {
+                       String occupation, ExperienceLevel experienceLevel, UserRole role,
+                       String companyName, String companyEmail) {
 
         validatePassword(rawPassword);
 
@@ -42,7 +43,7 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
         String passwordHash = passwordHasher.hash(rawPassword);
 
         // Criar comando e delegar para a factory (application cria a factory impl)
-        UserCreateDto dto = new UserCreateDto(name, email, passwordHash, occupation, experienceLevel, role);
+        UserCreateDto dto = new UserCreateDto(name, email, passwordHash, occupation, experienceLevel, role, companyName, companyEmail);
         User user = userFactory.create(dto);
 
         // Persistir via gateway e retornar o usuário salvo

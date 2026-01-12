@@ -50,7 +50,9 @@ public class UserController {
                 request.getPassword(),
                 request.getOccupation(),
                 request.getExperienceLevel(),
-                request.getRole()
+                request.getRole(),
+                request.getCompanyName(),
+                request.getCompanyEmail()
         );
         return new ResponseEntity<>(userMapper.toResponseDto(newUser), HttpStatus.CREATED);
     }
