@@ -49,7 +49,7 @@ class CreateUserUseCaseImplTest {
         ExperienceLevel experience = ExperienceLevel.PLENO;
         UserRole role = UserRole.PROFESSIONAL;
 
-        UserCreateDto dto = new UserCreateDto(name, email, hashedPassword, occupation, experience, role);
+        UserCreateDto dto = new UserCreateDto(name, email, hashedPassword, occupation, experience, role, null, null);
         User userToCreate = mock(User.class);
         User savedUser = mock(User.class);
 
@@ -59,7 +59,7 @@ class CreateUserUseCaseImplTest {
         when(userGateway.save(userToCreate)).thenReturn(savedUser);
 
         // Act
-        User result = createUserUseCase.create(name, email, rawPassword, occupation, experience, role);
+        User result = createUserUseCase.create(name, email, rawPassword, occupation, experience, role, null, null);
 
         // Assert
         assertThat(result).isEqualTo(savedUser);
@@ -81,7 +81,8 @@ class CreateUserUseCaseImplTest {
         when(userGateway.findByEmail(email)).thenReturn(Optional.of(existingUser));
 
         // Act & Assert
-        assertThatThrownBy(() -> createUserUseCase.create("John", email, "password123", "Dev", ExperienceLevel.JUNIOR, UserRole.PROFESSIONAL))
+        assertThatThrownBy(() -> createUserUseCase.create("John", email, "password123", "Dev",
+                                                          ExperienceLevel.JUNIOR, UserRole.PROFESSIONAL, null, null))
                 .isInstanceOf(InvalidUserDataException.class)
                 .hasMessageContaining("Email already registered");
 
@@ -100,7 +101,8 @@ class CreateUserUseCaseImplTest {
         String email = "test@example.com";
 
         // Act & Assert
-        assertThatThrownBy(() -> createUserUseCase.create("John", email, invalidPassword, "Dev", ExperienceLevel.JUNIOR, UserRole.PROFESSIONAL))
+        assertThatThrownBy(() -> createUserUseCase.create("John", email, invalidPassword, "Dev",
+                                                          ExperienceLevel.JUNIOR, UserRole.PROFESSIONAL, null, null))
                 .isInstanceOf(InvalidUserDataException.class)
                 .hasMessageContaining("Password must have at least");
 
