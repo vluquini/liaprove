@@ -85,6 +85,11 @@ public class AppConfig {
     }
 
     @Bean
+    public EvaluateVotingResultUseCase evaluateVotingResultUseCase(QuestionGateway questionGateway) {
+        return new MockEvaluateVotingResultUseCaseImpl(questionGateway);
+    }
+
+    @Bean
     public UpdateQuestionUseCase updateQuestionUseCase(QuestionGateway questionGateway, UserGateway userGateway) {
         return new UpdateQuestionUseCaseImpl(questionGateway, userGateway);
     }

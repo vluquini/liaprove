@@ -8,9 +8,18 @@ import com.lia.liaprove.core.usecases.question.EvaluateVotingResultUseCase;
 
 import java.util.Random;
 import java.util.UUID;
-import org.springframework.stereotype.Service;
 
-@Service
+/**
+ * Implementação mock (simulada) do {@link EvaluateVotingResultUseCase}.
+ * <p>
+ * Esta classe simula a avaliação dos resultados da votação de uma questão. Em vez de
+ * aplicar um algoritmo Bayesiano real, ela define aleatoriamente o status da questão para
+ * {@link QuestionStatus#APPROVED} ou {@link QuestionStatus#REJECTED}.
+ * <p>
+ * Esta implementação é destinada a fins de desenvolvimento e teste, permitindo que o
+ * ciclo de vida da questão seja concluído sem a necessidade de implementar o domínio completo
+ * de feedback e votação.
+ */
 public class MockEvaluateVotingResultUseCaseImpl implements EvaluateVotingResultUseCase {
 
     private final QuestionGateway questionGateway;
