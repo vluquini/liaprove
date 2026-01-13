@@ -6,6 +6,7 @@ import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.infrastructure.dtos.AuthenticationRequest;
 import com.lia.liaprove.infrastructure.dtos.CreateUserRequest;
+import com.lia.liaprove.infrastructure.dtos.question.ModerateQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.UpdateQuestionRequest;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
@@ -27,10 +28,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -299,6 +302,52 @@ public class QuestionControllerIntegrationTest {
         // Act & Assert
         mockMvc.perform(get("/api/v1/questions/{questionId}", existingQuestion.getId()))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Should moderate question successfully as ADMIN")
+    void shouldModerateQuestionSuccessfullyAsAdmin() throws Exception {
+        // Setup
+        String adminToken = registerAndLogin("admin.moderate@example.com", "password123", UserRole.ADMIN);
+        QuestionEntity question = createTestQuestion(QuestionStatus.VOTING);
+        UUID questionId = question.getId();
+
+        ModerateQuestionRequest moderateRequest = new ModerateQuestionRequest(QuestionStatus.APPROVED);
+
+        // Act & Assert
+        mockMvc.perform(patch("/api/v1/questions/{questionId}/moderate", questionId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(moderateRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id", is(questionId.toString())))
+                .andExpect(jsonPath("$.status", is(QuestionStatus.APPROVED.name())));
+
+        // Verify status in DB
+        QuestionEntity updatedQuestion = questionJpaRepository.findById(questionId).orElseThrow();
+        assertThat(updatedQuestion.getStatus()).isEqualTo(QuestionStatus.APPROVED);
+    }
+
+    @Test
+    @DisplayName("Should forbid moderate question as non-ADMIN")
+    void shouldForbidModerateQuestionAsNonAdmin() throws Exception {
+        // Setup
+        String professionalToken = registerAndLogin("professional.moderate@example.com", "password123", UserRole.PROFESSIONAL);
+        QuestionEntity question = createTestQuestion(QuestionStatus.VOTING);
+        UUID questionId = question.getId();
+
+        ModerateQuestionRequest moderateRequest = new ModerateQuestionRequest(QuestionStatus.APPROVED);
+
+        // Act & Assert
+        mockMvc.perform(patch("/api/v1/questions/{questionId}/moderate", questionId)
+                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(moderateRequest)))
+                .andExpect(status().isForbidden());
+
+        // Verify status in DB is unchanged
+        QuestionEntity originalQuestion = questionJpaRepository.findById(questionId).orElseThrow();
+        assertThat(originalQuestion.getStatus()).isEqualTo(QuestionStatus.VOTING);
     }
 }
     
