@@ -116,8 +116,14 @@ public abstract class Question {
         return status;
     }
 
-    public void setStatus(QuestionStatus status) {
-        this.status = status;
+    public void setStatus(QuestionStatus newStatus) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException("The new status cannot be null.");
+        }
+        if (this.status == newStatus) {
+            return;
+        }
+        this.status = newStatus;
     }
 
     public RelevanceLevel getRelevanceByLLM() {

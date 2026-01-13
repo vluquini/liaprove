@@ -5,10 +5,8 @@ import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
-import com.lia.liaprove.core.usecases.question.GetQuestionByIdUseCase;
-import com.lia.liaprove.core.usecases.question.ListQuestionsUseCase;
-import com.lia.liaprove.core.usecases.question.SubmitQuestionUseCase;
-import com.lia.liaprove.core.usecases.question.UpdateQuestionUseCase;
+import com.lia.liaprove.core.usecases.question.*;
+import com.lia.liaprove.infrastructure.dtos.question.ModerateQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.question.UpdateQuestionRequest;
@@ -25,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -38,6 +37,7 @@ public class QuestionController {
     private final UpdateQuestionUseCase updateQuestionUseCase;
     private final ListQuestionsUseCase listQuestionsUseCase;
     private final GetQuestionByIdUseCase getQuestionByIdUseCase;
+    private final ModerateQuestionUseCase moderateQuestionUseCase;
     private final QuestionMapper questionMapper;
 
     @PostMapping
@@ -108,8 +108,8 @@ public class QuestionController {
 
         List<Question> questions = listQuestionsUseCase.execute(query);
         List<QuestionResponse> response = questions.stream()
-        .map(questionMapper::toResponseDto)
-        .collect(Collectors.toList());
+                .map(questionMapper::toResponseDto)
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
     }
@@ -121,6 +121,22 @@ public class QuestionController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found"));
 
         QuestionResponse responseDto = questionMapper.toResponseDto(question);
+        return ResponseEntity.ok(responseDto);
+    }
+
+    @PatchMapping("/{questionId}/moderate")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<QuestionResponse> moderateQuestion(
+            @PathVariable UUID questionId,
+            @Valid @RequestBody ModerateQuestionRequest request) {
+
+        ModerateQuestionUseCase.ModerateQuestionCommand command =
+                new ModerateQuestionUseCase.ModerateQuestionCommand(request.newStatus(), Optional.empty());
+
+        Question moderatedQuestion = moderateQuestionUseCase.execute(questionId, command)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found"));
+
+        QuestionResponse responseDto = questionMapper.toResponseDto(moderatedQuestion);
         return ResponseEntity.ok(responseDto);
     }
 
