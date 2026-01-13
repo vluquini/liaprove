@@ -3,15 +3,9 @@ package com.lia.liaprove.infrastructure.configs;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
-import com.lia.liaprove.application.services.question.DefaultQuestionFactory;
-import com.lia.liaprove.application.services.question.SubmitQuestionUseCaseImpl;
-import com.lia.liaprove.application.services.question.UpdateQuestionUseCaseImpl;
-import com.lia.liaprove.application.services.question.ListQuestionsUseCaseImpl;
+import com.lia.liaprove.application.services.question.*;
 import com.lia.liaprove.application.services.user.*;
-import com.lia.liaprove.core.usecases.question.QuestionFactory;
-import com.lia.liaprove.core.usecases.question.SubmitQuestionUseCase;
-import com.lia.liaprove.core.usecases.question.UpdateQuestionUseCase;
-import com.lia.liaprove.core.usecases.question.ListQuestionsUseCase;
+import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.core.usecases.user.users.*;
 import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
@@ -98,5 +92,15 @@ public class AppConfig {
     @Bean
     public ListQuestionsUseCase listQuestionsUseCase(QuestionGateway questionGateway) {
         return new ListQuestionsUseCaseImpl(questionGateway);
+    }
+
+    @Bean
+    public GetQuestionByIdUseCase getQuestionByIdUseCase(QuestionGateway questionGateway) {
+        return new GetQuestionByIdUseCaseImpl(questionGateway);
+    }
+
+    @Bean
+    public ModerateQuestionUseCase moderateQuestionUseCase(QuestionGateway questionGateway) {
+        return new ModerateQuestionUseCaseImpl(questionGateway);
     }
 }
