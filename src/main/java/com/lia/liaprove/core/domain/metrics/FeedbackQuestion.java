@@ -20,14 +20,14 @@ public class FeedbackQuestion extends Feedback{
     private KnowledgeArea knowledgeArea;
     private RelevanceLevel relevanceLevel;
     // Reações (userId -> reaction). LinkedHashMap preserva ordem de inserção
-    private final Map<UUID, FeedbackReaction> reactionsByUser = new LinkedHashMap<>();
+    private Map<UUID, FeedbackReaction> reactionsByUser = new LinkedHashMap<>();
 
     public FeedbackQuestion() {}
 
-    public FeedbackQuestion(UUID id, User user, String comment, LocalDateTime submissionDate,
+    public FeedbackQuestion(User user, String comment, LocalDateTime submissionDate,
                             Question question, DifficultyLevel difficultyLevel, KnowledgeArea knowledgeArea,
                             RelevanceLevel relevanceLevel) {
-        super(id, user, comment, submissionDate, true);
+        super(user, comment, submissionDate, true);
         this.question = question;
         this.difficultyLevel = difficultyLevel;
         this.knowledgeArea = knowledgeArea;
@@ -38,11 +38,31 @@ public class FeedbackQuestion extends Feedback{
         return question;
     }
 
+    public void setQuestion(Question question) {
+        if (this.question != null) {
+            throw new IllegalStateException("The Question for this feedback has already been set and cannot be changed.");
+        }
+        this.question = question;
+    }
+
+    public void setReactionsByUser(Map<UUID, FeedbackReaction> reactionsByUser) {
+        if (!this.reactionsByUser.isEmpty()) {
+            throw new IllegalStateException("Feedback reactions have already been set and cannot be replaced.");
+        }
+        if (reactionsByUser != null) {
+            // Cópia defensiva para proteger a integridade do mapa interno
+            this.reactionsByUser = new LinkedHashMap<>(reactionsByUser);
+        }
+    }
+
     public DifficultyLevel getDifficultyLevel() {
         return difficultyLevel;
     }
 
     public void setDifficultyLevel(DifficultyLevel difficultyLevel) {
+        if (this.difficultyLevel != null) {
+            throw new IllegalStateException("DifficultyLevel has already been set and cannot be changed.");
+        }
         this.difficultyLevel = difficultyLevel;
         touchUpdatedAt();
     }
@@ -52,6 +72,9 @@ public class FeedbackQuestion extends Feedback{
     }
 
     public void setKnowledgeArea(KnowledgeArea knowledgeArea) {
+        if (this.knowledgeArea != null) {
+            throw new IllegalStateException("KnowledgeArea has already been set and cannot be changed.");
+        }
         this.knowledgeArea = knowledgeArea;
         touchUpdatedAt();
     }
@@ -61,6 +84,9 @@ public class FeedbackQuestion extends Feedback{
     }
 
     public void setRelevanceLevel(RelevanceLevel relevanceLevel) {
+        if (this.relevanceLevel != null) {
+            throw new IllegalStateException("RelevanceLevel has already been set and cannot be changed.");
+        }
         this.relevanceLevel = relevanceLevel;
         touchUpdatedAt();
     }

@@ -21,12 +21,11 @@ public abstract class Feedback {
 
     public Feedback() {}
 
-    public Feedback(UUID id, User user, String comment, LocalDateTime submissionDate, boolean visible) {
-        this.id = id;
+    public Feedback(User user, String comment, LocalDateTime submissionDate, boolean visible) {
         this.user = user;
         this.comment = comment;
         this.submissionDate = submissionDate;
-        this.visible = true;
+        this.visible = visible;
     }
 
     public UUID getId() {
@@ -34,6 +33,9 @@ public abstract class Feedback {
     }
 
     public void setId(UUID id) {
+        if (this.id != null) {
+            throw new IllegalStateException("ID has already been set and cannot be changed.");
+        }
         this.id = id;
     }
 
@@ -42,6 +44,9 @@ public abstract class Feedback {
     }
 
     public void setUser(User user) {
+        if (this.user != null) {
+            throw new IllegalStateException("User has already been set and cannot be changed.");
+        }
         this.user = user;
     }
 
@@ -58,6 +63,9 @@ public abstract class Feedback {
     }
 
     public void setSubmissionDate(LocalDateTime submissionDate) {
+        if (this.submissionDate != null) {
+            throw new IllegalStateException("Submission date has already been set and cannot be changed.");
+        }
         this.submissionDate = submissionDate;
     }
 

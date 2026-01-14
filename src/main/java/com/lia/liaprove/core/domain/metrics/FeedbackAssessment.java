@@ -4,7 +4,6 @@ import com.lia.liaprove.core.domain.assessment.Assessment;
 import com.lia.liaprove.core.domain.user.User;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 /**
  * Feedback deixado por um usuário sobre uma Assessment.
@@ -17,9 +16,9 @@ import java.util.UUID;
 public class FeedbackAssessment extends Feedback {
     private Assessment assessment;
 
-    public FeedbackAssessment(UUID id, User user, Assessment assessment, String comment,
+    public FeedbackAssessment(User user, Assessment assessment, String comment,
                               LocalDateTime submissionDate, boolean visible) {
-        super(id, user, comment, submissionDate, visible);
+        super(user, comment, submissionDate, visible);
         this.assessment = assessment;
     }
 
