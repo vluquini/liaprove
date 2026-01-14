@@ -35,7 +35,6 @@ public class SubmitFeedbackOnAssessmentUseCaseImpl implements SubmitFeedbackOnAs
                 .orElseThrow(() -> new AssessmentNotFoundException("Assessment with id " + assessmentId + " not found."));
 
         FeedbackAssessment feedback = new FeedbackAssessment(
-                UUID.randomUUID(),
                 user,
                 assessment,
                 comment,

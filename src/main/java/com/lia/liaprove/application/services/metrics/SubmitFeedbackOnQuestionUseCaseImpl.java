@@ -39,7 +39,6 @@ public class SubmitFeedbackOnQuestionUseCaseImpl implements SubmitFeedbackOnQues
                 .orElseThrow(() -> new QuestionNotFoundException("Question with id " + questionId + " not found."));
 
         FeedbackQuestion feedback = new FeedbackQuestion(
-                UUID.randomUUID(),
                 user,
                 comment,
                 LocalDateTime.now(),
