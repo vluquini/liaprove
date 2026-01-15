@@ -7,7 +7,7 @@ import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase; // New import
-import com.lia.liaprove.infrastructure.dtos.metrics.CreateFeedbackRequest; // New import
+import com.lia.liaprove.infrastructure.dtos.metrics.CreateFeedbackQuestionRequest; // New import
 import com.lia.liaprove.infrastructure.dtos.question.ModerateQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
@@ -147,7 +147,7 @@ public class QuestionController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> submitFeedbackOnQuestion(
             @PathVariable UUID questionId,
-            @Valid @RequestBody CreateFeedbackRequest request) {
+            @Valid @RequestBody CreateFeedbackQuestionRequest request) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
         UUID userId = principal.user().getId();
