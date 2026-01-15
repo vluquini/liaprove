@@ -6,6 +6,8 @@ import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.usecases.question.*;
+import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase; // New import
+import com.lia.liaprove.infrastructure.dtos.metrics.CreateFeedbackRequest; // New import
 import com.lia.liaprove.infrastructure.dtos.question.ModerateQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
@@ -39,6 +41,7 @@ public class QuestionController {
     private final GetQuestionByIdUseCase getQuestionByIdUseCase;
     private final ModerateQuestionUseCase moderateQuestionUseCase;
     private final QuestionMapper questionMapper;
+    private final SubmitFeedbackOnQuestionUseCase submitFeedbackOnQuestionUseCase; // New injection
 
     @PostMapping
     public ResponseEntity<QuestionResponse> submitQuestion(@Valid @RequestBody QuestionRequest request) {
@@ -140,5 +143,24 @@ public class QuestionController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @PostMapping("/{questionId}/feedback")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> submitFeedbackOnQuestion(
+            @PathVariable UUID questionId,
+            @Valid @RequestBody CreateFeedbackRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
+        UUID userId = principal.user().getId();
+
+        submitFeedbackOnQuestionUseCase.submitFeedback(
+                userId,
+                questionId,
+                request.getComment(),
+                request.getDifficultyLevel(),
+                request.getKnowledgeArea(),
+                request.getRelevanceLevel()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 }
 

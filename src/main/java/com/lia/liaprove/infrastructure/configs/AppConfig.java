@@ -1,14 +1,20 @@
 package com.lia.liaprove.infrastructure.configs;
 
+import com.lia.liaprove.application.gateways.metrics.FeedbackGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.application.services.question.*;
+import com.lia.liaprove.application.services.metrics.SubmitFeedbackOnQuestionUseCaseImpl;
 import com.lia.liaprove.application.services.user.*;
+import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.core.usecases.user.users.*;
+import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import com.lia.liaprove.infrastructure.repositories.FeedbackQuestionJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
+import com.lia.liaprove.infrastructure.services.FeedbackGatewayImpl;
 import com.lia.liaprove.infrastructure.services.PasswordHasherImpl;
 import com.lia.liaprove.infrastructure.services.UserGatewayImpl;
 import org.springframework.context.annotation.Bean;
@@ -107,5 +113,19 @@ public class AppConfig {
     @Bean
     public ModerateQuestionUseCase moderateQuestionUseCase(QuestionGateway questionGateway) {
         return new ModerateQuestionUseCaseImpl(questionGateway);
+    }
+
+    // Metrics Domain - Feedback Question
+    @Bean
+    public FeedbackGateway feedbackGateway(FeedbackQuestionJpaRepository feedbackQuestionJpaRepository,
+                                           FeedbackQuestionMapper feedbackQuestionMapper) {
+        return new FeedbackGatewayImpl(feedbackQuestionJpaRepository, feedbackQuestionMapper);
+    }
+
+    @Bean
+    public SubmitFeedbackOnQuestionUseCase submitFeedbackOnQuestionUseCase(FeedbackGateway feedbackGateway,
+                                                                           UserGateway userGateway,
+                                                                           QuestionGateway questionGateway) {
+        return new SubmitFeedbackOnQuestionUseCaseImpl(feedbackGateway, userGateway, questionGateway);
     }
 }
