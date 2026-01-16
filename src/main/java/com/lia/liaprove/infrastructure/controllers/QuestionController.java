@@ -1,17 +1,23 @@
 package com.lia.liaprove.infrastructure.controllers;
 
 import com.lia.liaprove.application.services.question.QuestionCreateDto;
+import com.lia.liaprove.core.domain.metrics.Vote;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
+import com.lia.liaprove.core.usecases.metrics.ListVotesForQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.*;
-import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase; // New import
-import com.lia.liaprove.infrastructure.dtos.metrics.CreateFeedbackQuestionRequest; // New import
+import com.lia.liaprove.core.usecases.metrics.CastVoteUseCase;
+import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase;
+import com.lia.liaprove.infrastructure.dtos.metrics.CastVoteRequest;
+import com.lia.liaprove.infrastructure.dtos.metrics.CreateFeedbackQuestionRequest;
+import com.lia.liaprove.infrastructure.dtos.metrics.VoteResponseDto;
 import com.lia.liaprove.infrastructure.dtos.question.ModerateQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.question.UpdateQuestionRequest;
+import com.lia.liaprove.infrastructure.mappers.metrics.VoteMapper;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.security.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -41,7 +47,10 @@ public class QuestionController {
     private final GetQuestionByIdUseCase getQuestionByIdUseCase;
     private final ModerateQuestionUseCase moderateQuestionUseCase;
     private final QuestionMapper questionMapper;
-    private final SubmitFeedbackOnQuestionUseCase submitFeedbackOnQuestionUseCase; // New injection
+    private final SubmitFeedbackOnQuestionUseCase submitFeedbackOnQuestionUseCase;
+    private final CastVoteUseCase castVoteUseCase;
+    private final ListVotesForQuestionUseCase listVotesForQuestionUseCase;
+    private final VoteMapper voteMapper;
 
     @PostMapping
     public ResponseEntity<QuestionResponse> submitQuestion(@Valid @RequestBody QuestionRequest request) {
@@ -161,6 +170,35 @@ public class QuestionController {
                 request.getRelevanceLevel()
         );
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/{questionId}/vote")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> castVote(
+            @PathVariable UUID questionId,
+            @Valid @RequestBody CastVoteRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
+        UUID userId = principal.user().getId();
+
+        castVoteUseCase.castVote(
+                userId,
+                questionId,
+                request.getVoteType()
+        );
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{questionId}/votes")
+    // TODO: Consider creating a separate public endpoint (e.g., /questions/{questionId}/vote-summary)
+    // that returns only aggregate vote counts (e.g., total approves, total rejects) for non-admin users.
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<VoteResponseDto>> getVotesForQuestion(@PathVariable UUID questionId) {
+        List<Vote> votes = listVotesForQuestionUseCase.getVotesForQuestion(questionId);
+        List<VoteResponseDto> response = votes.stream()
+                .map(voteMapper::toResponseDto)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 }
 

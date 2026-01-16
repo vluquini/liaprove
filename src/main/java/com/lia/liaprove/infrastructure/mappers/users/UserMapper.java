@@ -7,6 +7,7 @@ import com.lia.liaprove.infrastructure.dtos.UserResponseDto;
 import com.lia.liaprove.infrastructure.entities.users.UserEntity;
 import com.lia.liaprove.infrastructure.entities.users.UserProfessionalEntity;
 import com.lia.liaprove.infrastructure.entities.users.UserRecruiterEntity;
+import org.hibernate.Hibernate;
 import org.mapstruct.Mapper;
 import org.mapstruct.ReportingPolicy;
 
@@ -40,12 +41,21 @@ public interface UserMapper {
     UserProfessionalEntity toEntity(UserProfessional domain);
 
     default User toDomain(UserEntity entity) {
-        return switch (entity) {
-            case null -> null;
-            case UserRecruiterEntity ure -> toDomain(ure);
-            case UserProfessionalEntity upe -> toDomain(upe);
-            default -> throw new IllegalArgumentException("Unknown UserEntity subtype: " + entity.getClass());
-        };
+        if (entity == null) {
+            return null;
+        }
+
+        // Unproxy the entity to get the real underlying object
+        Object unproxiedEntity = Hibernate.unproxy(entity);
+
+        // Now perform the check on the real object
+        if (unproxiedEntity instanceof UserRecruiterEntity ure) {
+            return toDomain(ure);
+        } else if (unproxiedEntity instanceof UserProfessionalEntity upe) {
+            return toDomain(upe);
+        } else {
+            throw new IllegalArgumentException("Unknown UserEntity subtype: " + entity.getClass());
+        }
     }
 
     UserRecruiter toDomain(UserRecruiterEntity entity);
