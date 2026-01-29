@@ -1,6 +1,7 @@
 package com.lia.liaprove.infrastructure.mappers.question;
 
 import com.lia.liaprove.core.domain.question.Alternative;
+import com.lia.liaprove.infrastructure.dtos.question.AlternativeDto;
 import com.lia.liaprove.infrastructure.dtos.question.AlternativeRequestDto;
 import com.lia.liaprove.infrastructure.entities.question.AlternativeEntity;
 import org.mapstruct.Mapper;
@@ -18,4 +19,7 @@ public interface AlternativeMapper {
     @Mapping(target = "id", ignore = true) // A entidade pai (Question) será setada pelo QuestionMapper
     @Mapping(target = "question", ignore = true)
     AlternativeEntity toEntity(Alternative domain);
+
+    AlternativeDto toAlternativeDto(Alternative domain);
+//    List<AlternativeDto> toAlternativeDtoList(List<Alternative> domainList);
 }

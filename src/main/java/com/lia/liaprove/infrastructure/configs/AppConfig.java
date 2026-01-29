@@ -5,18 +5,21 @@ import com.lia.liaprove.application.gateways.metrics.VoteGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
+import com.lia.liaprove.application.services.metrics.ListFeedbacksForQuestionUseCaseImpl;
 import com.lia.liaprove.application.services.question.*;
 import com.lia.liaprove.application.services.metrics.CastVoteUseCaseImpl;
 import com.lia.liaprove.application.services.metrics.ListVotesForQuestionUseCaseImpl;
 import com.lia.liaprove.application.services.metrics.SubmitFeedbackOnQuestionUseCaseImpl;
 import com.lia.liaprove.application.services.user.*;
 import com.lia.liaprove.core.usecases.metrics.CastVoteUseCase;
+import com.lia.liaprove.core.usecases.metrics.ListFeedbacksForQuestionUseCase;
 import com.lia.liaprove.core.usecases.metrics.ListVotesForQuestionUseCase;
 import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.core.usecases.user.users.*;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.VoteMapper;
+import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
 import com.lia.liaprove.infrastructure.repositories.FeedbackQuestionJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
@@ -58,7 +61,8 @@ public class AppConfig {
     }
 
     @Bean
-    public CreateUserUseCase createUserUseCase(UserGateway userGateway, PasswordHasher passwordHasher, UserFactory userFactory) {
+    public CreateUserUseCase createUserUseCase(UserGateway userGateway, PasswordHasher passwordHasher,
+                                               UserFactory userFactory) {
         return new CreateUserUseCaseImpl(userGateway, passwordHasher, userFactory);
     }
 
@@ -123,11 +127,20 @@ public class AppConfig {
         return new ModerateQuestionUseCaseImpl(questionGateway);
     }
 
+    @Bean
+    public GetQuestionVotingDetailsUseCase getQuestionVotingDetailsUseCase(QuestionGateway questionGateway,
+                                                                         VoteGateway voteGateway,
+                                                                         FeedbackGateway feedbackGateway,
+                                                                         UserGateway userGateway) {
+        return new GetQuestionVotingDetailsUseCaseImpl(questionGateway, voteGateway, feedbackGateway, userGateway);
+    }
+
     // Metrics Domain - Feedback Question
     @Bean
     public FeedbackGateway feedbackGateway(FeedbackQuestionJpaRepository feedbackQuestionJpaRepository,
-                                           FeedbackQuestionMapper feedbackQuestionMapper) {
-        return new FeedbackGatewayImpl(feedbackQuestionJpaRepository, feedbackQuestionMapper);
+                                           FeedbackQuestionMapper feedbackQuestionMapper,
+                                           QuestionMapper questionMapper) {
+        return new FeedbackGatewayImpl(feedbackQuestionJpaRepository, feedbackQuestionMapper, questionMapper);
     }
 
     @Bean
@@ -135,6 +148,12 @@ public class AppConfig {
                                                                            UserGateway userGateway,
                                                                            QuestionGateway questionGateway) {
         return new SubmitFeedbackOnQuestionUseCaseImpl(feedbackGateway, userGateway, questionGateway);
+    }
+
+    @Bean
+    public ListFeedbacksForQuestionUseCase listFeedbacksForQuestionUseCase(FeedbackGateway feedbackGateway,
+                                                                           QuestionGateway questionGateway) {
+        return new ListFeedbacksForQuestionUseCaseImpl(feedbackGateway, questionGateway);
     }
 
     // Metrics Domain - Vote

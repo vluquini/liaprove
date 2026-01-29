@@ -1,22 +1,28 @@
 package com.lia.liaprove.infrastructure.mappers.question;
 
 import com.lia.liaprove.application.services.question.QuestionCreateDto;
+import com.lia.liaprove.application.services.question.QuestionVotingDetails;
 import com.lia.liaprove.core.domain.question.*;
+import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.usecases.question.UpdateQuestionUseCase;
+import com.lia.liaprove.infrastructure.dtos.AuthorDto;
 import com.lia.liaprove.infrastructure.dtos.question.*;
+import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
+import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
 import com.lia.liaprove.infrastructure.entities.question.AlternativeEntity;
 import com.lia.liaprove.infrastructure.entities.question.MultipleChoiceQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.ProjectQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import org.mapstruct.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
-@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR, uses = {AlternativeMapper.class})
+@Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.ERROR,
+        uses = {AlternativeMapper.class, FeedbackQuestionMapper.class, UserMapper.class})
 public interface QuestionMapper {
+
+    AuthorDto toAuthorDto(User user);
+
     // Dispatcher evita retorno abstrato/ambiguidade
     default QuestionEntity toEntity(Question domain) {
         return switch (domain) {
@@ -139,24 +145,62 @@ public interface QuestionMapper {
 
     // MultipleChoice: mapeia alternativas
     @Mapping(target = "authorId", expression = "java(authorId)")
-    QuestionCreateDto toQuestionCreateDto(MultipleChoiceQuestionRequest req, UUID authorId);
+    QuestionCreateDto toQuestionCreateDto(SubmitMultipleChoiceQuestionRequest req, UUID authorId);
 
     // Project: não possui alternatives — ignorar esse target
     @Mapping(target = "authorId", expression = "java(authorId)")
     @Mapping(target = "alternatives", ignore = true)
-    QuestionCreateDto toQuestionCreateDto(ProjectQuestionRequest req, UUID authorId);
+    QuestionCreateDto toQuestionCreateDto(SubmitProjectQuestionRequest req, UUID authorId);
 
 
     // Dispatcher genérico
-    default QuestionCreateDto toQuestionCreateDto(QuestionRequest req, UUID authorId) {
-        if (req instanceof MultipleChoiceQuestionRequest mc) return toQuestionCreateDto(mc, authorId);
-        if (req instanceof ProjectQuestionRequest p) return toQuestionCreateDto(p, authorId);
-        throw new IllegalArgumentException("Unknown CreateQuestionRequest subtype: " + req.getClass());
+    default QuestionCreateDto toQuestionCreateDto(SubmitQuestionRequest req, UUID authorId) {
+        if (req instanceof SubmitMultipleChoiceQuestionRequest mc) return toQuestionCreateDto(mc, authorId);
+        if (req instanceof SubmitProjectQuestionRequest p) return toQuestionCreateDto(p, authorId);
+        throw new IllegalArgumentException("Unknown SubmitQuestionRequest subtype: " + req.getClass());
     }
 
     // ####################################################################################################
     // ############################# MAPPINGS FROM DOMAIN TO DTO RESPONSE (NEW) ###########################
     // ####################################################################################################
+
+    @Mapping(source = "authorId", target = "authorId")
+    QuestionSummaryResponse toSummaryResponseDto(Question domain);
+    List<QuestionSummaryResponse> toSummaryResponseDtoList(List<Question> domainList);
+
+
+    @Mapping(source = "details.question.id", target = "id")
+    @Mapping(source = "details.question.title", target = "title")
+    @Mapping(source = "details.question.description", target = "description")
+    @Mapping(source = "details.question.knowledgeAreas", target = "knowledgeAreas")
+    @Mapping(source = "details.question.submissionDate", target = "submissionDate")
+    @Mapping(source = "details.author", target = "author") // Corrected source
+//    @Mapping(target = "alternatives", ignore = true) // Ignore direct mapping
+    @Mapping(source = "details.question", target = "alternatives")
+    @Mapping(source = "details.approveVotes", target = "voteSummary.approves")
+    @Mapping(source = "details.rejectVotes", target = "voteSummary.rejects")
+    @Mapping(source = "details.feedbacks", target = "feedbacks")
+    @Mapping(source = "details.question.relevanceByLLM", target = "relevanceByLLM")
+    QuestionDetailResponse toQuestionDetailResponseDto(QuestionVotingDetails details);
+
+
+    /**
+     * Helper que MapStruct irá invocar automaticamente para preencher
+     * List<AlternativeDto> a partir de Question.
+     *
+     * - É Default para conter a lógica de decisão (instanceof) de forma testável e type-safe.
+     * - Delegamos a conversão da lista para o método abstrato abaixo,
+     *   que o MapStruct implementará (e que por sua vez pode usar AlternativeMapper).
+     */
+    default List<AlternativeDto> mapAlternatives(Question question) {
+        if (question instanceof MultipleChoiceQuestion mc) {
+            List<Alternative> alts = mc.getAlternatives();
+            return (alts == null) ? Collections.emptyList() : toAlternativeDtoList(alts);
+        }
+        return Collections.emptyList();
+    }
+
+    List<AlternativeDto> toAlternativeDtoList(List<Alternative> domainList);
 
     MultipleChoiceQuestionResponse toResponseDto(MultipleChoiceQuestion domain);
 

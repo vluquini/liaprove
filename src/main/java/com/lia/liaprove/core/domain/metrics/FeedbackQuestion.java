@@ -97,6 +97,26 @@ public class FeedbackQuestion extends Feedback{
     }
 
     /**
+     * Define as reações para este feedback a partir de uma lista.
+     * Este método é primariamente para uso do frameworks de mapeamento (MapStruct)
+     * e garante que as reações não sejam sobrescritas.
+     *
+     * @param reactions A lista de reações a ser adicionada.
+     */
+    public void setReactions(List<FeedbackReaction> reactions) {
+        if (!this.reactionsByUser.isEmpty()) {
+            throw new IllegalStateException("Feedback reactions have already been set and cannot be replaced.");
+        }
+        if (reactions != null) {
+            for (FeedbackReaction reaction : reactions) {
+                if (reaction != null && reaction.getUser() != null) {
+                    this.reactionsByUser.put(reaction.getUser().getId(), reaction);
+                }
+            }
+        }
+    }
+
+    /**
      * Adiciona ou atualiza a reação do usuário.
      * - Se user já reagiu, atualiza o tipo.
      * - Retorna true se criou/alterou; false se não houve alteração.
