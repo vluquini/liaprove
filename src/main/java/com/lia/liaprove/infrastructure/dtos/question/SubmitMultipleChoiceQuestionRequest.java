@@ -15,7 +15,7 @@ import java.util.List;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @JsonTypeName("MULTIPLE_CHOICE")
-public class MultipleChoiceQuestionRequest extends QuestionRequest {
+public class SubmitMultipleChoiceQuestionRequest extends SubmitQuestionRequest {
     @Valid
     @NotNull
     @Size(min = 3, max = 5)

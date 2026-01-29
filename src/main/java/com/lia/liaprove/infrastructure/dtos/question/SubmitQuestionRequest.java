@@ -17,15 +17,15 @@ import java.util.Set;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(
-                value = MultipleChoiceQuestionRequest.class,
+                value = SubmitMultipleChoiceQuestionRequest.class,
                 name = "MULTIPLE_CHOICE"
         ),
         @JsonSubTypes.Type(
-                value = ProjectQuestionRequest.class,
+                value = SubmitProjectQuestionRequest.class,
                 name = "PROJECT"
         )
 })
-public abstract class QuestionRequest {
+public abstract class SubmitQuestionRequest {
     @NotBlank
     @Size(min = 10, max = 255)
     private String title;

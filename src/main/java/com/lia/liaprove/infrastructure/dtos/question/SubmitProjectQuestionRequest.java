@@ -9,4 +9,4 @@ import lombok.Setter;
 @Setter
 @EqualsAndHashCode(callSuper = true)
 @JsonTypeName("PROJECT")
-public class ProjectQuestionRequest extends QuestionRequest {}
+public class SubmitProjectQuestionRequest extends SubmitQuestionRequest {}
