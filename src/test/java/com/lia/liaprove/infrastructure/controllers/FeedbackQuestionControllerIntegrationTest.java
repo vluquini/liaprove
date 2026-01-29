@@ -6,7 +6,7 @@ import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.infrastructure.dtos.AuthenticationRequest;
 import com.lia.liaprove.infrastructure.dtos.CreateUserRequest;
-import com.lia.liaprove.infrastructure.dtos.metrics.CreateFeedbackQuestionRequest;
+import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackQuestionRequest;
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
@@ -124,7 +124,7 @@ public class FeedbackQuestionControllerIntegrationTest {
         String professionalToken = registerAndLogin("feedback.user@example.com", "password123", UserRole.PROFESSIONAL);
         QuestionEntity question = createTestQuestion(QuestionStatus.VOTING);
 
-        CreateFeedbackQuestionRequest feedbackRequest = new CreateFeedbackQuestionRequest(
+        SubmitFeedbackQuestionRequest feedbackRequest = new SubmitFeedbackQuestionRequest(
                 "This is a test feedback comment.",
                 DifficultyLevel.EASY,
                 KnowledgeArea.SOFTWARE_DEVELOPMENT,
@@ -156,7 +156,7 @@ public class FeedbackQuestionControllerIntegrationTest {
         // Arrange
         QuestionEntity question = createTestQuestion(QuestionStatus.VOTING);
 
-        CreateFeedbackQuestionRequest feedbackRequest = new CreateFeedbackQuestionRequest(
+        SubmitFeedbackQuestionRequest feedbackRequest = new SubmitFeedbackQuestionRequest(
                 "This is a test feedback comment.",
                 DifficultyLevel.EASY,
                 KnowledgeArea.SOFTWARE_DEVELOPMENT,
@@ -177,7 +177,7 @@ public class FeedbackQuestionControllerIntegrationTest {
         String professionalToken = registerAndLogin("feedback.user.badrequest@example.com", "password123", UserRole.PROFESSIONAL);
         QuestionEntity question = createTestQuestion(QuestionStatus.VOTING);
 
-        CreateFeedbackQuestionRequest invalidFeedbackRequest = new CreateFeedbackQuestionRequest(
+        SubmitFeedbackQuestionRequest invalidFeedbackRequest = new SubmitFeedbackQuestionRequest(
                 "", // Blank comment
                 null, // Null difficulty
                 KnowledgeArea.SOFTWARE_DEVELOPMENT,
