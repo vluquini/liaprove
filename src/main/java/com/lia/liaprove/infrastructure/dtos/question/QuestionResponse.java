@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
+import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -29,6 +30,8 @@ public abstract class QuestionResponse {
     private String description;
     private Set<KnowledgeArea> knowledgeAreas = new HashSet<>();
     private DifficultyLevel difficultyByCommunity;
+    private RelevanceLevel relevanceByCommunity;
+    private RelevanceLevel relevanceByLLM;
     private LocalDateTime submissionDate;
     private QuestionStatus status;
 }
