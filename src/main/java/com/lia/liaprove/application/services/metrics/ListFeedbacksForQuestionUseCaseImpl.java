@@ -20,7 +20,7 @@ public class ListFeedbacksForQuestionUseCaseImpl implements ListFeedbacksForQues
     }
 
     @Override
-    public List<FeedbackQuestion> getFeedbacksForQuestion(UUID questionId) {
+    public List<FeedbackQuestion> listFeedbacksForQuestion(UUID questionId) {
         questionGateway.findById(questionId)
                 .orElseThrow(() -> new QuestionNotFoundException("Question not found with id: " + questionId));
 

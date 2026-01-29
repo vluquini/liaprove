@@ -30,7 +30,7 @@ public class VoteGatewayImpl implements VoteGateway {
     }
 
     @Override
-    public List<Vote> findByQuestionId(UUID questionId) {
+    public List<Vote> findVotesByQuestionId(UUID questionId) {
         List<VoteEntity> voteEntities = voteJpaRepository.findByQuestionId(questionId);
         return voteEntities.stream()
                 .map(voteMapper::toDomain)

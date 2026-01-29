@@ -16,5 +16,5 @@ public interface VoteGateway {
      * Lista votos de uma Question.
      * @param questionId O objeto Vote a ser salvo.
      */
-    List<Vote> findByQuestionId(UUID questionId);
+    List<Vote> findVotesByQuestionId(UUID questionId);
 }

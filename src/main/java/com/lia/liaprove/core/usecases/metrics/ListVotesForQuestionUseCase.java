@@ -14,5 +14,5 @@ public interface ListVotesForQuestionUseCase {
      * @param questionId O ID da questão para a qual os votos serão listados.
      * @return Uma lista de objetos Vote. Pode ser vazia se não houver votos.
      */
-    List<Vote> getVotesForQuestion(UUID questionId);
+    List<Vote> listVotesForQuestion(UUID questionId);
 }

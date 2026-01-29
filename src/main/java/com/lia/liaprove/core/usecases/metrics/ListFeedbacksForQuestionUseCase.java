@@ -17,5 +17,5 @@ public interface ListFeedbacksForQuestionUseCase {
      * @return Uma lista de objetos FeedbackQuestion. Pode ser vazia se não houver feedbacks.
      * @throws QuestionNotFoundException se a questão não for encontrada.
      */
-    List<FeedbackQuestion> getFeedbacksForQuestion(UUID questionId);
+    List<FeedbackQuestion> listFeedbacksForQuestion(UUID questionId);
 }

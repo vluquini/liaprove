@@ -20,12 +20,12 @@ public class ListVotesForQuestionUseCaseImpl implements ListVotesForQuestionUseC
     }
 
     @Override
-    public List<Vote> getVotesForQuestion(UUID questionId) {
+    public List<Vote> listVotesForQuestion(UUID questionId) {
         // First, ensure the question exists.
         questionGateway.findById(questionId)
                 .orElseThrow(() -> new QuestionNotFoundException("Question not found with id: " + questionId));
 
         // Then, retrieve the votes for that question.
-        return voteGateway.findByQuestionId(questionId);
+        return voteGateway.findVotesByQuestionId(questionId);
     }
 }
