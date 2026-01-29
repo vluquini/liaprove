@@ -14,7 +14,7 @@ import lombok.AllArgsConstructor;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class CreateFeedbackQuestionRequest {
+public class SubmitFeedbackQuestionRequest {
     @NotBlank(message = "Comment cannot be empty")
     private String comment;
 
