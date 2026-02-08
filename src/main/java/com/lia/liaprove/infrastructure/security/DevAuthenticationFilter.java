@@ -1,19 +1,20 @@
 package com.lia.liaprove.infrastructure.security;
 
+import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Filtro de autenticação simplificado utilizado exclusivamente no profile {@code dev}.
@@ -37,26 +38,39 @@ import java.util.List;
 
 @Profile("dev")
 @Component
+@RequiredArgsConstructor
 public class DevAuthenticationFilter extends OncePerRequestFilter {
 
+    // E-mail do usuário seeded que será usado como identidade no dev
+    private static final String DEV_USER_HEADER = "X-Dev-User-Email";
+
+    private final UserJpaRepository userJpaRepository;
+    private final UserMapper userMapper;
+
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
+                                    FilterChain filterChain) throws ServletException, IOException {
 
-        Authentication auth =
-                new UsernamePasswordAuthenticationToken(
-                        "dev-user",
-                        null,
-                        List.of(
-                                new SimpleGrantedAuthority("ROLE_ADMIN"),
-                                new SimpleGrantedAuthority("ROLE_PROFESSIONAL"),
-                                new SimpleGrantedAuthority("ROLE_RECRUITER")
-                        )
-                );
+        // Se já autenticado, não sobrescrever
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
 
-        SecurityContextHolder.getContext().setAuthentication(auth);
+            String email = request.getHeader(DEV_USER_HEADER);
+
+            if (email != null && !email.isBlank()) {
+                userJpaRepository.findByEmail(email).ifPresent(userEntity -> {
+                    var userDomain = userMapper.toDomain(userEntity);
+                    var userDetails = new CustomUserDetails(userDomain);
+
+                    Authentication auth = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    SecurityContextHolder.getContext().setAuthentication(auth);
+                });
+            }
+        }
+
         filterChain.doFilter(request, response);
     }
 }
