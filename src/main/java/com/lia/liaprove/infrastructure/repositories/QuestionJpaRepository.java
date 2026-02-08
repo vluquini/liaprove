@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -31,5 +32,8 @@ public interface QuestionJpaRepository extends JpaRepository<QuestionEntity, UUI
             Pageable pageable
     );
 
-    List<QuestionEntity> findByStatusAndVotingEndDateBefore(QuestionStatus status, java.time.LocalDateTime votingEndDate);
+    List<QuestionEntity> findByStatusAndVotingEndDateBefore(QuestionStatus status, LocalDateTime votingEndDate);
+
+    @Query("SELECT q FROM QuestionEntity q LEFT JOIN FETCH TREAT(q AS MultipleChoiceQuestionEntity).alternatives a WHERE q.id = :id")
+    QuestionEntity findByIdFetchingAlternatives(@Param("id") UUID id);
 }

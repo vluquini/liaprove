@@ -37,14 +37,9 @@ public class FeedbackGatewayImpl implements FeedbackGateway {
 
     @Override
     public List<FeedbackQuestion> findFeedbacksByQuestionId(UUID questionId) {
-        List<FeedbackQuestionEntity> entities = feedbackQuestionJpaRepository.findByQuestionId(questionId);
+        List<FeedbackQuestionEntity> entities = feedbackQuestionJpaRepository.findWithDetailsByQuestionId(questionId);
         return entities.stream()
-                .map(entity -> {
-                    FeedbackQuestion domain = feedbackQuestionMapper.toDomain(entity);
-                    // Manually set the question domain object
-                    domain.setQuestion(questionMapper.toDomain(entity.getQuestion()));
-                    return domain;
-                })
+                .map(feedbackQuestionMapper::toDomain)
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 

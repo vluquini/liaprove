@@ -45,7 +45,8 @@ public class QuestionGatewayImpl implements QuestionGateway {
     @Override
     @Transactional(readOnly = true)
     public Optional<Question> findById(UUID id) {
-        return questionJpaRepository.findById(id).map(questionMapper::toDomain);
+        QuestionEntity entity = questionJpaRepository.findByIdFetchingAlternatives(id);
+        return Optional.ofNullable(entity).map(questionMapper::toDomain);
     }
 
     @Override

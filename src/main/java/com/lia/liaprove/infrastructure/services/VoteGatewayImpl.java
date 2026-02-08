@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class VoteGatewayImpl implements VoteGateway {
@@ -31,9 +32,9 @@ public class VoteGatewayImpl implements VoteGateway {
 
     @Override
     public List<Vote> findVotesByQuestionId(UUID questionId) {
-        List<VoteEntity> voteEntities = voteJpaRepository.findByQuestionId(questionId);
+        List<VoteEntity> voteEntities = voteJpaRepository.findWithDetailsByQuestionId(questionId);
         return voteEntities.stream()
                 .map(voteMapper::toDomain)
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
     }
 }
