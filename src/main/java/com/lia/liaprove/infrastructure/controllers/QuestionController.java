@@ -7,8 +7,10 @@ import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.core.usecases.metrics.CastVoteUseCase;
 import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase;
+import com.lia.liaprove.core.usecases.metrics.ReactToFeedbackUseCase;
 import com.lia.liaprove.infrastructure.dtos.metrics.CastVoteRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackQuestionRequest;
+import com.lia.liaprove.infrastructure.dtos.metrics.ReactToFeedbackRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionDetailResponse;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
@@ -41,6 +43,7 @@ public class QuestionController {
     private final SubmitFeedbackOnQuestionUseCase submitFeedbackOnQuestionUseCase;
     private final CastVoteUseCase castVoteUseCase;
     private final GetQuestionVotingDetailsUseCase getQuestionVotingDetailsUseCase;
+    private final ReactToFeedbackUseCase reactToFeedbackUseCase;
 
     @PostMapping
     public ResponseEntity<QuestionResponse> submitQuestion(@Valid @RequestBody SubmitQuestionRequest request) {
@@ -102,6 +105,21 @@ public class QuestionController {
                 request.getDifficultyLevel(),
                 request.getKnowledgeArea(),
                 request.getRelevanceLevel()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PostMapping("/feedbacks/{feedbackId}/react")
+    public ResponseEntity<Void> reactToFeedback(@PathVariable UUID feedbackId,
+                                                @Valid @RequestBody ReactToFeedbackRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
+        UUID userId = principal.user().getId();
+
+        reactToFeedbackUseCase.reactToFeedback(
+                userId,
+                feedbackId,
+                request.getReactionType()
         );
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

@@ -5,16 +5,10 @@ import com.lia.liaprove.application.gateways.metrics.VoteGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
-import com.lia.liaprove.application.services.metrics.ListFeedbacksForQuestionUseCaseImpl;
+import com.lia.liaprove.application.services.metrics.*;
 import com.lia.liaprove.application.services.question.*;
-import com.lia.liaprove.application.services.metrics.CastVoteUseCaseImpl;
-import com.lia.liaprove.application.services.metrics.ListVotesForQuestionUseCaseImpl;
-import com.lia.liaprove.application.services.metrics.SubmitFeedbackOnQuestionUseCaseImpl;
 import com.lia.liaprove.application.services.user.*;
-import com.lia.liaprove.core.usecases.metrics.CastVoteUseCase;
-import com.lia.liaprove.core.usecases.metrics.ListFeedbacksForQuestionUseCase;
-import com.lia.liaprove.core.usecases.metrics.ListVotesForQuestionUseCase;
-import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase;
+import com.lia.liaprove.core.usecases.metrics.*;
 import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.core.usecases.user.users.*;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
@@ -170,5 +164,10 @@ public class AppConfig {
     @Bean
     public ListVotesForQuestionUseCase listVotesForQuestionUseCase(VoteGateway voteGateway, QuestionGateway questionGateway) {
         return new ListVotesForQuestionUseCaseImpl(voteGateway, questionGateway);
+    }
+
+    @Bean
+    public ReactToFeedbackUseCase reactToFeedbackUseCase(FeedbackGateway feedbackGateway, UserGateway userGateway) {
+        return new ReactToFeedbackUseCaseImpl(feedbackGateway, userGateway);
     }
 }

@@ -7,6 +7,7 @@ import com.lia.liaprove.infrastructure.entities.metrics.FeedbackQuestionEntity;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.repositories.FeedbackQuestionJpaRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -45,27 +46,49 @@ public class FeedbackGatewayImpl implements FeedbackGateway {
 
     @Override
     public Optional<FeedbackQuestion> findFeedbackQuestionById(UUID feedbackId) {
-        return feedbackQuestionJpaRepository.findById(feedbackId)
-                .map(entity -> {
-                    FeedbackQuestion domain = feedbackQuestionMapper.toDomain(entity);
-                    // Manually set the question domain object
-                    domain.setQuestion(questionMapper.toDomain(entity.getQuestion()));
-                    return domain;
-                });
+        return feedbackQuestionJpaRepository.findFeedbackByIdWithDetails(feedbackId)
+                .map(feedbackQuestionMapper::toDomain);
     }
 
     @Override
     public void saveFeedbackQuestion(FeedbackQuestion feedback) {
-        FeedbackQuestionEntity entity = feedbackQuestionMapper.toEntity(feedback);
-        // Manually set the question entity
-        entity.setQuestion(questionMapper.toEntity(feedback.getQuestion()));
+        FeedbackQuestionEntity managedEntity;
 
-        feedback.getReactions().stream()
-                .map(feedbackQuestionMapper::reactionToEntity)
-                .forEach(entity::addReaction);
+        if (feedback.getId() != null) {
+            // This is an update scenario. Fetch the existing managed entity.
+            managedEntity = feedbackQuestionJpaRepository.findFeedbackByIdWithDetails(feedback.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("FeedbackQuestion not found for ID: " + feedback.getId()));
 
-        FeedbackQuestionEntity savedEntity = feedbackQuestionJpaRepository.save(entity);
-        // Important: Update the domain object's ID with the generated ID from the entity
-        feedback.setId(savedEntity.getId());
+            // Now, update only the mutable properties of the MANAGED entity.
+            // We assume 'comment' can be updated.
+            // The 'question' and 'user' associations are immutable for an existing feedback and should not be touched here.
+            managedEntity.setComment(feedback.getComment());
+
+            // Update reactions collection. This involves clearing the managed collection
+            // and re-populating it with entities derived from the domain object's reactions.
+            managedEntity.getReactions().clear();
+            feedback.getReactions().stream()
+                    .map(feedbackQuestionMapper::reactionToEntity) // Converts domain Reaction to ReactionEntity
+                    .forEach(managedEntity::addReaction);
+
+        } else {
+            // This is a creation scenario. Create a new entity from the domain object.
+            // The mapper will ignore 'question' and 'reactions', so we set them manually.
+            managedEntity = feedbackQuestionMapper.toEntity(feedback);
+            managedEntity.setQuestion(questionMapper.toEntity(feedback.getQuestion()));
+
+            feedback.getReactions().stream()
+                    .map(feedbackQuestionMapper::reactionToEntity)
+                    .forEach(managedEntity::addReaction);
+        }
+
+        // Save the managed (or newly created) entity.
+        // For updates, this will merge the changes into the database.
+        FeedbackQuestionEntity savedEntity = feedbackQuestionJpaRepository.save(managedEntity);
+
+        // Only set the ID on the domain object if it was a new creation.
+        if (feedback.getId() == null) {
+            feedback.setId(savedEntity.getId());
+        }
     }
 }
