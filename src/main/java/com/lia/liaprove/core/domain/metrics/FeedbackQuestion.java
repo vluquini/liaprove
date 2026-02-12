@@ -117,23 +117,46 @@ public class FeedbackQuestion extends Feedback{
     }
 
     /**
-     * Adiciona ou atualiza a reação do usuário.
-     * - Se user já reagiu, atualiza o tipo.
-     * - Retorna true se criou/alterou; false se não houve alteração.
+     * Gerencia a reação de um usuário a este feedback, seguindo as regras de negócio:
+     * <ul>
+     *     <li>Se uma reação existente for do mesmo tipo, ela é removida através de {@code removeReaction}.</li>
+     *     <li>Se uma reação existente for de um tipo diferente, ela é atualizada através de {@code updateReaction}.</li>
+     *     <li>Se não houver reação existente, uma nova é adicionada através de {@code addReaction}.</li>
+     * </ul>
+     * Retorna {@code true} se a lista de reações foi modificada (adição, atualização ou remoção).
+     *
+     * @param user O usuário cuja reação está sendo gerenciada.
+     * @param type O tipo de reação (LIKE, DISLIKE) a ser aplicada.
+     * @return {@code true} se a lista de reações foi modificada; {@code false} caso contrário.
+     * @throws NullPointerException se {@code user} ou {@code type} for nulo.
      */
-    public boolean addOrUpdateReaction(User user, ReactionType type) {
+    public boolean manageReaction(User user, ReactionType type) {
         Objects.requireNonNull(user, "user");
         Objects.requireNonNull(type, "type");
 
         UUID userId = user.getId();
         FeedbackReaction existing = reactionsByUser.get(userId);
+
         if (existing != null) {
-            if (existing.getType() == type) return false; // sem mudança
-            existing.setType(type);
+            if (existing.getType() == type) {
+                return removeReaction(user);
+            } else {
+                return updateReaction(existing, type);
+            }
         } else {
-            FeedbackReaction reaction = new FeedbackReaction(user, type);
-            reactionsByUser.put(userId, reaction);
+            return addReaction(user, type);
         }
+    }
+
+    private boolean addReaction(User user, ReactionType type) {
+        FeedbackReaction reaction = new FeedbackReaction(user, type);
+        reactionsByUser.put(user.getId(), reaction);
+        touchUpdatedAt();
+        return true;
+    }
+
+    private boolean updateReaction(FeedbackReaction existingReaction, ReactionType newType) {
+        existingReaction.setType(newType);
         touchUpdatedAt();
         return true;
     }
@@ -143,6 +166,7 @@ public class FeedbackQuestion extends Feedback{
         Objects.requireNonNull(user, "user");
         UUID id = user.getId();
         FeedbackReaction removed = reactionsByUser.remove(id);
+
         if (removed != null){
             touchUpdatedAt();
             return true;
