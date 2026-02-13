@@ -1,9 +1,6 @@
 package com.lia.liaprove.infrastructure.exceptions;
 
-import com.lia.liaprove.core.exceptions.AuthorizationException;
-import com.lia.liaprove.core.exceptions.InvalidCredentialsException;
-import com.lia.liaprove.core.exceptions.InvalidUserDataException;
-import com.lia.liaprove.core.exceptions.UserNotFoundException;
+import com.lia.liaprove.core.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,6 +68,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 
+    @ExceptionHandler(FeedbackNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleFeedbackNotFoundException(
+        FeedbackNotFoundException ex, HttpServletRequest req) {
+        log.warn("FeedbackNotFoundException: {}", ex.getMessage());
+        Map<String, Object> body = createErrorBody(HttpStatus.NOT_FOUND, "Not Found: " + ex.getMessage(), req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationExceptions(
             MethodArgumentNotValidException ex, HttpServletRequest req) {
@@ -86,5 +91,4 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(body);
     }
 }
-
 
