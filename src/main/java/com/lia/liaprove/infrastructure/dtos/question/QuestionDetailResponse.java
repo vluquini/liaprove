@@ -2,7 +2,7 @@ package com.lia.liaprove.infrastructure.dtos.question;
 
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
-import com.lia.liaprove.infrastructure.dtos.AuthorDto;
+import com.lia.liaprove.infrastructure.dtos.user.AuthorDto;
 import com.lia.liaprove.infrastructure.dtos.metrics.FeedbackQuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.metrics.VoteSummaryResponse;
 import lombok.AllArgsConstructor;

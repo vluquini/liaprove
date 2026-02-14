@@ -1,6 +1,6 @@
 package com.lia.liaprove.infrastructure.dtos.metrics;
 
-import com.lia.liaprove.infrastructure.dtos.AuthorDto;
+import com.lia.liaprove.infrastructure.dtos.user.AuthorDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

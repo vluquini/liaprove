@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.dtos;
+package com.lia.liaprove.infrastructure.dtos.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -3,7 +3,7 @@ package com.lia.liaprove.infrastructure.mappers.users;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserProfessional;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
-import com.lia.liaprove.infrastructure.dtos.UserResponseDto;
+import com.lia.liaprove.infrastructure.dtos.user.UserResponseDto;
 import com.lia.liaprove.infrastructure.entities.users.UserEntity;
 import com.lia.liaprove.infrastructure.entities.users.UserProfessionalEntity;
 import com.lia.liaprove.infrastructure.entities.users.UserRecruiterEntity;

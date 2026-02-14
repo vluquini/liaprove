@@ -1,7 +1,7 @@
 package com.lia.liaprove.infrastructure.dtos.metrics;
 
 import com.lia.liaprove.core.domain.metrics.VoteType;
-import com.lia.liaprove.infrastructure.dtos.UserResponseDto;
+import com.lia.liaprove.infrastructure.dtos.user.UserResponseDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

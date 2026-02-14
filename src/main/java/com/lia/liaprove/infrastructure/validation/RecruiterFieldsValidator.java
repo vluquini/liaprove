@@ -1,7 +1,7 @@
 package com.lia.liaprove.infrastructure.validation;
 
 import com.lia.liaprove.core.domain.user.UserRole;
-import com.lia.liaprove.infrastructure.dtos.CreateUserRequest;
+import com.lia.liaprove.infrastructure.dtos.user.CreateUserRequest;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 

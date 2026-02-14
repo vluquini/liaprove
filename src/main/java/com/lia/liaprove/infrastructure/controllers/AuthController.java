@@ -2,9 +2,9 @@ package com.lia.liaprove.infrastructure.controllers;
 
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.usecases.user.users.CreateUserUseCase;
-import com.lia.liaprove.infrastructure.dtos.AuthenticationRequest;
-import com.lia.liaprove.infrastructure.dtos.AuthenticationResponse;
-import com.lia.liaprove.infrastructure.dtos.CreateUserRequest;
+import com.lia.liaprove.infrastructure.dtos.user.AuthenticationRequest;
+import com.lia.liaprove.infrastructure.dtos.user.AuthenticationResponse;
+import com.lia.liaprove.infrastructure.dtos.user.CreateUserRequest;
 import com.lia.liaprove.infrastructure.security.CustomUserDetails;
 import com.lia.liaprove.infrastructure.security.JwtService;
 import jakarta.validation.Valid;

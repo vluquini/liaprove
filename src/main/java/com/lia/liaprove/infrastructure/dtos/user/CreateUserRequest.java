@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.dtos;
+package com.lia.liaprove.infrastructure.dtos.user;
 
 import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.UserRole;

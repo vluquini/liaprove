@@ -5,7 +5,7 @@ import com.lia.liaprove.application.services.question.QuestionVotingDetails;
 import com.lia.liaprove.core.domain.question.*;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.usecases.question.UpdateQuestionUseCase;
-import com.lia.liaprove.infrastructure.dtos.AuthorDto;
+import com.lia.liaprove.infrastructure.dtos.user.AuthorDto;
 import com.lia.liaprove.infrastructure.dtos.question.*;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
