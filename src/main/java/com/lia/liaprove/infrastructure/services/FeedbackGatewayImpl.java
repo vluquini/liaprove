@@ -63,6 +63,7 @@ public class FeedbackGatewayImpl implements FeedbackGateway {
             // We assume 'comment' can be updated.
             // The 'question' and 'user' associations are immutable for an existing feedback and should not be touched here.
             managedEntity.setComment(feedback.getComment());
+            managedEntity.setUpdatedAt(feedback.getUpdatedAt());
 
             // Update reactions collection. This involves clearing the managed collection
             // and re-populating it with entities derived from the domain object's reactions.

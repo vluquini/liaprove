@@ -170,4 +170,9 @@ public class AppConfig {
     public ReactToFeedbackUseCase reactToFeedbackUseCase(FeedbackGateway feedbackGateway, UserGateway userGateway) {
         return new ReactToFeedbackUseCaseImpl(feedbackGateway, userGateway);
     }
+
+    @Bean
+    public UpdateFeedbackCommentUseCase updateFeedbackCommentUseCase(FeedbackGateway feedbackGateway) {
+        return new UpdateFeedbackCommentUseCaseImpl(feedbackGateway);
+    }
 }

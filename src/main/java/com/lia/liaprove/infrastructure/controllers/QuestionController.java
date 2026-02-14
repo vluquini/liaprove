@@ -8,9 +8,11 @@ import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.core.usecases.metrics.CastVoteUseCase;
 import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase;
 import com.lia.liaprove.core.usecases.metrics.ReactToFeedbackUseCase;
+import com.lia.liaprove.core.usecases.metrics.UpdateFeedbackCommentUseCase;
 import com.lia.liaprove.infrastructure.dtos.metrics.CastVoteRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.ReactToFeedbackRequest;
+import com.lia.liaprove.infrastructure.dtos.metrics.UpdateFeedbackCommentRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionDetailResponse;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
@@ -44,6 +46,7 @@ public class QuestionController {
     private final CastVoteUseCase castVoteUseCase;
     private final GetQuestionVotingDetailsUseCase getQuestionVotingDetailsUseCase;
     private final ReactToFeedbackUseCase reactToFeedbackUseCase;
+    private final UpdateFeedbackCommentUseCase updateFeedbackCommentUseCase;
 
     @PostMapping
     public ResponseEntity<QuestionResponse> submitQuestion(@Valid @RequestBody SubmitQuestionRequest request) {
@@ -122,6 +125,17 @@ public class QuestionController {
                 request.getReactionType()
         );
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @PatchMapping("/feedbacks/{feedbackId}")
+    public ResponseEntity<Void> updateFeedbackComment(@PathVariable UUID feedbackId,
+                                                      @Valid @RequestBody UpdateFeedbackCommentRequest request) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
+        UUID actorId = principal.user().getId();
+
+        updateFeedbackCommentUseCase.execute(actorId, feedbackId, request.getComment());
+        return ResponseEntity.ok().build();
     }
 
     // Metrics Domain - Vote

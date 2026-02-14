@@ -9,6 +9,7 @@ import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.infrastructure.dtos.metrics.ReactToFeedbackRequest;
+import com.lia.liaprove.infrastructure.dtos.metrics.UpdateFeedbackCommentRequest;
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import com.lia.liaprove.infrastructure.entities.users.UserEntity;
@@ -33,6 +34,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -264,5 +266,47 @@ public class FeedbackQuestionControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reactRequest)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Should update feedback comment successfully")
+    void shouldUpdateFeedbackCommentSuccessfully() throws Exception {
+        // Setup
+        UserEntity author = getSeededUserEntity("carlos.silva@example.com");
+        QuestionEntity question = createTestQuestion();
+        FeedbackQuestionEntity feedback = createTestFeedbackQuestion(author, question);
+
+        UpdateFeedbackCommentRequest updateRequest = new UpdateFeedbackCommentRequest("Updated comment text.");
+
+        // Act
+        mockMvc.perform(patch("/api/v1/questions/feedbacks/{feedbackId}", feedback.getId())
+                        .header("X-Dev-User-Email", author.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isOk());
+
+        // Assert
+        FeedbackQuestionEntity updatedFeedback = feedbackQuestionJpaRepository.findById(feedback.getId()).orElseThrow();
+        assertThat(updatedFeedback.getComment()).isEqualTo("Updated comment text.");
+        assertThat(updatedFeedback.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Should return FORBIDDEN when updating others comment")
+    void shouldReturnForbiddenWhenUpdatingOthersComment() throws Exception {
+        // Setup
+        UserEntity author = getSeededUserEntity("carlos.silva@example.com");
+        UserEntity otherUser = getSeededUserEntity("mariana.costa@example.com");
+        QuestionEntity question = createTestQuestion();
+        FeedbackQuestionEntity feedback = createTestFeedbackQuestion(author, question);
+
+        UpdateFeedbackCommentRequest updateRequest = new UpdateFeedbackCommentRequest("Unauthorized update attempt.");
+
+        // Act & Assert
+        mockMvc.perform(patch("/api/v1/questions/feedbacks/{feedbackId}", feedback.getId())
+                        .header("X-Dev-User-Email", otherUser.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateRequest)))
+                .andExpect(status().isForbidden());
     }
 }
