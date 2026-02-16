@@ -4,12 +4,9 @@ import java.util.UUID;
 
 /**
  * Caso de uso para ativar/desativar a conta de um usuário.
- * <p>
- * Pode lançar as seguintes exceções (unchecked):
- * - {@code UserNotFoundException} se o usuário não for encontrado.
+ * Permite que admins moderem usuários e que usuários desativem suas próprias contas.
  */
 public interface UserModerationUseCase {
-    void activateUser(UUID userId, UUID adminId);
-    void deactivateUser(UUID userId, UUID adminId);
+    void activateUser(UUID targetUserId, UUID actorId);
+    void deactivateUser(UUID targetUserId, UUID actorId);
 }
-

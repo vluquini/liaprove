@@ -10,6 +10,7 @@ import com.lia.liaprove.application.services.question.*;
 import com.lia.liaprove.application.services.user.*;
 import com.lia.liaprove.core.usecases.metrics.*;
 import com.lia.liaprove.core.usecases.question.*;
+import com.lia.liaprove.core.usecases.user.admin.UserModerationUseCase;
 import com.lia.liaprove.core.usecases.user.users.*;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.VoteMapper;
@@ -85,6 +86,11 @@ public class AppConfig {
         return new DeleteUserUseCaseImpl(userGateway);
     }
 
+    @Bean
+    public UserModerationUseCase userModerationUseCase(UserGateway userGateway) {
+        return new UserModerationUseCaseImpl(userGateway);
+    }
+
     // Question Domain
     @Bean
     public QuestionFactory questionFactory() {
@@ -129,7 +135,7 @@ public class AppConfig {
         return new GetQuestionVotingDetailsUseCaseImpl(questionGateway, voteGateway, feedbackGateway, userGateway);
     }
 
-    // Metrics Domain - Feedback Question
+    // Metrics Domain - Feedback
     @Bean
     public FeedbackGateway feedbackGateway(FeedbackQuestionJpaRepository feedbackQuestionJpaRepository,
                                            FeedbackQuestionMapper feedbackQuestionMapper,

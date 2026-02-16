@@ -1,7 +1,9 @@
 package com.lia.liaprove.infrastructure.controllers;
 
 import com.lia.liaprove.core.domain.user.User;
+import com.lia.liaprove.core.domain.user.UserStatus;
 import com.lia.liaprove.core.usecases.user.users.CreateUserUseCase;
+import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.infrastructure.dtos.user.AuthenticationRequest;
 import com.lia.liaprove.infrastructure.dtos.user.AuthenticationResponse;
 import com.lia.liaprove.infrastructure.dtos.user.CreateUserRequest;
@@ -26,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
     private final CreateUserUseCase createUserUseCase;
+    private final UserGateway userGateway;
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
     private final JwtService jwtService;
@@ -58,7 +61,15 @@ public class AuthController {
                 )
         );
         // Se a autenticação for bem-sucedida, gera um token
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getEmail());
+        final CustomUserDetails userDetails = (CustomUserDetails) userDetailsService.loadUserByUsername(request.getEmail());
+        User user = userDetails.user();
+
+        // Reativação automática se o usuário estiver INACTIVE
+        if (UserStatus.INACTIVE.equals(user.getStatus())) {
+            user.setStatus(UserStatus.ACTIVE);
+            userGateway.save(user);
+        }
+
         final String jwtToken = jwtService.generateToken(userDetails);
         return ResponseEntity.ok(AuthenticationResponse.builder().token(jwtToken).build());
     }
