@@ -1,7 +1,6 @@
 package com.lia.liaprove.infrastructure.security;
 
 import com.lia.liaprove.core.domain.user.User;
-import com.lia.liaprove.core.domain.user.UserStatus;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -43,6 +42,6 @@ public record CustomUserDetails(User user) implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getStatus() == UserStatus.ACTIVE;
+        return true;
     }
 }
