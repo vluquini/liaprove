@@ -20,14 +20,12 @@ import com.lia.liaprove.infrastructure.dtos.question.UpdateQuestionRequest;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.VoteMapper;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
-import com.lia.liaprove.infrastructure.security.CustomUserDetails;
+import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -52,6 +50,7 @@ public class AdminQuestionController {
     private final QuestionMapper questionMapper;
     private final FeedbackQuestionMapper feedbackQuestionMapper;
     private final VoteMapper voteMapper;
+    private final SecurityContextService securityContextService;
 
     // Question Domain
 
@@ -88,9 +87,7 @@ public class AdminQuestionController {
     public ResponseEntity<QuestionResponse> updateQuestion(
             @PathVariable UUID questionId,
             @RequestBody UpdateQuestionRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
-        UUID actorId = principal.user().getId();
+        UUID actorId = securityContextService.getCurrentUserId();
 
         UpdateQuestionUseCase.UpdateQuestionCommand command = questionMapper.toUpdateCommand(request);
 

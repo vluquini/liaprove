@@ -8,14 +8,12 @@ import com.lia.liaprove.infrastructure.dtos.metrics.CastVoteRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.ReactToFeedbackRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.UpdateFeedbackCommentRequest;
-import com.lia.liaprove.infrastructure.security.CustomUserDetails;
+import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -30,12 +28,11 @@ public class MetricsController {
     private final CastVoteUseCase castVoteUseCase;
     private final ReactToFeedbackUseCase reactToFeedbackUseCase;
     private final UpdateFeedbackCommentUseCase updateFeedbackCommentUseCase;
+    private final SecurityContextService securityContextService;
 
     @PostMapping("/questions/{questionId}/vote")
     public ResponseEntity<Void> castVote(@PathVariable UUID questionId, @Valid @RequestBody CastVoteRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
-        UUID userId = principal.user().getId();
+        UUID userId = securityContextService.getCurrentUserId();
 
         castVoteUseCase.castVote(
                 userId,
@@ -48,9 +45,7 @@ public class MetricsController {
     @PostMapping("/questions/{questionId}/feedback")
     public ResponseEntity<Void> submitFeedbackOnQuestion(@PathVariable UUID questionId,
                                                          @Valid @RequestBody SubmitFeedbackQuestionRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
-        UUID userId = principal.user().getId();
+        UUID userId = securityContextService.getCurrentUserId();
 
         submitFeedbackOnQuestionUseCase.submitFeedback(
                 userId,
@@ -66,9 +61,7 @@ public class MetricsController {
     @PostMapping("/feedbacks/{feedbackId}/react")
     public ResponseEntity<Void> reactToFeedback(@PathVariable UUID feedbackId,
                                                 @Valid @RequestBody ReactToFeedbackRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
-        UUID userId = principal.user().getId();
+        UUID userId = securityContextService.getCurrentUserId();
 
         reactToFeedbackUseCase.reactToFeedback(
                 userId,
@@ -81,9 +74,7 @@ public class MetricsController {
     @PatchMapping("/feedbacks/{feedbackId}")
     public ResponseEntity<Void> updateFeedbackComment(@PathVariable UUID feedbackId,
                                                       @Valid @RequestBody UpdateFeedbackCommentRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
-        UUID actorId = principal.user().getId();
+        UUID actorId = securityContextService.getCurrentUserId();
 
         updateFeedbackCommentUseCase.execute(actorId, feedbackId, request.getComment());
         return ResponseEntity.ok().build();

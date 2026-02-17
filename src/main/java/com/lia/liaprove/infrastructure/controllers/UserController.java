@@ -7,13 +7,11 @@ import com.lia.liaprove.infrastructure.dtos.user.ChangePasswordRequest;
 import com.lia.liaprove.infrastructure.dtos.user.UpdateUserRequest;
 import com.lia.liaprove.infrastructure.dtos.user.UserResponseDto;
 import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
-import com.lia.liaprove.infrastructure.security.CustomUserDetails;
+import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -28,6 +26,7 @@ public class UserController {
     private final ChangePasswordUseCase changePasswordUseCase;
     private final UserModerationUseCase userModerationUseCase;
     private final UserMapper userMapper;
+    private final SecurityContextService securityContextService;
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUserById(@PathVariable UUID id) {
@@ -56,9 +55,7 @@ public class UserController {
 
     @PatchMapping("/me/deactivate")
     public ResponseEntity<String> deactivateOwnAccount() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
-        UUID userId = principal.user().getId();
+        UUID userId = securityContextService.getCurrentUserId();
 
         userModerationUseCase.deactivateUser(userId, userId);
 

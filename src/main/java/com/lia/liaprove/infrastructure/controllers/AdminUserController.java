@@ -7,12 +7,10 @@ import com.lia.liaprove.core.usecases.user.users.DeleteUserUseCase;
 import com.lia.liaprove.core.usecases.user.users.FindUsersUseCase;
 import com.lia.liaprove.infrastructure.dtos.user.UserResponseDto;
 import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
-import com.lia.liaprove.infrastructure.security.CustomUserDetails;
+import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +28,7 @@ public class AdminUserController {
     private final DeleteUserUseCase deleteUserUseCase;
     private final UserModerationUseCase userModerationUseCase;
     private final UserMapper userMapper;
+    private final SecurityContextService securityContextService;
 
     @GetMapping
     public ResponseEntity<List<UserResponseDto>> findUsers(
@@ -47,9 +46,7 @@ public class AdminUserController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> hardDeleteUser(@PathVariable UUID id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
-        UUID adminId = principal.user().getId();
+        UUID adminId = securityContextService.getCurrentUserId();
 
         deleteUserUseCase.delete(id, adminId);
         return ResponseEntity.noContent().build();
@@ -57,9 +54,7 @@ public class AdminUserController {
 
     @PatchMapping("/{id}/activate")
     public ResponseEntity<Void> activateUser(@PathVariable UUID id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
-        UUID adminId = principal.user().getId();
+        UUID adminId = securityContextService.getCurrentUserId();
 
         userModerationUseCase.activateUser(id, adminId);
         return ResponseEntity.ok().build();
@@ -67,9 +62,7 @@ public class AdminUserController {
 
     @PatchMapping("/{id}/deactivate")
     public ResponseEntity<Void> deactivateUser(@PathVariable UUID id) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
-        UUID adminId = principal.user().getId();
+        UUID adminId = securityContextService.getCurrentUserId();
 
         userModerationUseCase.deactivateUser(id, adminId);
         return ResponseEntity.ok().build();

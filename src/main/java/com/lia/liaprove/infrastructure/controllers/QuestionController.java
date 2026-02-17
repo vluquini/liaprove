@@ -10,14 +10,12 @@ import com.lia.liaprove.infrastructure.dtos.question.SubmitQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionSummaryResponse;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
-import com.lia.liaprove.infrastructure.security.CustomUserDetails;
+import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -35,12 +33,11 @@ public class QuestionController {
     private final ListQuestionsUseCase listQuestionsUseCase;
     private final QuestionMapper questionMapper;
     private final GetQuestionVotingDetailsUseCase getQuestionVotingDetailsUseCase;
+    private final SecurityContextService securityContextService;
 
     @PostMapping
     public ResponseEntity<QuestionResponse> submitQuestion(@Valid @RequestBody SubmitQuestionRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        CustomUserDetails principal = (CustomUserDetails) auth.getPrincipal();
-        UUID authorId = principal.user().getId();
+        UUID authorId = securityContextService.getCurrentUserId();
 
         QuestionCreateDto dto = questionMapper.toQuestionCreateDto(request, authorId);
         Question submitted = submitQuestionUseCase.submit(dto);
@@ -55,7 +52,7 @@ public class QuestionController {
             @RequestParam(defaultValue = "10") int size) {
 
         ListQuestionsUseCase.ListQuestionsQuery query = new ListQuestionsUseCase.ListQuestionsQuery(
-                null,    // knowledgeAreas
+                null,                  // knowledgeAreas
                 null,                  // difficultyLevel
                 QuestionStatus.VOTING, // status
                 null,                  // authorId
