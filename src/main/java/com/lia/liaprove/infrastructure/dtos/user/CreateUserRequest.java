@@ -20,7 +20,7 @@ public class CreateUserRequest {
     private String email;
 
     @NotBlank
-    @Size(min = 6)
+    @Size(min = 6, message = "size must be at least 6")
     private String password;
 
     private String occupation;

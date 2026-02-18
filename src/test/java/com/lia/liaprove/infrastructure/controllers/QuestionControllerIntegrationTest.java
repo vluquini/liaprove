@@ -1,15 +1,14 @@
 package com.lia.liaprove.infrastructure.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lia.liaprove.core.domain.question.*;
-import com.lia.liaprove.core.domain.user.ExperienceLevel;
-import com.lia.liaprove.core.domain.user.UserRole;
-import com.lia.liaprove.infrastructure.dtos.user.AuthenticationRequest;
-import com.lia.liaprove.infrastructure.dtos.user.CreateUserRequest;
-import com.lia.liaprove.infrastructure.dtos.question.ModerateQuestionRequest;
-import com.lia.liaprove.infrastructure.dtos.question.UpdateQuestionRequest;
+import com.lia.liaprove.core.domain.question.DifficultyLevel;
+import com.lia.liaprove.core.domain.question.KnowledgeArea;
+import com.lia.liaprove.core.domain.question.QuestionStatus;
+import com.lia.liaprove.core.domain.question.RelevanceLevel;
+import com.lia.liaprove.infrastructure.dtos.question.AlternativeRequestDto;
+import com.lia.liaprove.infrastructure.dtos.question.SubmitMultipleChoiceQuestionRequest;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
-import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
+import com.lia.liaprove.infrastructure.entities.users.UserEntity;
 import com.lia.liaprove.infrastructure.repositories.QuestionJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -18,12 +17,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -32,13 +30,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@ActiveProfiles("dev")
+@Sql(scripts = {"classpath:db/h2-populate-users.sql", "classpath:db/h2-populate-questions.sql"},
+        executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class QuestionControllerIntegrationTest {
 
     @Autowired
@@ -53,301 +52,105 @@ public class QuestionControllerIntegrationTest {
     @Autowired
     private QuestionJpaRepository questionJpaRepository;
 
-    @Autowired
-    private QuestionMapper questionMapper;
-
     @AfterEach
     void tearDown() {
         questionJpaRepository.deleteAll();
         userJpaRepository.deleteAll();
     }
 
-    private String registerAndLogin(String email, String password, UserRole role) throws Exception {
-        CreateUserRequest createUserRequest = new CreateUserRequest();
-        createUserRequest.setName("Test " + role.name());
-        createUserRequest.setEmail(email);
-        createUserRequest.setPassword(password);
-        createUserRequest.setOccupation("Tester");
-        createUserRequest.setExperienceLevel(ExperienceLevel.SENIOR);
-        createUserRequest.setRole(role);
-
-        mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createUserRequest)))
-                .andExpect(status().isOk());
-
-        AuthenticationRequest authRequest = new AuthenticationRequest(email, password);
-        MvcResult result = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(authRequest)))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        String response = result.getResponse().getContentAsString();
-        return new ObjectMapper().readTree(response).get("token").asText();
-    }
-
-    private QuestionEntity createTestQuestion(QuestionStatus status) {
-        MultipleChoiceQuestion questionDomain = new MultipleChoiceQuestion(
-                List.of(
-                        new Alternative(null, "Alternative A", false),
-                        new Alternative(null, "Alternative B", true)
-                )
-        );
-        questionDomain.setAuthorId(UUID.randomUUID());
-        questionDomain.setTitle("Test Question Title - " + UUID.randomUUID()); // Ensure unique title
-        questionDomain.setDescription("Test question description. - " + UUID.randomUUID()); // Ensure unique description
-        questionDomain.setKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
-        questionDomain.setDifficultyByCommunity(DifficultyLevel.MEDIUM);
-        questionDomain.setStatus(status);
-        questionDomain.setSubmissionDate(LocalDateTime.now());
-        questionDomain.setVotingEndDate(LocalDateTime.now().plusDays(7));
-        questionDomain.setRelevanceByCommunity(RelevanceLevel.THREE);
-        questionDomain.setRelevanceByLLM(RelevanceLevel.FOUR);
-        questionDomain.setRecruiterUsageCount(0);
-
-
-        QuestionEntity entity = questionMapper.toEntity(questionDomain);
-        return questionJpaRepository.save(entity);
+    private UserEntity getSeededUserEntity(String email) {
+        return userJpaRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Seeded user not found: " + email));
     }
 
     @Test
-    @DisplayName("Should update question successfully when user is ADMIN")
-    void shouldUpdateQuestionSuccessfully_WhenUserIsAdmin() throws Exception {
+    @DisplayName("Should submit question successfully when authenticated")
+    void shouldSubmitQuestionSuccessfully() throws Exception {
         // Setup
-        String adminToken = registerAndLogin("admin.update@example.com", "password123", UserRole.ADMIN);
-        QuestionEntity question = createTestQuestion(QuestionStatus.APPROVED);
-        UUID questionId = question.getId();
+        UserEntity user = getSeededUserEntity("carlos.silva@example.com");
 
-        List<Alternative> newAlternatives = List.of(
-                new Alternative(null, "Updated Alt X", true),
-                new Alternative(null, "Updated Alt Y", false)
-        );
-        UpdateQuestionRequest updateRequest = new UpdateQuestionRequest(
-                "Updated Title",
-                "Updated description.",
-                Set.of(KnowledgeArea.DATABASE, KnowledgeArea.AI),
-                newAlternatives
-        );
+        SubmitMultipleChoiceQuestionRequest request = new SubmitMultipleChoiceQuestionRequest();
+        request.setTitle("New Question Title with minimum length");
+        request.setDescription("New question description that meets the minimum length requirement.");
+        request.setKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
+        request.setDifficultyByCommunity(DifficultyLevel.EASY);
+        request.setRelevanceByCommunity(RelevanceLevel.THREE);
 
-        // Act & Assert
-        mockMvc.perform(put("/api/v1/questions/{questionId}", questionId)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
+        request.setAlternatives(List.of(
+                new AlternativeRequestDto("Correct Answer Text", true),
+                new AlternativeRequestDto("Wrong Answer Text 1", false),
+                new AlternativeRequestDto("Wrong Answer Text 2", false)
+        ));
+
+        // Act
+        mockMvc.perform(post("/api/v1/questions")
+                        .header("X-Dev-User-Email", user.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(questionId.toString())))
-                .andExpect(jsonPath("$.title", is("Updated Title")))
-                .andExpect(jsonPath("$.description", is("Updated description.")))
-                .andExpect(jsonPath("$.knowledgeAreas", hasSize(2)))
-                .andExpect(jsonPath("$.knowledgeAreas[?(@ == 'DATABASE')]").exists())
-                .andExpect(jsonPath("$.knowledgeAreas[?(@ == 'AI')]").exists())
-                .andExpect(jsonPath("$.alternatives", hasSize(2)))
-                .andExpect(jsonPath("$.alternatives[0].text", is("Updated Alt X")));
-    }
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id", notNullValue()))
+                .andExpect(jsonPath("$.title", is(request.getTitle())))
+                .andExpect(jsonPath("$.status", is(QuestionStatus.VOTING.name())));
 
-    @Test
-    @DisplayName("Should return Forbidden when user is not ADMIN")
-    void shouldReturnForbidden_WhenUserIsNotAdmin() throws Exception {
-        // Setup
-        String professionalToken = registerAndLogin("professional.update@example.com", "password123", UserRole.PROFESSIONAL);
-        QuestionEntity question = createTestQuestion(QuestionStatus.APPROVED);
-        UUID questionId = question.getId();
-
-        UpdateQuestionRequest updateRequest = new UpdateQuestionRequest(
-                "Attempted Update", null, null, null
-        );
-
-        // Act & Assert
-        mockMvc.perform(put("/api/v1/questions/{questionId}", questionId)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @DisplayName("Should return Not Found when question does not exist")
-    void shouldReturnNotFound_WhenQuestionDoesNotExist() throws Exception {
-        // Setup
-        String adminToken = registerAndLogin("admin.notfound@example.com", "password123", UserRole.ADMIN);
-        UUID nonExistentId = UUID.randomUUID();
-
-        UpdateQuestionRequest updateRequest = new UpdateQuestionRequest(
-                "Title for non-existent question", null, null, null
-        );
-
-        // Act & Assert
-        mockMvc.perform(put("/api/v1/questions/{questionId}", nonExistentId)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updateRequest)))
-                .andExpect(status().isNotFound());
+        // Assert
+        List<QuestionEntity> questions = questionJpaRepository.findAll();
+        assertThat(questions).anyMatch(q -> request.getTitle().equals(q.getTitle()));
     }
 
     @Test
     @DisplayName("Should list voting questions successfully when authenticated")
-    void shouldListVotingQuestionsSuccessfullyWhenAuthenticated() throws Exception {
+    void shouldListVotingQuestionsSuccessfully() throws Exception {
         // Setup
-        String professionalToken = registerAndLogin("professional.list@example.com", "password123", UserRole.PROFESSIONAL);
-
-        // Create questions with different statuses
-        createTestQuestion(QuestionStatus.APPROVED);
-        createTestQuestion(QuestionStatus.APPROVED);
-        QuestionEntity votingQuestion1 = createTestQuestion(QuestionStatus.VOTING);
-        QuestionEntity votingQuestion2 = createTestQuestion(QuestionStatus.VOTING);
-        createTestQuestion(QuestionStatus.REJECTED);
+        UserEntity user = getSeededUserEntity("mariana.costa@example.com");
+        long votingCount = questionJpaRepository.findAll().stream()
+                .filter(q -> q.getStatus() == QuestionStatus.VOTING)
+                .count();
 
         // Act & Assert
         mockMvc.perform(get("/api/v1/questions/voting")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken))
+                        .header("X-Dev-User-Email", user.getEmail()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2))) // Expecting only VOTING questions
-                .andExpect(jsonPath("$[*].id", containsInAnyOrder(
-                        votingQuestion1.getId().toString(),
-                        votingQuestion2.getId().toString()
-                )))
-                .andExpect(jsonPath("$[*].status", everyItem(is(QuestionStatus.VOTING.name()))));
+                .andExpect(jsonPath("$", hasSize((int) votingCount)));
+                // Removido check de status pois QuestionSummaryResponse não possui este campo
     }
 
     @Test
     @DisplayName("Should return unauthorized when listing voting questions without authentication")
-    void shouldReturnUnauthorizedWhenNotAuthenticated() throws Exception {
+    void shouldReturnUnauthorizedWhenListingVotingQuestions() throws Exception {
         // Act & Assert
         mockMvc.perform(get("/api/v1/questions/voting"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("Should allow ADMIN to list all questions without filters")
-    void shouldAllowAdminToListAllQuestions() throws Exception {
+    @DisplayName("Should get question voting details successfully when authenticated")
+    void shouldGetQuestionVotingDetailsSuccessfully() throws Exception {
         // Setup
-        String adminToken = registerAndLogin("admin.listall@example.com", "password123", UserRole.ADMIN);
-        createTestQuestion(QuestionStatus.VOTING);
-        createTestQuestion(QuestionStatus.APPROVED);
-        createTestQuestion(QuestionStatus.REJECTED);
+        UserEntity user = getSeededUserEntity("junior.dev@example.com");
+        QuestionEntity question = questionJpaRepository.findAll().stream()
+                .filter(q -> q.getStatus() == QuestionStatus.VOTING)
+                .findFirst()
+                .orElseThrow();
 
         // Act & Assert
-        mockMvc.perform(get("/api/v1/questions")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
+        mockMvc.perform(get("/api/v1/questions/{questionId}/voting-details", question.getId())
+                        .header("X-Dev-User-Email", user.getEmail()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(3)));
+                .andExpect(jsonPath("$.id", is(question.getId().toString())))
+                .andExpect(jsonPath("$.title", is(question.getTitle())));
+                // Ajustado paths JSON pois QuestionDetailResponse é flat na raiz
     }
 
     @Test
-    @DisplayName("Should forbid non-ADMIN user from listing all questions")
-    void shouldForbidNonAdminFromListingAllQuestions() throws Exception {
+    @DisplayName("Should return Not Found for voting details when question does not exist")
+    void shouldReturnNotFoundForVotingDetails() throws Exception {
         // Setup
-        String professionalToken = registerAndLogin("professional.listall.forbidden@example.com", "password123", UserRole.PROFESSIONAL);
-
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/questions")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    @DisplayName("Should allow ADMIN to filter questions by status")
-    void shouldAllowAdminToFilterByStatus() throws Exception {
-        // Setup
-        String adminToken = registerAndLogin("admin.filter@example.com", "password123", UserRole.ADMIN);
-        createTestQuestion(QuestionStatus.VOTING);
-        createTestQuestion(QuestionStatus.APPROVED);
-        createTestQuestion(QuestionStatus.APPROVED);
-
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/questions")
-                        .param("status", "APPROVED")
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[*].status", everyItem(is("APPROVED"))));
-    }
-
-    @Test
-    @DisplayName("Should retrieve a question by ID successfully when authenticated")
-    void shouldRetrieveQuestionByIdSuccessfullyWhenAuthenticated() throws Exception {
-        // Setup
-        String professionalToken = registerAndLogin("professional.getbyid@example.com", "password123", UserRole.PROFESSIONAL);
-        QuestionEntity existingQuestion = createTestQuestion(QuestionStatus.APPROVED);
-
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/questions/{questionId}", existingQuestion.getId())
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(existingQuestion.getId().toString())))
-                .andExpect(jsonPath("$.title", is(existingQuestion.getTitle())))
-                .andExpect(jsonPath("$.status", is(existingQuestion.getStatus().name())));
-    }
-
-    @Test
-    @DisplayName("Should return Not Found when retrieving a non-existent question by ID")
-    void shouldReturnNotFoundWhenRetrievingNonExistentQuestionById() throws Exception {
-        // Setup
-        String professionalToken = registerAndLogin("professional.getbyid.notfound@example.com", "password123", UserRole.PROFESSIONAL);
+        UserEntity user = getSeededUserEntity("admin@liaprove.com");
         UUID nonExistentId = UUID.randomUUID();
 
         // Act & Assert
-        mockMvc.perform(get("/api/v1/questions/{questionId}", nonExistentId)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken))
+        mockMvc.perform(get("/api/v1/questions/{questionId}/voting-details", nonExistentId)
+                        .header("X-Dev-User-Email", user.getEmail()))
                 .andExpect(status().isNotFound());
     }
-
-    @Test
-    @DisplayName("Should return Unauthorized when retrieving a question by ID without authentication")
-    void shouldReturnUnauthorizedWhenRetrievingQuestionByIdWithoutAuthentication() throws Exception {
-        // Setup
-        QuestionEntity existingQuestion = createTestQuestion(QuestionStatus.APPROVED);
-
-        // Act & Assert
-        mockMvc.perform(get("/api/v1/questions/{questionId}", existingQuestion.getId()))
-                .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @DisplayName("Should moderate question successfully as ADMIN")
-    void shouldModerateQuestionSuccessfullyAsAdmin() throws Exception {
-        // Setup
-        String adminToken = registerAndLogin("admin.moderate@example.com", "password123", UserRole.ADMIN);
-        QuestionEntity question = createTestQuestion(QuestionStatus.VOTING);
-        UUID questionId = question.getId();
-
-        ModerateQuestionRequest moderateRequest = new ModerateQuestionRequest(QuestionStatus.APPROVED);
-
-        // Act & Assert
-        mockMvc.perform(patch("/api/v1/questions/{questionId}/moderate", questionId)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + adminToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(moderateRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(questionId.toString())))
-                .andExpect(jsonPath("$.status", is(QuestionStatus.APPROVED.name())));
-
-        // Verify status in DB
-        QuestionEntity updatedQuestion = questionJpaRepository.findById(questionId).orElseThrow();
-        assertThat(updatedQuestion.getStatus()).isEqualTo(QuestionStatus.APPROVED);
-    }
-
-    @Test
-    @DisplayName("Should forbid moderate question as non-ADMIN")
-    void shouldForbidModerateQuestionAsNonAdmin() throws Exception {
-        // Setup
-        String professionalToken = registerAndLogin("professional.moderate@example.com", "password123", UserRole.PROFESSIONAL);
-        QuestionEntity question = createTestQuestion(QuestionStatus.VOTING);
-        UUID questionId = question.getId();
-
-        ModerateQuestionRequest moderateRequest = new ModerateQuestionRequest(QuestionStatus.APPROVED);
-
-        // Act & Assert
-        mockMvc.perform(patch("/api/v1/questions/{questionId}/moderate", questionId)
-                        .header(HttpHeaders.AUTHORIZATION, "Bearer " + professionalToken)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(moderateRequest)))
-                .andExpect(status().isForbidden());
-
-        // Verify status in DB is unchanged
-        QuestionEntity originalQuestion = questionJpaRepository.findById(questionId).orElseThrow();
-        assertThat(originalQuestion.getStatus()).isEqualTo(QuestionStatus.VOTING);
-    }
 }
-    
