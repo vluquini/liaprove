@@ -5,5 +5,5 @@ package com.lia.liaprove.core.domain.assessment;
  * Estes status controlam a disponibilidade e o ciclo de vida de avaliações criadas por recrutadores.
  */
 public enum PersonalizedAssessmentStatus {
-    ACTIVE, EXPIRED, INACTIVE
+    ACTIVE, DEACTIVATED, REVOKED, CLOSED
 }

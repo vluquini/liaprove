@@ -6,4 +6,6 @@ import java.util.UUID;
 
 public interface AssessmentGateway {
     Optional<Assessment> findById(UUID id);
+    Optional<Assessment> findByShareableToken(String token);
+    Assessment save(Assessment assessment);
 }

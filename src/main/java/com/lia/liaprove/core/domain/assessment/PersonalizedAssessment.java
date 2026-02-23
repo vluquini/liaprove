@@ -16,20 +16,19 @@ import java.util.UUID;
  */
 public class PersonalizedAssessment extends Assessment {
     private UserRecruiter createdBy;
-    // Data de expiração da avaliação
     private LocalDateTime expirationDate;
-    // Total de vezes que a avaliação foi realizada
     private int totalAttempts;
-    private boolean allowsRetake;
-    // Status da avaliação
+    private int maxAttempts;
+    private String shareableToken;
     private PersonalizedAssessmentStatus status;
 
-    public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate, List<Question> questions, List<FeedbackAssessment> feedbacks, Duration evaluationTimer, UserRecruiter createdBy, LocalDateTime expirationDate, int totalAttempts, boolean allowsRetake, PersonalizedAssessmentStatus status) {
+    public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate, List<Question> questions, List<FeedbackAssessment> feedbacks, Duration evaluationTimer, UserRecruiter createdBy, LocalDateTime expirationDate, int totalAttempts, int maxAttempts, String shareableToken, PersonalizedAssessmentStatus status) {
         super(id, title, description, creationDate, questions, feedbacks, evaluationTimer);
         this.createdBy = createdBy;
         this.expirationDate = expirationDate;
         this.totalAttempts = totalAttempts;
-        this.allowsRetake = allowsRetake;
+        this.maxAttempts = maxAttempts;
+        this.shareableToken = shareableToken;
         this.status = status;
     }
 
@@ -55,6 +54,22 @@ public class PersonalizedAssessment extends Assessment {
 
     public void setTotalAttempts(int totalAttempts) {
         this.totalAttempts = totalAttempts;
+    }
+
+    public int getMaxAttempts() {
+        return maxAttempts;
+    }
+
+    public void setMaxAttempts(int maxAttempts) {
+        this.maxAttempts = maxAttempts;
+    }
+
+    public String getShareableToken() {
+        return shareableToken;
+    }
+
+    public void setShareableToken(String shareableToken) {
+        this.shareableToken = shareableToken;
     }
 
     public PersonalizedAssessmentStatus getStatus() {
