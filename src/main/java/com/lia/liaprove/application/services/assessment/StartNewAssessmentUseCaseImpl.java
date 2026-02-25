@@ -82,8 +82,9 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
                 UUID.randomUUID(),
                 assessment,
                 user,
-                questions,
-                new ArrayList<>(),
+                questions,           // A mesma lista, já embaralhada pela factory
+                new ArrayList<>(),   // Answers
+                new ArrayList<>(),   // Feedbacks
                 LocalDateTime.now(),
                 null,
                 null,
@@ -106,7 +107,6 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
                 "Avaliação gerada pelo sistema.",
                 LocalDateTime.now(),
                 questions,
-                new ArrayList<>(),
                 // Lógica de tempo pode ser configurada aqui
                 getTimerForDifficulty(difficultyLevel)
         );
@@ -115,8 +115,9 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
                 UUID.randomUUID(),
                 assessment,
                 user,
-                questions, // A mesma lista, já embaralhada pela factory
-                new ArrayList<>(),
+                questions,           // A mesma lista, já embaralhada pela factory
+                new ArrayList<>(),   // Answers
+                new ArrayList<>(),   // Feedbacks
                 LocalDateTime.now(),
                 null,
                 null,

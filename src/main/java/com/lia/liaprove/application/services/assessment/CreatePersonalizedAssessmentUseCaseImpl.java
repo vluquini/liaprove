@@ -15,7 +15,6 @@ import com.lia.liaprove.core.usecases.assessments.CreatePersonalizedAssessmentUs
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -71,7 +70,6 @@ public class CreatePersonalizedAssessmentUseCaseImpl implements CreatePersonaliz
                 description,
                 LocalDateTime.now(),
                 questions,
-                new ArrayList<>(), // Feedbacks inicial vazio
                 Duration.ofMinutes(evaluationTimerMinutes),
                 recruiter,
                 expirationDate,

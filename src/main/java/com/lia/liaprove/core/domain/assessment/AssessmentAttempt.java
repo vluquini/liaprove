@@ -1,5 +1,6 @@
 package com.lia.liaprove.core.domain.assessment;
 
+import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.user.User;
 
@@ -15,20 +16,22 @@ public class AssessmentAttempt {
     private UUID id;
     private Assessment assessment;
     private User user;
-    private List<Question> questions; // Lista de questões no momento da tentativa
-    private List<Answer> answers;     // Respostas do usuário
+    private List<Question> questions;           // Lista de questões no momento da tentativa
+    private List<Answer> answers;               // Respostas do usuário
+    private List<FeedbackAssessment> feedbacks; // Feedbacks associados a esta tentativa
     private LocalDateTime startedAt;
     private LocalDateTime finishedAt;
     private Integer accuracyRate;
     private Certificate certificate;
     private AssessmentAttemptStatus status;
 
-    public AssessmentAttempt(UUID id, Assessment assessment, User user, List<Question> questions, List<Answer> answers, LocalDateTime startedAt, LocalDateTime finishedAt, Integer accuracyRate, Certificate certificate, AssessmentAttemptStatus status) {
+    public AssessmentAttempt(UUID id, Assessment assessment, User user, List<Question> questions, List<Answer> answers, List<FeedbackAssessment> feedbacks, LocalDateTime startedAt, LocalDateTime finishedAt, Integer accuracyRate, Certificate certificate, AssessmentAttemptStatus status) {
         this.id = id;
         this.assessment = assessment;
         this.user = user;
         this.questions = questions;
         this.answers = answers;
+        this.feedbacks = feedbacks;
         this.startedAt = startedAt;
         this.finishedAt = finishedAt;
         this.accuracyRate = accuracyRate;
@@ -70,6 +73,14 @@ public class AssessmentAttempt {
 
     public void setAnswers(List<Answer> answers) {
         this.answers = answers;
+    }
+
+    public List<FeedbackAssessment> getFeedbacks() {
+        return feedbacks;
+    }
+
+    public void setFeedbacks(List<FeedbackAssessment> feedbacks) {
+        this.feedbacks = feedbacks;
     }
 
     public LocalDateTime getStartedAt() {

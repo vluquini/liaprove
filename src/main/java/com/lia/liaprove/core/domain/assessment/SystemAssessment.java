@@ -1,6 +1,5 @@
 package com.lia.liaprove.core.domain.assessment;
 
-import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
 import com.lia.liaprove.core.domain.question.Question;
 
 import java.time.Duration;
@@ -14,8 +13,9 @@ import java.util.UUID;
  * diferenciando-se apenas por sua origem ser o próprio sistema.
  */
 public class SystemAssessment extends Assessment{
-    public SystemAssessment(UUID id, String title, String description, LocalDateTime creationDate, List<Question> questions, List<FeedbackAssessment> feedbacks, Duration evaluationTimer) {
-        super(id, title, description, creationDate, questions, feedbacks, evaluationTimer);
+    public SystemAssessment(UUID id, String title, String description, LocalDateTime creationDate,
+                            List<Question> questions, Duration evaluationTimer) {
+        super(id, title, description, creationDate, questions, evaluationTimer);
     }
 
 }

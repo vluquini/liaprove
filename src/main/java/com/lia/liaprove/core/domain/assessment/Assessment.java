@@ -1,6 +1,5 @@
 package com.lia.liaprove.core.domain.assessment;
 
-import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
 import com.lia.liaprove.core.domain.question.Question;
 
 import java.time.Duration;
@@ -20,23 +19,25 @@ public abstract class Assessment {
     // Como os Recruiters podem criar novas avaliações, a data de criação é uma informação importante
     private LocalDateTime creationDate;
     private List<Question> questions;
-    private List<FeedbackAssessment> feedbacks;
     // Limite de tempo da avaliação
     private Duration evaluationTimer;
 
     public Assessment(UUID id, String title, String description, LocalDateTime creationDate, List<Question> questions,
-                      List<FeedbackAssessment> feedbacks, Duration evaluationTimer) {
+                      Duration evaluationTimer) {
         this.id = id;
         this.title = title;
         this.description = description;
         this.creationDate = creationDate;
         this.questions = questions;
-        this.feedbacks = feedbacks;
         this.evaluationTimer = evaluationTimer;
     }
 
     public UUID getId() {
         return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getTitle() {
@@ -69,14 +70,6 @@ public abstract class Assessment {
 
     public void setQuestions(List<Question> questions) {
         this.questions = questions;
-    }
-
-    public List<FeedbackAssessment> getFeedbacks() {
-        return feedbacks;
-    }
-
-    public void setFeedbacks(List<FeedbackAssessment> feedbacks) {
-        this.feedbacks = feedbacks;
     }
 
     public Duration getEvaluationTimer() {
