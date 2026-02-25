@@ -1,0 +1,137 @@
+package com.lia.liaprove.application.services.assessment;
+
+import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
+import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
+import com.lia.liaprove.application.gateways.user.UserGateway;
+import com.lia.liaprove.core.domain.assessment.*;
+import com.lia.liaprove.core.domain.question.DifficultyLevel;
+import com.lia.liaprove.core.domain.question.KnowledgeArea;
+import com.lia.liaprove.core.domain.question.Question;
+import com.lia.liaprove.core.domain.user.User;
+import com.lia.liaprove.core.exceptions.AssessmentNotFoundException;
+import com.lia.liaprove.core.exceptions.AssessmentNotActiveException;
+import com.lia.liaprove.core.exceptions.MaxAttemptsReachedException;
+import com.lia.liaprove.core.exceptions.UserAlreadyAttemptedAssessmentException;
+import com.lia.liaprove.core.exceptions.UserNotFoundException;
+import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
+import com.lia.liaprove.core.usecases.assessments.SystemAssessmentFactory;
+
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase {
+
+    private final AssessmentGateway assessmentGateway;
+    private final AssessmentAttemptGateway attemptGateway;
+    private final UserGateway userGateway;
+    private final SystemAssessmentFactory systemAssessmentFactory;
+
+    public StartNewAssessmentUseCaseImpl(AssessmentGateway assessmentGateway, AssessmentAttemptGateway attemptGateway, UserGateway userGateway, SystemAssessmentFactory systemAssessmentFactory) {
+        this.assessmentGateway = assessmentGateway;
+        this.attemptGateway = attemptGateway;
+        this.userGateway = userGateway;
+        this.systemAssessmentFactory = systemAssessmentFactory;
+    }
+
+    @Override
+    public AssessmentAttempt execute(UUID userId, String shareableToken, Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel) {
+        User user = userGateway.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        if (shareableToken != null && !shareableToken.isBlank()) {
+            return startPersonalizedAssessment(user, shareableToken);
+        }
+
+        if (knowledgeAreas != null && !knowledgeAreas.isEmpty() && difficultyLevel != null) {
+            return startSystemAssessment(user, knowledgeAreas, difficultyLevel);
+        } else {
+            throw new IllegalArgumentException("Invalid criteria to start the assessment. Provide a token or area of knowledge and difficulty.");
+        }
+    }
+
+    private AssessmentAttempt startPersonalizedAssessment(User user, String shareableToken) {
+        PersonalizedAssessment assessment = (PersonalizedAssessment) assessmentGateway.findByShareableToken(shareableToken)
+                .orElseThrow(() -> new AssessmentNotFoundException("Personalized assessment not found."));
+
+        // Validações
+        if (assessment.getStatus() != PersonalizedAssessmentStatus.ACTIVE) {
+            throw new AssessmentNotActiveException("This assessment is not active.");
+        }
+        if (assessment.getExpirationDate() != null && LocalDateTime.now().isAfter(assessment.getExpirationDate())) {
+            throw new AssessmentNotActiveException("This assessment has already expired.");
+        }
+        if (attemptGateway.existsByAssessmentIdAndUserId(assessment.getId(), user.getId())) {
+            throw new UserAlreadyAttemptedAssessmentException("You have already completed this assessment.");
+        }
+
+        long attemptCount = attemptGateway.countByAssessmentId(assessment.getId());
+
+        if (attemptCount >= assessment.getMaxAttempts()) {
+            throw new MaxAttemptsReachedException("The maximum number of participants for this assessment has been reached.");
+        }
+
+        List<Question> questions = new ArrayList<>(assessment.getQuestions());
+        Collections.shuffle(questions);
+        
+        AssessmentAttempt attempt = new AssessmentAttempt(
+                UUID.randomUUID(),
+                assessment,
+                user,
+                questions,
+                new ArrayList<>(),
+                LocalDateTime.now(),
+                null,
+                null,
+                null,
+                AssessmentAttemptStatus.IN_PROGRESS
+        );
+
+        return attemptGateway.save(attempt);
+    }
+
+    private AssessmentAttempt startSystemAssessment(User user, Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel) {
+        List<Question> questions = systemAssessmentFactory.createQuestions(knowledgeAreas, difficultyLevel);
+        if (questions.isEmpty()) {
+            throw new AssessmentNotFoundException("It was not possible to generate an assessment. There are not enough questions for the selected criteria.");
+        }
+
+        SystemAssessment assessment = new SystemAssessment(
+                UUID.randomUUID(),
+                "Avaliação de " + knowledgeAreas.iterator().next().toString(),
+                "Avaliação gerada pelo sistema.",
+                LocalDateTime.now(),
+                questions,
+                new ArrayList<>(),
+                // Lógica de tempo pode ser configurada aqui
+                getTimerForDifficulty(difficultyLevel)
+        );
+
+        AssessmentAttempt attempt = new AssessmentAttempt(
+                UUID.randomUUID(),
+                assessment,
+                user,
+                questions, // A mesma lista, já embaralhada pela factory
+                new ArrayList<>(),
+                LocalDateTime.now(),
+                null,
+                null,
+                null,
+                AssessmentAttemptStatus.IN_PROGRESS
+        );
+
+        return attemptGateway.save(attempt);
+    }
+
+    private Duration getTimerForDifficulty(DifficultyLevel difficultyLevel) {
+        return switch (difficultyLevel) {
+            case EASY   -> Duration.ofMinutes(5);
+            case MEDIUM -> Duration.ofMinutes(10);
+            default     -> Duration.ofMinutes(20);
+        };
+    }
+}

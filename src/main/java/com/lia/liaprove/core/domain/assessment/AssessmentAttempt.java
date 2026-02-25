@@ -1,8 +1,10 @@
 package com.lia.liaprove.core.domain.assessment;
 
+import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.user.User;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -13,17 +15,20 @@ public class AssessmentAttempt {
     private UUID id;
     private Assessment assessment;
     private User user;
+    private List<Question> questions; // Lista de questões no momento da tentativa
+    private List<Answer> answers;     // Respostas do usuário
     private LocalDateTime startedAt;
     private LocalDateTime finishedAt;
     private Integer accuracyRate;
     private Certificate certificate;
     private AssessmentAttemptStatus status;
 
-    public AssessmentAttempt(UUID id, Assessment assessment, User user, LocalDateTime startedAt, LocalDateTime finishedAt,
-                             Integer accuracyRate, Certificate certificate, AssessmentAttemptStatus status) {
+    public AssessmentAttempt(UUID id, Assessment assessment, User user, List<Question> questions, List<Answer> answers, LocalDateTime startedAt, LocalDateTime finishedAt, Integer accuracyRate, Certificate certificate, AssessmentAttemptStatus status) {
         this.id = id;
         this.assessment = assessment;
         this.user = user;
+        this.questions = questions;
+        this.answers = answers;
         this.startedAt = startedAt;
         this.finishedAt = finishedAt;
         this.accuracyRate = accuracyRate;
@@ -51,9 +56,26 @@ public class AssessmentAttempt {
         this.user = user;
     }
 
+    public List<Question> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(List<Question> questions) {
+        this.questions = questions;
+    }
+
+    public List<Answer> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(List<Answer> answers) {
+        this.answers = answers;
+    }
+
     public LocalDateTime getStartedAt() {
         return startedAt;
     }
+
 
     public void setStartedAt(LocalDateTime startedAt) {
         this.startedAt = startedAt;
