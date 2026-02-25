@@ -6,6 +6,7 @@ import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -28,6 +29,7 @@ public abstract class QuestionResponse {
     private UUID authorId;
     private String title;
     private String description;
+    @Builder.Default
     private Set<KnowledgeArea> knowledgeAreas = new HashSet<>();
     private DifficultyLevel difficultyByCommunity;
     private RelevanceLevel relevanceByCommunity;
