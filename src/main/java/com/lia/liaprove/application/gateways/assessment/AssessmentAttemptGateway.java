@@ -1,6 +1,8 @@
 package com.lia.liaprove.application.gateways.assessment;
 
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
+
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -13,6 +15,13 @@ public interface AssessmentAttemptGateway {
      * @return A tentativa salva.
      */
     AssessmentAttempt save(AssessmentAttempt attempt);
+
+    /**
+     * Recupera uma tentativa de avaliação pelo seu ID.
+     * @param id O ID da tentativa.
+     * @return Um Optional contendo a tentativa encontrada, ou vazio se não existir.
+     */
+    Optional<AssessmentAttempt> findById(UUID id);
 
     /**
      * Conta o número de tentativas para uma avaliação específica.
