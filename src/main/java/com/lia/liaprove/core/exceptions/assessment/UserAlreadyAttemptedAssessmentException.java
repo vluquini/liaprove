@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.exceptions;
+package com.lia.liaprove.core.exceptions.assessment;
 
 /**
  * Exceção lançada quando um usuário tenta iniciar uma avaliação que já realizou.

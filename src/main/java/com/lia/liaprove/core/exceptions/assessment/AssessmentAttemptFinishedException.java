@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.exceptions;
+package com.lia.liaprove.core.exceptions.assessment;
 
 /**
  * Exceção lançada quando se tenta modificar ou submeter respostas para uma tentativa

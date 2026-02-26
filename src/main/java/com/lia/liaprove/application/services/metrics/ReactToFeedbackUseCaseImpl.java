@@ -5,9 +5,9 @@ import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.metrics.FeedbackQuestion;
 import com.lia.liaprove.core.domain.metrics.ReactionType;
 import com.lia.liaprove.core.domain.user.User;
-import com.lia.liaprove.core.exceptions.AuthorizationException;
-import com.lia.liaprove.core.exceptions.FeedbackNotFoundException;
-import com.lia.liaprove.core.exceptions.UserNotFoundException;
+import com.lia.liaprove.core.exceptions.user.AuthorizationException;
+import com.lia.liaprove.core.exceptions.metrics.FeedbackNotFoundException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 import com.lia.liaprove.core.usecases.metrics.ReactToFeedbackUseCase;
 
 import java.util.UUID;

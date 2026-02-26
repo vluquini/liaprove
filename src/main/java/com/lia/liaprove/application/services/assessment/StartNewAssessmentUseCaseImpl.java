@@ -8,11 +8,11 @@ import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.user.User;
-import com.lia.liaprove.core.exceptions.AssessmentNotFoundException;
-import com.lia.liaprove.core.exceptions.AssessmentNotActiveException;
-import com.lia.liaprove.core.exceptions.MaxAttemptsReachedException;
-import com.lia.liaprove.core.exceptions.UserAlreadyAttemptedAssessmentException;
-import com.lia.liaprove.core.exceptions.UserNotFoundException;
+import com.lia.liaprove.core.exceptions.assessment.AssessmentNotFoundException;
+import com.lia.liaprove.core.exceptions.assessment.AssessmentNotActiveException;
+import com.lia.liaprove.core.exceptions.assessment.MaxAttemptsReachedException;
+import com.lia.liaprove.core.exceptions.assessment.UserAlreadyAttemptedAssessmentException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SystemAssessmentFactory;
 

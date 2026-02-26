@@ -1,8 +1,8 @@
 package com.lia.liaprove.core.usecases.assessments;
 
 import com.lia.liaprove.core.domain.assessment.Assessment;
-import com.lia.liaprove.core.exceptions.AssessmentNotFoundException;
-import com.lia.liaprove.core.exceptions.AuthorizationException;
+import com.lia.liaprove.core.exceptions.assessment.AssessmentNotFoundException;
+import com.lia.liaprove.core.exceptions.user.AuthorizationException;
 
 import java.util.UUID;
 

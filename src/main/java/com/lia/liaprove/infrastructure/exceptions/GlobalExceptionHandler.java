@@ -1,6 +1,10 @@
 package com.lia.liaprove.infrastructure.exceptions;
 
-import com.lia.liaprove.core.exceptions.*;
+import com.lia.liaprove.core.exceptions.metrics.FeedbackNotFoundException;
+import com.lia.liaprove.core.exceptions.user.AuthorizationException;
+import com.lia.liaprove.core.exceptions.user.InvalidCredentialsException;
+import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

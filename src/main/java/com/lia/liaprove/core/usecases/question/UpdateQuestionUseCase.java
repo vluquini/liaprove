@@ -1,8 +1,8 @@
 package com.lia.liaprove.core.usecases.question;
 
 import com.lia.liaprove.core.domain.question.*;
-import com.lia.liaprove.core.exceptions.UserNotFoundException;
-import com.lia.liaprove.core.exceptions.AuthorizationException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
+import com.lia.liaprove.core.exceptions.user.AuthorizationException;
 import java.util.*;
 
 /**

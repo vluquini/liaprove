@@ -7,8 +7,8 @@ import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRole;
-import com.lia.liaprove.core.exceptions.AuthorizationException;
-import com.lia.liaprove.core.exceptions.UserNotFoundException;
+import com.lia.liaprove.core.exceptions.user.AuthorizationException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 import com.lia.liaprove.core.usecases.algorithms.bayesian.BayesianNetworkUseCase;
 import com.lia.liaprove.core.usecases.assessments.SuggestQuestionsForAssessmentUseCase;
 

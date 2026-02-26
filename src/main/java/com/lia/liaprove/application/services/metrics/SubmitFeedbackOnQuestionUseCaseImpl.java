@@ -9,8 +9,8 @@ import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.core.domain.user.User;
-import com.lia.liaprove.core.exceptions.QuestionNotFoundException;
-import com.lia.liaprove.core.exceptions.UserNotFoundException;
+import com.lia.liaprove.core.exceptions.question.QuestionNotFoundException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase;
 
 import java.time.LocalDateTime;

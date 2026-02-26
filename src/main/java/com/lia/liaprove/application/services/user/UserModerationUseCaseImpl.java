@@ -4,8 +4,8 @@ import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.domain.user.UserStatus;
-import com.lia.liaprove.core.exceptions.AuthorizationException;
-import com.lia.liaprove.core.exceptions.UserNotFoundException;
+import com.lia.liaprove.core.exceptions.user.AuthorizationException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 import com.lia.liaprove.core.usecases.user.admin.UserModerationUseCase;
 
 import java.util.Objects;

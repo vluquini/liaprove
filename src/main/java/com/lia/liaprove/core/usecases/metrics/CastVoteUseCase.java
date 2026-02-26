@@ -1,8 +1,8 @@
 package com.lia.liaprove.core.usecases.metrics;
 
 import com.lia.liaprove.core.domain.metrics.VoteType;
-import com.lia.liaprove.core.exceptions.QuestionNotFoundException;
-import com.lia.liaprove.core.exceptions.UserNotFoundException;
+import com.lia.liaprove.core.exceptions.question.QuestionNotFoundException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 
 import java.util.UUID;
 

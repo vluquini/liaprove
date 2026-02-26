@@ -2,7 +2,7 @@ package com.lia.liaprove.core.usecases.assessments;
 
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.Certificate;
-import com.lia.liaprove.core.exceptions.CertificateEligibilityException;
+import com.lia.liaprove.core.exceptions.assessment.CertificateEligibilityException;
 
 /**
  * Caso de uso para emitir um certificado para um usuário aprovado em uma avaliação.

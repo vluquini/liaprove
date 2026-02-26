@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.exceptions;
+package com.lia.liaprove.core.exceptions.user;
 
 /**
  * Exceção lançada quando um usuário com o identificador solicitado não é encontrado.

@@ -3,7 +3,7 @@ package com.lia.liaprove.application.services.metrics;
 import com.lia.liaprove.application.gateways.metrics.VoteGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.core.domain.metrics.Vote;
-import com.lia.liaprove.core.exceptions.QuestionNotFoundException;
+import com.lia.liaprove.core.exceptions.question.QuestionNotFoundException;
 import com.lia.liaprove.core.usecases.metrics.ListVotesForQuestionUseCase;
 
 import java.util.List;

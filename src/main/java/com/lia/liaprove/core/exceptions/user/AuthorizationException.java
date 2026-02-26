@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.exceptions;
+package com.lia.liaprove.core.exceptions.user;
 
 /**
  * Exceção lançada quando o usuário/sistema não está autorizado a executar determinada ação.

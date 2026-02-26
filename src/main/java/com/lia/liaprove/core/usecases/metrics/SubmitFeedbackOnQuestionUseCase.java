@@ -3,8 +3,8 @@ package com.lia.liaprove.core.usecases.metrics;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
-import com.lia.liaprove.core.exceptions.QuestionNotFoundException;
-import com.lia.liaprove.core.exceptions.UserNotFoundException;
+import com.lia.liaprove.core.exceptions.question.QuestionNotFoundException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 
 import java.util.UUID;
 

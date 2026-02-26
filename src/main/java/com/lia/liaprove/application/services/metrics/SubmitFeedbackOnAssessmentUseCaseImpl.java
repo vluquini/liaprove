@@ -6,8 +6,8 @@ import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.assessment.Assessment;
 import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
 import com.lia.liaprove.core.domain.user.User;
-import com.lia.liaprove.core.exceptions.AssessmentNotFoundException;
-import com.lia.liaprove.core.exceptions.UserNotFoundException;
+import com.lia.liaprove.core.exceptions.assessment.AssessmentNotFoundException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnAssessmentUseCase;
 
 import java.time.LocalDateTime;

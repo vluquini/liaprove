@@ -3,7 +3,7 @@ package com.lia.liaprove.application.services.user;
 import com.lia.liaprove.core.domain.user.*;
 import com.lia.liaprove.core.usecases.user.users.UserFactory;
 
-import com.lia.liaprove.core.exceptions.InvalidUserDataException;
+import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;

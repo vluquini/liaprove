@@ -3,7 +3,7 @@ package com.lia.liaprove.application.services.question;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
-import com.lia.liaprove.core.exceptions.QuestionNotFoundException;
+import com.lia.liaprove.core.exceptions.question.QuestionNotFoundException;
 import com.lia.liaprove.core.usecases.question.EvaluateVotingResultUseCase;
 
 import java.util.Random;

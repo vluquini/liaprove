@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.exceptions;
+package com.lia.liaprove.core.exceptions.assessment;
 
 /**
  * Exceção lançada quando um certificado solicitado não é encontrado.

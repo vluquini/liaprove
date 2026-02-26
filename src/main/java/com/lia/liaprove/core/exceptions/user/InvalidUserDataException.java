@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.exceptions;
+package com.lia.liaprove.core.exceptions.user;
 
 /**
 * Exceção lançada quando os dados fornecidos para criação/atualização de um usuário são inválidos.

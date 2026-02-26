@@ -1,7 +1,7 @@
 package com.lia.liaprove.core.usecases.assessments;
 
 import com.lia.liaprove.core.domain.assessment.Certificate;
-import com.lia.liaprove.core.exceptions.CertificateNotFoundException;
+import com.lia.liaprove.core.exceptions.assessment.CertificateNotFoundException;
 
 /**
  * Serviço de gerenciamento de certificados no domínio.

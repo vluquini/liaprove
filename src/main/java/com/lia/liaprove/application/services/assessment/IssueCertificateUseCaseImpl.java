@@ -4,7 +4,7 @@ import com.lia.liaprove.application.gateways.assessment.CertificateGateway;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
 import com.lia.liaprove.core.domain.assessment.Certificate;
-import com.lia.liaprove.core.exceptions.CertificateEligibilityException;
+import com.lia.liaprove.core.exceptions.assessment.CertificateEligibilityException;
 import com.lia.liaprove.core.usecases.assessments.IssueCertificateUseCase;
 
 import java.time.LocalDate;

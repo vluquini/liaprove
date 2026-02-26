@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.exceptions;
+package com.lia.liaprove.core.exceptions.assessment;
 
 /**
  * Exceção lançada quando o número máximo de participantes para uma avaliação foi atingido.

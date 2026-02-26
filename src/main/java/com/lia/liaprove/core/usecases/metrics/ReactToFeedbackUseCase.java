@@ -1,8 +1,8 @@
 package com.lia.liaprove.core.usecases.metrics;
 
 import com.lia.liaprove.core.domain.metrics.ReactionType;
-import com.lia.liaprove.core.exceptions.FeedbackNotFoundException;
-import com.lia.liaprove.core.exceptions.UserNotFoundException;
+import com.lia.liaprove.core.exceptions.metrics.FeedbackNotFoundException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 
 import java.util.UUID;
 

@@ -7,8 +7,8 @@ import com.lia.liaprove.core.domain.metrics.Vote;
 import com.lia.liaprove.core.domain.metrics.VoteType;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.user.User;
-import com.lia.liaprove.core.exceptions.QuestionNotFoundException;
-import com.lia.liaprove.core.exceptions.UserNotFoundException;
+import com.lia.liaprove.core.exceptions.question.QuestionNotFoundException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 import com.lia.liaprove.core.usecases.metrics.CastVoteUseCase;
 
 import java.util.UUID;

@@ -1,7 +1,7 @@
 package com.lia.liaprove.application.services.question;
 
 import com.lia.liaprove.core.domain.question.*;
-import com.lia.liaprove.core.exceptions.InvalidUserDataException;
+import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
 import com.lia.liaprove.core.usecases.question.QuestionFactory;
 
 import java.text.Normalizer;

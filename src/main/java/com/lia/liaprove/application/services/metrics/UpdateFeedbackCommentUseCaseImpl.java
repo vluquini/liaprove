@@ -2,8 +2,8 @@ package com.lia.liaprove.application.services.metrics;
 
 import com.lia.liaprove.application.gateways.metrics.FeedbackGateway;
 import com.lia.liaprove.core.domain.metrics.FeedbackQuestion;
-import com.lia.liaprove.core.exceptions.AuthorizationException;
-import com.lia.liaprove.core.exceptions.FeedbackNotFoundException;
+import com.lia.liaprove.core.exceptions.user.AuthorizationException;
+import com.lia.liaprove.core.exceptions.metrics.FeedbackNotFoundException;
 import com.lia.liaprove.core.usecases.metrics.UpdateFeedbackCommentUseCase;
 
 import java.util.UUID;

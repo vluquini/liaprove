@@ -1,7 +1,7 @@
 package com.lia.liaprove.core.usecases.metrics;
 
 import com.lia.liaprove.core.domain.metrics.FeedbackQuestion;
-import com.lia.liaprove.core.exceptions.QuestionNotFoundException;
+import com.lia.liaprove.core.exceptions.question.QuestionNotFoundException;
 
 import java.util.List;
 import java.util.UUID;
