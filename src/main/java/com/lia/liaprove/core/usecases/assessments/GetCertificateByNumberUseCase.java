@@ -4,12 +4,12 @@ import com.lia.liaprove.core.domain.assessment.Certificate;
 import com.lia.liaprove.core.exceptions.assessment.CertificateNotFoundException;
 
 /**
- * Serviço de gerenciamento de certificados no domínio.
- *
- * <p>Responsabilidade: atribuir e revogar certificados de usuários. Este contrato é
- * genérico — pode ser invocado por um usuário administrador ou pelo sistema.
+ * Caso de uso para buscar e validar publicamente um certificado pelo seu número identificador.
+ * <p>
+ * Permite que qualquer pessoa ou sistema verifique a autenticidade de um certificado
+ * a partir de sua URL pública (ex: liaprove.com/certificates/{certificateNumber}).
  */
-public interface ValidateCertificateUseCase {
+public interface GetCertificateByNumberUseCase {
 
     /**
      * Busca e retorna um certificado com base no número de identificação fornecido.
