@@ -10,7 +10,7 @@ import java.util.Set;
  * DTO para encapsular os critérios de filtro ao listar tentativas de avaliação.
  * Usado pelo gateway para construir queries de busca.
  */
-public record ListAttemptsFilter(
+public record ListAttemptsFilterDto(
         Optional<Boolean> isPersonalized,
         Optional<LocalDateTime> startDate,
         Optional<LocalDateTime> endDate,

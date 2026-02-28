@@ -1,6 +1,6 @@
 package com.lia.liaprove.application.gateways.assessment;
 
-import com.lia.liaprove.application.services.assessment.dto.ListAttemptsFilter;
+import com.lia.liaprove.application.services.assessment.dto.ListAttemptsFilterDto;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 
 import java.util.List;
@@ -37,7 +37,7 @@ public interface AssessmentAttemptGateway {
      * @param filter Objeto com os critérios de filtro.
      * @return Uma lista de tentativas que correspondem aos filtros.
      */
-    List<AssessmentAttempt> findAllByCriteria(ListAttemptsFilter filter);
+    List<AssessmentAttempt> findAllByCriteria(ListAttemptsFilterDto filter);
 
     /**
      * Conta o número de tentativas para uma avaliação específica.

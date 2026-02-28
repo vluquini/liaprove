@@ -2,7 +2,7 @@ package com.lia.liaprove.application.services.assessment;
 
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
-import com.lia.liaprove.core.domain.assessment.SuggestionCriteria;
+import com.lia.liaprove.application.services.assessment.dto.SuggestionCriteriaDto;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.user.User;
@@ -33,7 +33,7 @@ public class SuggestQuestionsForAssessmentUseCaseImpl implements SuggestQuestion
     }
 
     @Override
-    public List<ScoredQuestion> execute(UUID recruiterId, SuggestionCriteria criteria) {
+    public List<ScoredQuestion> execute(UUID recruiterId, SuggestionCriteriaDto criteria) {
         // 1. Validar se o usuário é um Recrutador ou Admin
         User user = userGateway.findById(recruiterId)
                 .orElseThrow(() -> new UserNotFoundException("Usuário não encontrado."));

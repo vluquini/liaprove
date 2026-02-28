@@ -1,6 +1,7 @@
 package com.lia.liaprove.application.services.assessment;
 
 import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
+import com.lia.liaprove.application.services.assessment.dto.SubmitAssessmentAnswersDto;
 import com.lia.liaprove.core.domain.assessment.Answer;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;

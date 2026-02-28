@@ -2,7 +2,7 @@ package com.lia.liaprove.application.services.assessment;
 
 import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
 import com.lia.liaprove.application.gateways.user.UserGateway;
-import com.lia.liaprove.application.services.assessment.dto.ListAttemptsFilter;
+import com.lia.liaprove.application.services.assessment.dto.ListAttemptsFilterDto;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
 import com.lia.liaprove.core.domain.user.User;
@@ -43,7 +43,7 @@ public class ListAllAssessmentAttemptsUseCaseImpl implements ListAllAssessmentAt
         }
 
         // 2. Montar o filtro e delegar ao gateway
-        ListAttemptsFilter filter = new ListAttemptsFilter(isPersonalized, startDate, endDate, statuses);
+        ListAttemptsFilterDto filter = new ListAttemptsFilterDto(isPersonalized, startDate, endDate, statuses);
         
         return attemptGateway.findAllByCriteria(filter);
     }

@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.domain.assessment;
+package com.lia.liaprove.application.services.assessment.dto;
 
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
@@ -9,12 +9,12 @@ import java.util.Set;
 /**
  * Representa os critérios para filtrar sugestões de questões.
  */
-public class SuggestionCriteria {
+public class SuggestionCriteriaDto {
     private final Set<KnowledgeArea> knowledgeAreas;
     private final Set<DifficultyLevel> difficultyLevels;
     private final int limit;
 
-    public SuggestionCriteria(Set<KnowledgeArea> knowledgeAreas, Set<DifficultyLevel> difficultyLevels, int limit) {
+    public SuggestionCriteriaDto(Set<KnowledgeArea> knowledgeAreas, Set<DifficultyLevel> difficultyLevels, int limit) {
         this.knowledgeAreas = knowledgeAreas;
         this.difficultyLevels = difficultyLevels;
         this.limit = (limit <= 0) ? 10 : limit;

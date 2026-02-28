@@ -1,4 +1,4 @@
-package com.lia.liaprove.application.services.assessment;
+package com.lia.liaprove.application.services.assessment.dto;
 
 import java.util.List;
 import java.util.UUID;

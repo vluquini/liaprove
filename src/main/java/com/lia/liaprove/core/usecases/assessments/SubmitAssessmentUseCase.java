@@ -1,6 +1,6 @@
 package com.lia.liaprove.core.usecases.assessments;
 
-import com.lia.liaprove.application.services.assessment.SubmitAssessmentAnswersDto;
+import com.lia.liaprove.application.services.assessment.dto.SubmitAssessmentAnswersDto;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.exceptions.assessment.AssessmentAttemptFinishedException;
 import com.lia.liaprove.core.exceptions.assessment.AssessmentNotFoundException;

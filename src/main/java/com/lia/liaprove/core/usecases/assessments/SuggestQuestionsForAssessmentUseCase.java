@@ -1,7 +1,7 @@
 package com.lia.liaprove.core.usecases.assessments;
 
 import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
-import com.lia.liaprove.core.domain.assessment.SuggestionCriteria;
+import com.lia.liaprove.application.services.assessment.dto.SuggestionCriteriaDto;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
 import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 
@@ -21,5 +21,5 @@ public interface SuggestQuestionsForAssessmentUseCase {
      * @throws UserNotFoundException  se o ID do recrutador não for encontrado.
      * @throws AuthorizationException se o usuário não for um recrutador.
      */
-    List<ScoredQuestion> execute(UUID recruiterId, SuggestionCriteria criteria);
+    List<ScoredQuestion> execute(UUID recruiterId, SuggestionCriteriaDto criteria);
 }
