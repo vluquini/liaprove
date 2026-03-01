@@ -35,7 +35,8 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
     private final UserGateway userGateway;
     private final GenerateSystemAssessmentUseCase generateSystemAssessmentUseCase;
 
-    public StartNewAssessmentUseCaseImpl(AssessmentGateway assessmentGateway, AssessmentAttemptGateway attemptGateway, UserGateway userGateway, GenerateSystemAssessmentUseCase generateSystemAssessmentUseCase) {
+    public StartNewAssessmentUseCaseImpl(AssessmentGateway assessmentGateway, AssessmentAttemptGateway attemptGateway,
+                                         UserGateway userGateway, GenerateSystemAssessmentUseCase generateSystemAssessmentUseCase) {
         this.assessmentGateway = assessmentGateway;
         this.attemptGateway = attemptGateway;
         this.userGateway = userGateway;
@@ -43,7 +44,8 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
     }
 
     @Override
-    public AssessmentAttempt execute(UUID userId, String shareableToken, Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel) {
+    public AssessmentAttempt execute(UUID userId, String shareableToken, Set<KnowledgeArea> knowledgeAreas,
+                                     DifficultyLevel difficultyLevel) {
         User user = userGateway.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
@@ -81,20 +83,8 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
 
         List<Question> questions = new ArrayList<>(assessment.getQuestions());
         Collections.shuffle(questions);
-        
-        AssessmentAttempt attempt = new AssessmentAttempt(
-                UUID.randomUUID(),
-                assessment,
-                user,
-                questions,           // A mesma lista, já embaralhada pela factory
-                new ArrayList<>(),   // Answers
-                new ArrayList<>(),   // Feedbacks
-                LocalDateTime.now(),
-                null,
-                null,
-                null,
-                AssessmentAttemptStatus.IN_PROGRESS
-        );
+
+        AssessmentAttempt attempt = createAssessmentAttempt(assessment, user, questions);
 
         return attemptGateway.save(attempt);
     }
@@ -105,8 +95,16 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
             throw new AssessmentNotFoundException("It was not possible to generate an assessment. There are not enough questions for the selected criteria.");
         }
 
-        SystemAssessment assessment = new SystemAssessment(
-                UUID.randomUUID(),
+        SystemAssessment assessment = createSystemAssessment(knowledgeAreas, difficultyLevel, questions);
+
+        AssessmentAttempt attempt = createAssessmentAttempt(assessment, user, questions);
+
+        return attemptGateway.save(attempt);
+    }
+
+    private SystemAssessment createSystemAssessment(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, List<Question> questions) {
+        return new SystemAssessment(
+                null,             // Null pois JPA gera na camada infra
                 "Avaliação de " + knowledgeAreas.iterator().next().toString(),
                 "Avaliação gerada pelo sistema.",
                 LocalDateTime.now(),
@@ -114,9 +112,11 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
                 // Lógica de tempo pode ser configurada aqui
                 getTimerForDifficulty(difficultyLevel)
         );
+    }
 
-        AssessmentAttempt attempt = new AssessmentAttempt(
-                UUID.randomUUID(),
+    private AssessmentAttempt createAssessmentAttempt(Assessment assessment, User user, List<Question> questions) {
+        return new AssessmentAttempt(
+                null,             // Null pois JPA gera na camada infra
                 assessment,
                 user,
                 questions,           // A mesma lista, já embaralhada pela factory
@@ -128,8 +128,6 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
                 null,
                 AssessmentAttemptStatus.IN_PROGRESS
         );
-
-        return attemptGateway.save(attempt);
     }
 
     private Duration getTimerForDifficulty(DifficultyLevel difficultyLevel) {
