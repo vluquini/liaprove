@@ -14,7 +14,7 @@ import com.lia.liaprove.core.exceptions.assessment.MaxAttemptsReachedException;
 import com.lia.liaprove.core.exceptions.assessment.UserAlreadyAttemptedAssessmentException;
 import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
-import com.lia.liaprove.core.usecases.assessments.SystemAssessmentFactory;
+import com.lia.liaprove.core.usecases.assessments.GenerateSystemAssessmentUseCase;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -24,18 +24,22 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+/**
+ * Implementação do caso de uso responsável por iniciar uma nova tentativa de avaliação.
+ * Este serviço gerencia o início da execução (do sistema ou personalizada), mas não cria a definição da avaliação.
+ */
 public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase {
 
     private final AssessmentGateway assessmentGateway;
     private final AssessmentAttemptGateway attemptGateway;
     private final UserGateway userGateway;
-    private final SystemAssessmentFactory systemAssessmentFactory;
+    private final GenerateSystemAssessmentUseCase generateSystemAssessmentUseCase;
 
-    public StartNewAssessmentUseCaseImpl(AssessmentGateway assessmentGateway, AssessmentAttemptGateway attemptGateway, UserGateway userGateway, SystemAssessmentFactory systemAssessmentFactory) {
+    public StartNewAssessmentUseCaseImpl(AssessmentGateway assessmentGateway, AssessmentAttemptGateway attemptGateway, UserGateway userGateway, GenerateSystemAssessmentUseCase generateSystemAssessmentUseCase) {
         this.assessmentGateway = assessmentGateway;
         this.attemptGateway = attemptGateway;
         this.userGateway = userGateway;
-        this.systemAssessmentFactory = systemAssessmentFactory;
+        this.generateSystemAssessmentUseCase = generateSystemAssessmentUseCase;
     }
 
     @Override
@@ -96,7 +100,7 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
     }
 
     private AssessmentAttempt startSystemAssessment(User user, Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel) {
-        List<Question> questions = systemAssessmentFactory.createQuestions(knowledgeAreas, difficultyLevel);
+        List<Question> questions = generateSystemAssessmentUseCase.createQuestions(knowledgeAreas, difficultyLevel);
         if (questions.isEmpty()) {
             throw new AssessmentNotFoundException("It was not possible to generate an assessment. There are not enough questions for the selected criteria.");
         }

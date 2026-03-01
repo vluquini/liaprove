@@ -8,10 +8,10 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * Interface para a fábrica responsável por criar a lista de questões
+ * Interface responsável por gerar a lista de questões
  * para uma avaliação do sistema, com base em critérios específicos.
  */
-public interface SystemAssessmentFactory {
+public interface GenerateSystemAssessmentUseCase {
     /**
      * Cria uma lista de questões para uma nova avaliação do sistema.
      *

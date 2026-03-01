@@ -11,7 +11,7 @@ import com.lia.liaprove.core.domain.user.UserRecruiter;
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
 import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
-import com.lia.liaprove.core.usecases.assessments.CreateAssessmentUseCase;
+import com.lia.liaprove.core.usecases.assessments.CreatePersonalizedAssessmentUseCase;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -20,16 +20,17 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 /**
- * Implementação do caso de uso para criação de avaliações personalizadas por recrutadores.
+ * Implementação do caso de uso responsável pela criação de avaliações personalizadas.
+ * Permite que recrutadores configurem avaliações com questões específicas, prazos e limites de acesso.
  */
-public class CreateAssessmentUseCaseImpl implements CreateAssessmentUseCase {
+public class CreatePersonalizedPersonalizedAssessmentUseCaseImpl implements CreatePersonalizedAssessmentUseCase {
 
     private final AssessmentGateway assessmentGateway;
     private final QuestionGateway questionGateway;
     private final UserGateway userGateway;
 
-    public CreateAssessmentUseCaseImpl(AssessmentGateway assessmentGateway, QuestionGateway questionGateway,
-                                       UserGateway userGateway) {
+    public CreatePersonalizedPersonalizedAssessmentUseCaseImpl(AssessmentGateway assessmentGateway, QuestionGateway questionGateway,
+                                                               UserGateway userGateway) {
         this.assessmentGateway = assessmentGateway;
         this.questionGateway = questionGateway;
         this.userGateway = userGateway;

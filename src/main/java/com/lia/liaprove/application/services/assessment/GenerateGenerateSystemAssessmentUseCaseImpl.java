@@ -2,11 +2,15 @@ package com.lia.liaprove.application.services.assessment;
 
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.core.domain.question.*;
-import com.lia.liaprove.core.usecases.assessments.SystemAssessmentFactory;
+import com.lia.liaprove.core.usecases.assessments.GenerateSystemAssessmentUseCase;
 
 import java.util.*;
 
-public class SystemAssessmentFactoryImpl implements SystemAssessmentFactory {
+/**
+ * Implementação do caso de uso responsável por gerar a lista de questões para avaliações do sistema.
+ * Seleciona questões aleatoriamente seguindo proporções de dificuldade e áreas de conhecimento escolhidas.
+ */
+public class GenerateGenerateSystemAssessmentUseCaseImpl implements GenerateSystemAssessmentUseCase {
 
     private final QuestionGateway questionGateway;
 
@@ -22,7 +26,7 @@ public class SystemAssessmentFactoryImpl implements SystemAssessmentFactory {
     private static final double HARD_RATIO_EASY   = 0.1;
     private static final double HARD_RATIO_MEDIUM = 0.3;
 
-    public SystemAssessmentFactoryImpl(QuestionGateway questionGateway) {
+    public GenerateGenerateSystemAssessmentUseCaseImpl(QuestionGateway questionGateway) {
         this.questionGateway = questionGateway;
     }
 
