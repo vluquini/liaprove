@@ -1,0 +1,24 @@
+package com.lia.liaprove.infrastructure.mappers.assessment;
+
+import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
+import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
+import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
+import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.ReportingPolicy;
+
+@Mapper(
+        componentModel = "spring",
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        uses = {AssessmentMapper.class, AnswerMapper.class, CertificateMapper.class, QuestionMapper.class, UserMapper.class}
+)
+public interface AssessmentAttemptMapper {
+
+    @Mapping(target = "answers", source = "answers")
+    AssessmentAttemptEntity toEntity(AssessmentAttempt domain);
+
+    @Mapping(target = "feedbacks", expression = "java(new java.util.ArrayList<>())")
+    AssessmentAttempt toDomain(AssessmentAttemptEntity entity);
+}
+
