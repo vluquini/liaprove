@@ -31,3 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Data H2 Files ###
+/data
+
