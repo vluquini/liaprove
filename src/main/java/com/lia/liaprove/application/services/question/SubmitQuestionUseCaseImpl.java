@@ -25,6 +25,10 @@ public class SubmitQuestionUseCaseImpl implements SubmitQuestionUseCase {
     public Question submit(QuestionCreateDto dto) {
         Objects.requireNonNull(dto, "Data must not be null");
 
+        if (dto.relevanceByLLM() == null) {
+            throw new InvalidUserDataException("AI pre-analysis is required before question submission.");
+        }
+
         // Check for existing question by description BEFORE creating the new question object
         if (questionGateway.existsByDescription(dto.description())) {
             throw new InvalidUserDataException("Unable to process question submission with the provided details.");
