@@ -2,9 +2,12 @@ package com.lia.liaprove.infrastructure.controllers;
 
 import com.lia.liaprove.application.services.question.QuestionCreateDto;
 import com.lia.liaprove.application.services.question.QuestionVotingDetails;
+import com.lia.liaprove.core.domain.question.Alternative;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
+import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.*;
+import com.lia.liaprove.infrastructure.dtos.question.PreAnalyzeQuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionDetailResponse;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Collections;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,6 +38,37 @@ public class QuestionController {
     private final QuestionMapper questionMapper;
     private final GetQuestionVotingDetailsUseCase getQuestionVotingDetailsUseCase;
     private final SecurityContextService securityContextService;
+    private final PreAnalyzeQuestionUseCase preAnalyzeQuestionUseCase;
+
+    @PostMapping("/pre-analysis")
+    public ResponseEntity<PreAnalyzeQuestionResponse> preAnalyzeQuestion(@Valid @RequestBody SubmitQuestionRequest request) {
+        UUID authorId = securityContextService.getCurrentUserId();
+        QuestionCreateDto dto = questionMapper.toQuestionCreateDto(request, authorId);
+
+        PreAnalyzeQuestionUseCase.PreAnalysisCommand command = new PreAnalyzeQuestionUseCase.PreAnalysisCommand(
+                dto.title(),
+                dto.description(),
+                dto.knowledgeAreas(),
+                dto.difficultyByCommunity(),
+                dto.relevanceByCommunity(),
+                dto.alternatives() == null
+                        ? Collections.emptyList()
+                        : dto.alternatives().stream().map(Alternative::text).toList()
+        );
+
+        PreAnalyzeQuestionUseCase.PreAnalysisResult result = preAnalyzeQuestionUseCase.execute(command);
+
+        PreAnalyzeQuestionResponse response = new PreAnalyzeQuestionResponse(
+                result.relevanceByLLM(),
+                result.languageSuggestions(),
+                result.biasOrAmbiguityWarnings(),
+                result.distractorSuggestions(),
+                result.difficultyLevelByLLM(),
+                result.topicConsistencyNotes()
+        );
+
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping
     public ResponseEntity<QuestionResponse> submitQuestion(@Valid @RequestBody SubmitQuestionRequest request) {
