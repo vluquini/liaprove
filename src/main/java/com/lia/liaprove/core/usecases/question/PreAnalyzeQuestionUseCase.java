@@ -29,7 +29,7 @@ public interface PreAnalyzeQuestionUseCase {
             List<String> languageSuggestions,
             List<String> biasOrAmbiguityWarnings,
             List<String> distractorSuggestions,
-            String complexityAnalysis,
+            String difficultyLevelByLLM,
             List<String> topicConsistencyNotes
     ) {}
 }

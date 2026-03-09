@@ -1,6 +1,7 @@
 package com.lia.liaprove.infrastructure.exceptions;
 
 import com.lia.liaprove.core.exceptions.metrics.FeedbackNotFoundException;
+import com.lia.liaprove.core.exceptions.question.QuestionPreAnalysisException;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
 import com.lia.liaprove.core.exceptions.user.InvalidCredentialsException;
 import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
@@ -78,6 +79,14 @@ public class GlobalExceptionHandler {
         log.warn("FeedbackNotFoundException: {}", ex.getMessage());
         Map<String, Object> body = createErrorBody(HttpStatus.NOT_FOUND, "Not Found: " + ex.getMessage(), req.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(QuestionPreAnalysisException.class)
+    public ResponseEntity<Map<String, Object>> handleQuestionPreAnalysisException(
+            QuestionPreAnalysisException ex, HttpServletRequest req) {
+        log.warn("QuestionPreAnalysisException: {}", ex.getMessage());
+        Map<String, Object> body = createErrorBody(HttpStatus.BAD_GATEWAY, ex.getMessage(), req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(body);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

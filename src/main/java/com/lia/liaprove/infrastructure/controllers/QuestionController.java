@@ -2,9 +2,11 @@ package com.lia.liaprove.infrastructure.controllers;
 
 import com.lia.liaprove.application.services.question.QuestionCreateDto;
 import com.lia.liaprove.application.services.question.QuestionVotingDetails;
+import com.lia.liaprove.core.domain.question.Alternative;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.usecases.question.*;
+import com.lia.liaprove.infrastructure.dtos.question.PreAnalyzeQuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionDetailResponse;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
@@ -33,6 +35,7 @@ public class QuestionController {
     private final ListQuestionsUseCase listQuestionsUseCase;
     private final QuestionMapper questionMapper;
     private final GetQuestionVotingDetailsUseCase getQuestionVotingDetailsUseCase;
+    private final PreAnalyzeQuestionUseCase preAnalyzeQuestionUseCase;
     private final SecurityContextService securityContextService;
 
     @PostMapping
@@ -44,6 +47,38 @@ public class QuestionController {
 
         QuestionResponse responseDto = questionMapper.toResponseDto(submitted);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+
+    @PostMapping("/pre-analysis")
+    public ResponseEntity<PreAnalyzeQuestionResponse> preAnalyzeQuestion(@Valid @RequestBody SubmitQuestionRequest request) {
+        UUID authorId = securityContextService.getCurrentUserId();
+        QuestionCreateDto dto = questionMapper.toQuestionCreateDto(request, authorId);
+
+        List<String> alternativesText = dto.alternatives() == null
+                ? List.of()
+                : dto.alternatives().stream().map(Alternative::text).toList();
+
+        PreAnalyzeQuestionUseCase.PreAnalysisCommand command = new PreAnalyzeQuestionUseCase.PreAnalysisCommand(
+                dto.title(),
+                dto.description(),
+                dto.knowledgeAreas(),
+                dto.difficultyByCommunity(),
+                dto.relevanceByCommunity(),
+                alternativesText
+        );
+
+        PreAnalyzeQuestionUseCase.PreAnalysisResult result = preAnalyzeQuestionUseCase.execute(command);
+
+        PreAnalyzeQuestionResponse response = new PreAnalyzeQuestionResponse(
+                result.relevanceByLLM(),
+                result.languageSuggestions(),
+                result.biasOrAmbiguityWarnings(),
+                result.distractorSuggestions(),
+                result.difficultyLevelByLLM(),
+                result.topicConsistencyNotes()
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/voting")

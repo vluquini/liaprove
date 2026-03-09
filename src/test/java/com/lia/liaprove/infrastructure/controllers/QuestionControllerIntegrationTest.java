@@ -1,10 +1,12 @@
 package com.lia.liaprove.infrastructure.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lia.liaprove.application.gateways.ai.QuestionPreAnalysisGateway;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
+import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
 import com.lia.liaprove.infrastructure.dtos.question.AlternativeRequestDto;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitMultipleChoiceQuestionRequest;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
@@ -19,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -28,6 +31,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -52,6 +57,9 @@ public class QuestionControllerIntegrationTest {
     @Autowired
     private QuestionJpaRepository questionJpaRepository;
 
+    @MockitoBean
+    private QuestionPreAnalysisGateway questionPreAnalysisGateway;
+
     @AfterEach
     void tearDown() {
         questionJpaRepository.deleteAll();
@@ -75,6 +83,7 @@ public class QuestionControllerIntegrationTest {
         request.setKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
         request.setDifficultyByCommunity(DifficultyLevel.EASY);
         request.setRelevanceByCommunity(RelevanceLevel.THREE);
+        request.setRelevanceByLLM(RelevanceLevel.THREE);
 
         request.setAlternatives(List.of(
                 new AlternativeRequestDto("Correct Answer Text", true),
@@ -95,6 +104,42 @@ public class QuestionControllerIntegrationTest {
         // Assert
         List<QuestionEntity> questions = questionJpaRepository.findAll();
         assertThat(questions).anyMatch(q -> request.getTitle().equals(q.getTitle()));
+    }
+
+    @Test
+    @DisplayName("Should pre-analyze question successfully when authenticated")
+    void shouldPreAnalyzeQuestionSuccessfully() throws Exception {
+        UserEntity user = getSeededUserEntity("carlos.silva@example.com");
+
+        SubmitMultipleChoiceQuestionRequest request = new SubmitMultipleChoiceQuestionRequest();
+        request.setTitle("How does polymorphism improve OOP design decisions?");
+        request.setDescription("Explain how polymorphism improves extensibility and maintenance in object-oriented systems.");
+        request.setKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
+        request.setDifficultyByCommunity(DifficultyLevel.MEDIUM);
+        request.setRelevanceByCommunity(RelevanceLevel.FOUR);
+        request.setAlternatives(List.of(
+                new AlternativeRequestDto("Allows dynamic dispatch and extensibility", true),
+                new AlternativeRequestDto("Removes need for interfaces", false),
+                new AlternativeRequestDto("Eliminates encapsulation", false)
+        ));
+
+        when(questionPreAnalysisGateway.analyze(any())).thenReturn(new PreAnalyzeQuestionUseCase.PreAnalysisResult(
+                RelevanceLevel.FOUR,
+                List.of("Improve sentence clarity."),
+                List.of("Avoid ambiguous wording in requirement."),
+                List.of("Create a more plausible distractor option."),
+                "INTERMEDIATE due to abstraction and design trade-offs.",
+                List.of("Consistent with software development area.")
+        ));
+
+        mockMvc.perform(post("/api/v1/questions/pre-analysis")
+                        .header("X-Dev-User-Email", user.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.relevanceByLLM", is(RelevanceLevel.FOUR.name())))
+                .andExpect(jsonPath("$.difficultyLevelByLLM", containsString("INTERMEDIATE")))
+                .andExpect(jsonPath("$.languageSuggestions", hasSize(1)));
     }
 
     @Test

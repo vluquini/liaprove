@@ -1,5 +1,7 @@
 package com.lia.liaprove.infrastructure.configs;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lia.liaprove.application.gateways.ai.QuestionPreAnalysisGateway;
 import com.lia.liaprove.application.gateways.metrics.FeedbackGateway;
 import com.lia.liaprove.application.gateways.metrics.VoteGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
@@ -23,6 +25,10 @@ import com.lia.liaprove.infrastructure.services.FeedbackGatewayImpl;
 import com.lia.liaprove.infrastructure.services.PasswordHasherImpl;
 import com.lia.liaprove.infrastructure.services.UserGatewayImpl;
 import com.lia.liaprove.infrastructure.services.VoteGatewayImpl;
+import com.lia.liaprove.infrastructure.services.ai.SpringAiQuestionPreAnalysisGatewayImpl;
+import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -133,6 +139,18 @@ public class AppConfig {
                                                                          FeedbackGateway feedbackGateway,
                                                                          UserGateway userGateway) {
         return new GetQuestionVotingDetailsUseCaseImpl(questionGateway, voteGateway, feedbackGateway, userGateway);
+    }
+
+    @Bean
+    public QuestionPreAnalysisGateway questionPreAnalysisGateway(ObjectProvider<ChatClient.Builder> chatClientBuilderProvider,
+                                                                 ObjectMapper objectMapper,
+                                                                 @Value("${app.ai.pre-analysis.enabled:true}") boolean enabled) {
+        return new SpringAiQuestionPreAnalysisGatewayImpl(chatClientBuilderProvider, objectMapper, enabled);
+    }
+
+    @Bean
+    public PreAnalyzeQuestionUseCase preAnalyzeQuestionUseCase(QuestionPreAnalysisGateway questionPreAnalysisGateway) {
+        return new PreAnalyzeQuestionUseCaseImpl(questionPreAnalysisGateway);
     }
 
     // Metrics Domain - Feedback
