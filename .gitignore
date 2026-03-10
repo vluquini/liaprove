@@ -35,3 +35,6 @@ build/
 ### Data H2 Files ###
 /data
 
+### Temporary Files
+/utils
+
