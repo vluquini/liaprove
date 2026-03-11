@@ -6,6 +6,7 @@ import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
+import com.lia.liaprove.core.usecases.question.PrepareQuestionSubmissionUseCase;
 import com.lia.liaprove.infrastructure.dtos.question.AlternativeRequestDto;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitMultipleChoiceQuestionRequest;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
@@ -59,6 +60,9 @@ public class QuestionControllerIntegrationTest {
     @MockitoBean
     private PreAnalyzeQuestionUseCase preAnalyzeQuestionUseCase;
 
+    @MockitoBean
+    private PrepareQuestionSubmissionUseCase prepareQuestionSubmissionUseCase;
+
     @AfterEach
     void tearDown() {
         questionJpaRepository.deleteAll();
@@ -82,13 +86,24 @@ public class QuestionControllerIntegrationTest {
         request.setKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
         request.setDifficultyByCommunity(DifficultyLevel.EASY);
         request.setRelevanceByCommunity(RelevanceLevel.THREE);
-        request.setRelevanceByLLM(RelevanceLevel.FOUR);
 
         request.setAlternatives(List.of(
                 new AlternativeRequestDto("Correct Answer Text", true),
                 new AlternativeRequestDto("Wrong Answer Text 1", false),
                 new AlternativeRequestDto("Wrong Answer Text 2", false)
         ));
+
+        when(prepareQuestionSubmissionUseCase.execute(any())).thenReturn(
+                new PrepareQuestionSubmissionUseCase.PreparedQuestion(
+                        request.getTitle(),
+                        request.getDescription(),
+                        List.of(
+                                new PrepareQuestionSubmissionUseCase.AlternativeInput("Correct Answer Text", true),
+                                new PrepareQuestionSubmissionUseCase.AlternativeInput("Wrong Answer Text 1", false),
+                                new PrepareQuestionSubmissionUseCase.AlternativeInput("Wrong Answer Text 2", false)
+                        ),
+                        RelevanceLevel.FOUR
+                ));
 
         // Act
         mockMvc.perform(post("/api/v1/questions")
@@ -123,7 +138,6 @@ public class QuestionControllerIntegrationTest {
         ));
 
         PreAnalyzeQuestionUseCase.PreAnalysisResult mockedResult = new PreAnalyzeQuestionUseCase.PreAnalysisResult(
-                RelevanceLevel.FOUR,
                 List.of("Improve clarity in first sentence."),
                 List.of("Potential ambiguity around expected scope."),
                 List.of("Distractor suggestion 1"),
@@ -134,11 +148,10 @@ public class QuestionControllerIntegrationTest {
         when(preAnalyzeQuestionUseCase.execute(any())).thenReturn(mockedResult);
 
         mockMvc.perform(post("/api/v1/questions/pre-analysis")
-                        .header("X-Dev-User-Email", user.getEmail())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
+                .header("X-Dev-User-Email", user.getEmail())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.relevanceByLLM", is("FOUR")))
                 .andExpect(jsonPath("$.languageSuggestions[0]", is("Improve clarity in first sentence.")))
                 .andExpect(jsonPath("$.difficultyLevelByLLM", is("Intermediate complexity.")))
                 .andExpect(jsonPath("$.distractorSuggestions[0]", is("Distractor suggestion 1")));

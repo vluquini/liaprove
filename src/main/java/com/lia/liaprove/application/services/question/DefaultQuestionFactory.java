@@ -179,7 +179,7 @@ public class DefaultQuestionFactory implements QuestionFactory {
         question.setSubmissionDate(LocalDateTime.now());
         question.setVotingEndDate(LocalDateTime.now().plusDays(7));
         question.setStatus(QuestionStatus.VOTING);
-        question.setRelevanceByLLM(RelevanceLevel.FIVE); // temporário
+        question.setRelevanceByLLM(dto.relevanceByLLM());
         question.setRecruiterUsageCount(0);
     }
 

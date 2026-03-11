@@ -145,11 +145,13 @@ public interface QuestionMapper {
 
     // MultipleChoice: mapeia alternativas
     @Mapping(target = "authorId", expression = "java(authorId)")
+    @Mapping(target = "relevanceByLLM", ignore = true)
     QuestionCreateDto toQuestionCreateDto(SubmitMultipleChoiceQuestionRequest req, UUID authorId);
 
     // Project: não possui alternatives — ignorar esse target
     @Mapping(target = "authorId", expression = "java(authorId)")
     @Mapping(target = "alternatives", ignore = true)
+    @Mapping(target = "relevanceByLLM", ignore = true)
     QuestionCreateDto toQuestionCreateDto(SubmitProjectQuestionRequest req, UUID authorId);
 
 

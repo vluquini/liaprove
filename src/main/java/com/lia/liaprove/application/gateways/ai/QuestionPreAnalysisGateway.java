@@ -1,6 +1,7 @@
 package com.lia.liaprove.application.gateways.ai;
 
 import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
+import com.lia.liaprove.core.usecases.question.PrepareQuestionSubmissionUseCase;
 
 /**
  * Porta de integração com provedor de IA para pré-análise de questões.
@@ -8,4 +9,7 @@ import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
  */
 public interface QuestionPreAnalysisGateway {
     PreAnalyzeQuestionUseCase.PreAnalysisResult analyze(PreAnalyzeQuestionUseCase.PreAnalysisCommand command);
+
+    PrepareQuestionSubmissionUseCase.PreparedQuestion
+    prepareForSubmission(PrepareQuestionSubmissionUseCase.PreparationCommand command);
 }

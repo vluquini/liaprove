@@ -25,7 +25,6 @@ public interface PreAnalyzeQuestionUseCase {
     ) {}
 
     record PreAnalysisResult(
-            RelevanceLevel relevanceByLLM,
             List<String> languageSuggestions,
             List<String> biasOrAmbiguityWarnings,
             List<String> distractorSuggestions,

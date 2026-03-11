@@ -109,6 +109,11 @@ public class AppConfig {
     }
 
     @Bean
+    public PrepareQuestionSubmissionUseCase prepareQuestionSubmissionUseCase(QuestionPreAnalysisGateway questionPreAnalysisGateway) {
+        return new PrepareQuestionSubmissionUseCaseImpl(questionPreAnalysisGateway);
+    }
+
+    @Bean
     public EvaluateVotingResultUseCase evaluateVotingResultUseCase(QuestionGateway questionGateway) {
         return new MockEvaluateVotingResultUseCaseImpl(questionGateway);
     }
