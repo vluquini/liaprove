@@ -7,6 +7,7 @@ import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
+import com.lia.liaprove.core.usecases.question.PrepareQuestionSubmissionUseCase;
 import com.lia.liaprove.infrastructure.dtos.question.AlternativeRequestDto;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitMultipleChoiceQuestionRequest;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
@@ -83,13 +84,24 @@ public class QuestionControllerIntegrationTest {
         request.setKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
         request.setDifficultyByCommunity(DifficultyLevel.EASY);
         request.setRelevanceByCommunity(RelevanceLevel.THREE);
-        request.setRelevanceByLLM(RelevanceLevel.THREE);
 
         request.setAlternatives(List.of(
                 new AlternativeRequestDto("Correct Answer Text", true),
                 new AlternativeRequestDto("Wrong Answer Text 1", false),
                 new AlternativeRequestDto("Wrong Answer Text 2", false)
         ));
+
+        when(questionPreAnalysisGateway.prepareForSubmission(any())).thenReturn(
+                new PrepareQuestionSubmissionUseCase.PreparedQuestion(
+                        request.getTitle(),
+                        request.getDescription(),
+                        List.of(
+                                new PrepareQuestionSubmissionUseCase.AlternativeInput("Correct Answer Text", true),
+                                new PrepareQuestionSubmissionUseCase.AlternativeInput("Wrong Answer Text 1", false),
+                                new PrepareQuestionSubmissionUseCase.AlternativeInput("Wrong Answer Text 2", false)
+                        ),
+                        RelevanceLevel.THREE
+                ));
 
         // Act
         mockMvc.perform(post("/api/v1/questions")
@@ -124,7 +136,6 @@ public class QuestionControllerIntegrationTest {
         ));
 
         when(questionPreAnalysisGateway.analyze(any())).thenReturn(new PreAnalyzeQuestionUseCase.PreAnalysisResult(
-                RelevanceLevel.FOUR,
                 List.of("Improve sentence clarity."),
                 List.of("Avoid ambiguous wording in requirement."),
                 List.of("Create a more plausible distractor option."),
@@ -137,7 +148,6 @@ public class QuestionControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.relevanceByLLM", is(RelevanceLevel.FOUR.name())))
                 .andExpect(jsonPath("$.difficultyLevelByLLM", containsString("INTERMEDIATE")))
                 .andExpect(jsonPath("$.languageSuggestions", hasSize(1)));
     }
@@ -156,7 +166,7 @@ public class QuestionControllerIntegrationTest {
                         .header("X-Dev-User-Email", user.getEmail()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize((int) votingCount)));
-                // Removido check de status pois QuestionSummaryResponse não possui este campo
+        // Removido check de status pois QuestionSummaryResponse não possui este campo
     }
 
     @Test
@@ -183,7 +193,7 @@ public class QuestionControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(question.getId().toString())))
                 .andExpect(jsonPath("$.title", is(question.getTitle())));
-                // Ajustado paths JSON pois QuestionDetailResponse é flat na raiz
+        // Ajustado paths JSON pois QuestionDetailResponse é flat na raiz
     }
 
     @Test

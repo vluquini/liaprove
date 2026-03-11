@@ -9,6 +9,7 @@ import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.infrastructure.dtos.question.PreAnalyzeQuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionDetailResponse;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitQuestionRequest;
+import com.lia.liaprove.infrastructure.dtos.question.SubmitProjectQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionSummaryResponse;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
@@ -36,13 +37,45 @@ public class QuestionController {
     private final QuestionMapper questionMapper;
     private final GetQuestionVotingDetailsUseCase getQuestionVotingDetailsUseCase;
     private final PreAnalyzeQuestionUseCase preAnalyzeQuestionUseCase;
+    private final PrepareQuestionSubmissionUseCase prepareQuestionSubmissionUseCase;
     private final SecurityContextService securityContextService;
 
     @PostMapping
     public ResponseEntity<QuestionResponse> submitQuestion(@Valid @RequestBody SubmitQuestionRequest request) {
         UUID authorId = securityContextService.getCurrentUserId();
+        QuestionCreateDto mappedDto = questionMapper.toQuestionCreateDto(request, authorId);
 
-        QuestionCreateDto dto = questionMapper.toQuestionCreateDto(request, authorId);
+        PrepareQuestionSubmissionUseCase.PreparationCommand preparationCommand =
+                new PrepareQuestionSubmissionUseCase.PreparationCommand(
+                        mappedDto.title(),
+                        mappedDto.description(),
+                        mappedDto.knowledgeAreas(),
+                        mappedDto.difficultyByCommunity(),
+                        mappedDto.relevanceByCommunity(),
+                        toAlternativeInputs(mappedDto.alternatives()),
+                        safeList(request.getAcceptedLanguageSuggestions()),
+                        safeList(request.getAcceptedBiasOrAmbiguityWarnings()),
+                        safeList(request.getAcceptedDistractorSuggestions()),
+                        request.getAcceptedDifficultyLevelByLLM(),
+                        safeList(request.getAcceptedTopicConsistencyNotes())
+                );
+
+        PrepareQuestionSubmissionUseCase.PreparedQuestion preparedQuestion =
+                prepareQuestionSubmissionUseCase.execute(preparationCommand);
+
+        QuestionCreateDto dto = new QuestionCreateDto(
+                authorId,
+                preparedQuestion.title(),
+                preparedQuestion.description(),
+                mappedDto.knowledgeAreas(),
+                mappedDto.difficultyByCommunity(),
+                mappedDto.relevanceByCommunity(),
+                preparedQuestion.relevanceByLLM(),
+                request instanceof SubmitProjectQuestionRequest
+                        ? List.of()
+                        : toAlternatives(preparedQuestion.alternatives())
+        );
+
         Question submitted = submitQuestionUseCase.submit(dto);
 
         QuestionResponse responseDto = questionMapper.toResponseDto(submitted);
@@ -70,7 +103,6 @@ public class QuestionController {
         PreAnalyzeQuestionUseCase.PreAnalysisResult result = preAnalyzeQuestionUseCase.execute(command);
 
         PreAnalyzeQuestionResponse response = new PreAnalyzeQuestionResponse(
-                result.relevanceByLLM(),
                 result.languageSuggestions(),
                 result.biasOrAmbiguityWarnings(),
                 result.distractorSuggestions(),
@@ -110,5 +142,27 @@ public class QuestionController {
 
         QuestionDetailResponse responseDto = questionMapper.toQuestionDetailResponseDto(details);
         return ResponseEntity.ok(responseDto);
+    }
+
+    private static List<String> safeList(List<String> values) {
+        return values == null ? List.of() : values;
+    }
+
+    private static List<PrepareQuestionSubmissionUseCase.AlternativeInput> toAlternativeInputs(List<Alternative> alternatives) {
+        if (alternatives == null) {
+            return List.of();
+        }
+        return alternatives.stream()
+                .map(alt -> new PrepareQuestionSubmissionUseCase.AlternativeInput(alt.text(), alt.correct()))
+                .toList();
+    }
+
+    private static List<Alternative> toAlternatives(List<PrepareQuestionSubmissionUseCase.AlternativeInput> alternatives) {
+        if (alternatives == null) {
+            return List.of();
+        }
+        return alternatives.stream()
+                .map(alt -> new Alternative(null, alt.text(), alt.correct()))
+                .toList();
     }
 }

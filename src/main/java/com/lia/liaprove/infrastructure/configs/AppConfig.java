@@ -153,6 +153,11 @@ public class AppConfig {
         return new PreAnalyzeQuestionUseCaseImpl(questionPreAnalysisGateway);
     }
 
+    @Bean
+    public PrepareQuestionSubmissionUseCase prepareQuestionSubmissionUseCase(QuestionPreAnalysisGateway questionPreAnalysisGateway) {
+        return new PrepareQuestionSubmissionUseCaseImpl(questionPreAnalysisGateway);
+    }
+
     // Metrics Domain - Feedback
     @Bean
     public FeedbackGateway feedbackGateway(FeedbackQuestionJpaRepository feedbackQuestionJpaRepository,
