@@ -2,7 +2,6 @@ package com.lia.liaprove.infrastructure.controllers;
 
 import com.lia.liaprove.application.services.question.QuestionCreateDto;
 import com.lia.liaprove.application.services.question.QuestionVotingDetails;
-import com.lia.liaprove.core.domain.question.Alternative;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
@@ -10,7 +9,6 @@ import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.infrastructure.dtos.question.PreAnalyzeQuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionDetailResponse;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitQuestionRequest;
-import com.lia.liaprove.infrastructure.dtos.question.SubmitProjectQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionSummaryResponse;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Collections;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,28 +42,12 @@ public class QuestionController {
     @PostMapping("/pre-analysis")
     public ResponseEntity<PreAnalyzeQuestionResponse> preAnalyzeQuestion(@Valid @RequestBody SubmitQuestionRequest request) {
         UUID authorId = securityContextService.getCurrentUserId();
-        QuestionCreateDto dto = questionMapper.toQuestionCreateDto(request, authorId);
 
-        PreAnalyzeQuestionUseCase.PreAnalysisCommand command = new PreAnalyzeQuestionUseCase.PreAnalysisCommand(
-                dto.title(),
-                dto.description(),
-                dto.knowledgeAreas(),
-                dto.difficultyByCommunity(),
-                dto.relevanceByCommunity(),
-                dto.alternatives() == null
-                        ? Collections.emptyList()
-                        : dto.alternatives().stream().map(Alternative::text).toList()
-        );
+        QuestionCreateDto dto = questionMapper.toQuestionCreateDto(request, authorId);
+        PreAnalyzeQuestionUseCase.PreAnalysisCommand command = questionMapper.toPreAnalysisCommand(dto);
 
         PreAnalyzeQuestionUseCase.PreAnalysisResult result = preAnalyzeQuestionUseCase.execute(command);
-
-        PreAnalyzeQuestionResponse response = new PreAnalyzeQuestionResponse(
-                result.languageSuggestions(),
-                result.biasOrAmbiguityWarnings(),
-                result.distractorSuggestions(),
-                result.difficultyLevelByLLM(),
-                result.topicConsistencyNotes()
-        );
+        PreAnalyzeQuestionResponse response = questionMapper.toPreAnalysisResponse(result);
 
         return ResponseEntity.ok(response);
     }
@@ -78,34 +59,16 @@ public class QuestionController {
         QuestionCreateDto mappedDto = questionMapper.toQuestionCreateDto(request, authorId);
 
         PrepareQuestionSubmissionUseCase.PreparationCommand preparationCommand =
-                new PrepareQuestionSubmissionUseCase.PreparationCommand(
-                        mappedDto.title(),
-                        mappedDto.description(),
-                        mappedDto.knowledgeAreas(),
-                        mappedDto.difficultyByCommunity(),
-                        mappedDto.relevanceByCommunity(),
-                        toAlternativeInputs(mappedDto.alternatives()),
-                        safeList(request.getAcceptedLanguageSuggestions()),
-                        safeList(request.getAcceptedBiasOrAmbiguityWarnings()),
-                        safeList(request.getAcceptedDistractorSuggestions()),
-                        request.getAcceptedDifficultyLevelByLLM(),
-                        safeList(request.getAcceptedTopicConsistencyNotes())
-                );
+                questionMapper.toPreparationCommand(mappedDto, request);
 
         PrepareQuestionSubmissionUseCase.PreparedQuestion preparedQuestion =
                 prepareQuestionSubmissionUseCase.execute(preparationCommand);
 
-        QuestionCreateDto dto = new QuestionCreateDto(
+        QuestionCreateDto dto = questionMapper.toPreparedQuestionCreateDto(
                 authorId,
-                preparedQuestion.title(),
-                preparedQuestion.description(),
-                mappedDto.knowledgeAreas(),
-                mappedDto.difficultyByCommunity(),
-                mappedDto.relevanceByCommunity(),
-                preparedQuestion.relevanceByLLM(),
-                request instanceof SubmitProjectQuestionRequest
-                        ? List.of()
-                        : toAlternatives(preparedQuestion.alternatives())
+                mappedDto,
+                preparedQuestion,
+                request
         );
         Question submitted = submitQuestionUseCase.submit(dto);
 
@@ -119,7 +82,7 @@ public class QuestionController {
             @RequestParam(defaultValue = "10") int size) {
 
         ListQuestionsUseCase.ListQuestionsQuery query = new ListQuestionsUseCase.ListQuestionsQuery(
-                null,                  // knowledgeAreas
+                null,    // knowledgeAreas
                 null,                  // difficultyLevel
                 QuestionStatus.VOTING, // status
                 null,                  // authorId
@@ -142,27 +105,5 @@ public class QuestionController {
 
         QuestionDetailResponse responseDto = questionMapper.toQuestionDetailResponseDto(details);
         return ResponseEntity.ok(responseDto);
-    }
-
-    private static List<String> safeList(List<String> values) {
-        return values == null ? List.of() : values;
-    }
-
-    private static List<PrepareQuestionSubmissionUseCase.AlternativeInput> toAlternativeInputs(List<Alternative> alternatives) {
-        if (alternatives == null) {
-            return List.of();
-        }
-        return alternatives.stream()
-                .map(alt -> new PrepareQuestionSubmissionUseCase.AlternativeInput(alt.text(), alt.correct()))
-                .toList();
-    }
-
-    private static List<Alternative> toAlternatives(List<PrepareQuestionSubmissionUseCase.AlternativeInput> alternatives) {
-        if (alternatives == null) {
-            return List.of();
-        }
-        return alternatives.stream()
-                .map(alt -> new Alternative(null, alt.text(), alt.correct()))
-                .toList();
     }
 }
