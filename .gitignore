@@ -32,7 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
-### Data H2 Files ###
+### Postgres and H2 Data Files ###
 /data
 
 ### Temporary Files ###
