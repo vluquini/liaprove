@@ -7,6 +7,15 @@ import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.core.exceptions.question.QuestionPreAnalysisException;
 import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.PrepareQuestionSubmissionUseCase;
+import com.lia.liaprove.infrastructure.dtos.ai.AcceptedSuggestionsInput;
+import com.lia.liaprove.infrastructure.dtos.ai.LlmAlternative;
+import com.lia.liaprove.infrastructure.dtos.ai.LlmPreAnalysisOutput;
+import com.lia.liaprove.infrastructure.dtos.ai.LlmSubmissionOutput;
+import com.lia.liaprove.infrastructure.dtos.ai.PromptInput;
+import com.lia.liaprove.infrastructure.dtos.ai.ProviderChatRequest;
+import com.lia.liaprove.infrastructure.dtos.ai.ProviderChatResponse;
+import com.lia.liaprove.infrastructure.dtos.ai.SubmissionPreparationInput;
+import com.lia.liaprove.infrastructure.dtos.ai.SubmissionQuestionDraftInput;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -14,75 +23,51 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
- * Adapter HTTP para pré-análise de questões com IA (sem Spring AI).
+ * HTTP adapter for LLM-based question pre-analysis and submission preparation.
+ * It calls an external LLM provider via HTTP, parses the JSON response, and returns
+ * structured suggestions or a prepared question, with fallback across configured models.
  */
 @Service
 public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGateway {
 
-    private static final String SYSTEM_PROMPT = """
-            You are an assistant specialized in reviewing technical assessment questions.
-            Always return a valid JSON object with these fields:
-            - languageSuggestions: string[] with suggestions about grammar, clarity, and coherence with the provided knowledgeAreas; include reformulations to reduce ambiguity
-            - biasOrAmbiguityWarnings: string[]
-            - distractorSuggestions: string[] (you may suggest adding new distractors)
-            - difficultyLevelByLLM: string (difficulty estimated by the LLM: EASY, MEDIUM, HARD)
-            - topicConsistencyNotes: string[]
-            Allowed knowledge areas are strictly:
-            SOFTWARE_DEVELOPMENT, DATABASE, CYBERSECURITY, NETWORKS, AI.
-            Multiple choice questions must have between 3 and 5 alternatives total.
-            Keep responses concise and actionable. Always respond in Portuguese-BR.
-            """;
-
-    private static final String SUBMISSION_PREPARATION_SYSTEM_PROMPT = """
-            You are an assistant that prepares a final technical question for submission.
-            Respond only with a valid JSON object. Do not include markdown.
-            Apply only suggestions explicitly accepted by the user.
-            Keep all non-accepted aspects unchanged.
-            Compute relevanceByLLM based on title, description and knowledgeAreas.
-            Allowed knowledge areas are strictly:
-            SOFTWARE_DEVELOPMENT, DATABASE, CYBERSECURITY, NETWORKS, AI.
-            Return exactly:
-            - title: final question title
-            - description: final question description
-            - alternatives: list of objects with fields { "text": "...", "correct": true|false }
-            - relevanceByLLM: one of [ONE, TWO, THREE, FOUR, FIVE]
-            For multiple choice:
-            - Keep exactly one correct alternative (do not change which one is correct).
-            - Ensure total alternatives count is between 3 and 5.
-            - If acceptedDistractorSuggestions include adding a new alternative and total < 5, add it.
-            - If total is already 5 and a new distractor is accepted, replace the weakest distractor.
-            Always respond in Portuguese-BR.
-            """;
-
     private final ObjectMapper objectMapper;
     private final RestClient restClient;
     private final String apiKey;
-    private final String model;
+    private final List<String> models;
     private final String completionsPath;
     private final String referer;
     private final String appTitle;
+    private final String preAnalysisSystemPrompt;
+    private final String submissionPreparationSystemPrompt;
 
     public HttpQuestionPreAnalysisGatewayImpl(
             ObjectMapper objectMapper,
-            @Value("${ai.http.base-url:https://openrouter.ai/api/v1}") String baseUrl,
-            @Value("${ai.http.chat-completions-path:/chat/completions}") String completionsPath,
+            @Value("${ai.http.base-url:}") String baseUrl,
+            @Value("${ai.http.chat-completions-path:}") String completionsPath,
             @Value("${ai.http.api-key:}") String apiKey,
-            @Value("${ai.http.model:google/gemma-3-27b-it:free}") String model,
-            @Value("${ai.http.connect-timeout-ms:5000}") int connectTimeoutMs,
-            @Value("${ai.http.read-timeout-ms:20000}") int readTimeoutMs,
+            @Value("${ai.http.principal.model:}") String model,
+            @Value("${ai.http.fallbacks.models:}") String modelsCsv,
+            @Value("${ai.http.connect-timeout-ms:}") int connectTimeoutMs,
+            @Value("${ai.http.read-timeout-ms:}") int readTimeoutMs,
             @Value("${ai.http.referer:}") String referer,
-            @Value("${ai.http.title:liaprove}") String appTitle) {
+            @Value("${ai.http.title:}") String appTitle,
+            @Value("${ai.http.pre-analysis-system-prompt}") String preAnalysisSystemPrompt,
+            @Value("${ai.http.submission-preparation-system-prompt}") String submissionPreparationSystemPrompt) {
 
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;
-        this.model = model;
+        this.models = resolveModels(model, modelsCsv);
         this.completionsPath = completionsPath;
         this.referer = referer;
         this.appTitle = appTitle;
+        this.preAnalysisSystemPrompt = preAnalysisSystemPrompt;
+        this.submissionPreparationSystemPrompt = submissionPreparationSystemPrompt;
 
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(connectTimeoutMs);
@@ -94,6 +79,9 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
                 .build();
     }
 
+    /**
+     * Sends the question draft to the LLM and returns structured suggestions.
+     */
     @Override
     public PreAnalyzeQuestionUseCase.PreAnalysisResult analyze(PreAnalyzeQuestionUseCase.PreAnalysisCommand command) {
         if (apiKey == null || apiKey.isBlank()) {
@@ -102,51 +90,33 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
 
         try {
             String userPrompt = buildUserPrompt(command);
-            ProviderChatRequest body = new ProviderChatRequest(
-                    model,
-                    0.2,
-//                    new ProviderChatRequest.ResponseFormat("json_object"),
-                    List.of(
-                            new ProviderChatRequest.Message("system", SYSTEM_PROMPT),
-                            new ProviderChatRequest.Message("user", userPrompt)
-                    )
+            List<ProviderChatRequest.Message> messages = List.of(
+                    new ProviderChatRequest.Message("system", preAnalysisSystemPrompt),
+                    new ProviderChatRequest.Message("user", userPrompt)
             );
 
-            ProviderChatResponse response = restClient.post()
-                    .uri(completionsPath)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .headers(headers -> {
-                        headers.setBearerAuth(apiKey);
-                        if (referer != null && !referer.isBlank()) {
-                            headers.set("HTTP-Referer", referer);
-                        }
-                        if (appTitle != null && !appTitle.isBlank()) {
-                            headers.set("X-Title", appTitle);
-                        }
-                    })
-                    .body(body)
-                    .retrieve()
-                    .body(ProviderChatResponse.class);
+            return executeWithFallback(model -> {
+                ProviderChatRequest body = new ProviderChatRequest(model, 0.2, messages);
+                ProviderChatResponse response = callProvider(body);
+                String content = extractContent(response);
+                LlmPreAnalysisOutput output = objectMapper.readValue(content, LlmPreAnalysisOutput.class);
 
-            String content = extractContent(response);
-            LlmPreAnalysisOutput output = objectMapper.readValue(content, LlmPreAnalysisOutput.class);
-
-            return new PreAnalyzeQuestionUseCase.PreAnalysisResult(
-                    nullSafe(output.languageSuggestions()),
-                    nullSafe(output.biasOrAmbiguityWarnings()),
-                    nullSafe(output.distractorSuggestions()),
-                    output.difficultyLevelByLLM(),
-                    nullSafe(output.topicConsistencyNotes())
-            );
-        } catch (QuestionPreAnalysisException ex) {
-            throw ex;
-        } catch (RestClientResponseException ex) {
-            throw new QuestionPreAnalysisException("AI provider error: " + ex.getStatusCode() + " - " + ex.getResponseBodyAsString(), ex);
+                return new PreAnalyzeQuestionUseCase.PreAnalysisResult(
+                        nullSafe(output.languageSuggestions()),
+                        nullSafe(output.biasOrAmbiguityWarnings()),
+                        nullSafe(output.distractorSuggestions()),
+                        output.difficultyLevelByLLM(),
+                        nullSafe(output.topicConsistencyNotes())
+                );
+            });
         } catch (JsonProcessingException ex) {
             throw new QuestionPreAnalysisException("Failed to parse AI provider response.", ex);
         }
     }
 
+    /**
+     * Sends the draft plus accepted suggestions to the LLM and returns a prepared question.
+     */
     @Override
     public PrepareQuestionSubmissionUseCase.PreparedQuestion prepareForSubmission(
             PrepareQuestionSubmissionUseCase.PreparationCommand command) {
@@ -156,54 +126,37 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
 
         try {
             String userPrompt = buildSubmissionPreparationUserPrompt(command);
-            ProviderChatRequest body = new ProviderChatRequest(
-                    model,
-                    0.2,
-                    List.of(
-                            new ProviderChatRequest.Message("system", SUBMISSION_PREPARATION_SYSTEM_PROMPT),
-                            new ProviderChatRequest.Message("user", userPrompt)
-                    )
+            List<ProviderChatRequest.Message> messages = List.of(
+                    new ProviderChatRequest.Message("system", submissionPreparationSystemPrompt),
+                    new ProviderChatRequest.Message("user", userPrompt)
             );
 
-            ProviderChatResponse response = restClient.post()
-                    .uri(completionsPath)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .headers(headers -> {
-                        headers.setBearerAuth(apiKey);
-                        if (referer != null && !referer.isBlank()) {
-                            headers.set("HTTP-Referer", referer);
-                        }
-                        if (appTitle != null && !appTitle.isBlank()) {
-                            headers.set("X-Title", appTitle);
-                        }
-                    })
-                    .body(body)
-                    .retrieve()
-                    .body(ProviderChatResponse.class);
+            return executeWithFallback(model -> {
+                ProviderChatRequest body = new ProviderChatRequest(model, 0.2, messages);
+                ProviderChatResponse response = callProvider(body);
+                String content = extractContent(response);
+                LlmSubmissionOutput output = objectMapper.readValue(content, LlmSubmissionOutput.class);
 
-            String content = extractContent(response);
-            LlmSubmissionOutput output = objectMapper.readValue(content, LlmSubmissionOutput.class);
+                List<PrepareQuestionSubmissionUseCase.AlternativeInput> alternatives = mapAlternatives(output.alternatives());
+                if (alternatives.isEmpty()) {
+                    alternatives = command.alternatives() == null ? List.of() : command.alternatives();
+                }
 
-            List<PrepareQuestionSubmissionUseCase.AlternativeInput> alternatives = mapAlternatives(output.alternatives());
-            if (alternatives.isEmpty()) {
-                alternatives = command.alternatives() == null ? List.of() : command.alternatives();
-            }
-
-            return new PrepareQuestionSubmissionUseCase.PreparedQuestion(
-                    output.title(),
-                    output.description(),
-                    alternatives,
-                    parseRelevance(output.relevanceByLLM())
-            );
-        } catch (QuestionPreAnalysisException ex) {
-            throw ex;
-        } catch (RestClientResponseException ex) {
-            throw new QuestionPreAnalysisException("AI provider error: " + ex.getStatusCode() + " - " + ex.getResponseBodyAsString(), ex);
+                return new PrepareQuestionSubmissionUseCase.PreparedQuestion(
+                        output.title(),
+                        output.description(),
+                        alternatives,
+                        parseRelevance(output.relevanceByLLM())
+                );
+            });
         } catch (JsonProcessingException ex) {
             throw new QuestionPreAnalysisException("Failed to parse AI provider response.", ex);
         }
     }
 
+    /**
+     * Builds the JSON user prompt for the pre-analysis request.
+     */
     private String buildUserPrompt(PreAnalyzeQuestionUseCase.PreAnalysisCommand command) throws JsonProcessingException {
         return objectMapper.writeValueAsString(new PromptInput(
                 command.title(),
@@ -215,6 +168,9 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
         ));
     }
 
+    /**
+     * Builds the JSON user prompt for submission preparation.
+     */
     private String buildSubmissionPreparationUserPrompt(PrepareQuestionSubmissionUseCase.PreparationCommand command)
             throws JsonProcessingException {
         SubmissionPreparationInput input = new SubmissionPreparationInput(
@@ -238,6 +194,30 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
         return objectMapper.writeValueAsString(input);
     }
 
+    /**
+     * Executes the HTTP call to the LLM provider.
+     */
+    private ProviderChatResponse callProvider(ProviderChatRequest body) {
+        return restClient.post()
+                .uri(completionsPath)
+                .contentType(MediaType.APPLICATION_JSON)
+                .headers(headers -> {
+                    headers.setBearerAuth(apiKey);
+                    if (referer != null && !referer.isBlank()) {
+                        headers.set("HTTP-Referer", referer);
+                    }
+                    if (appTitle != null && !appTitle.isBlank()) {
+                        headers.set("X-Title", appTitle);
+                    }
+                })
+                .body(body)
+                .retrieve()
+                .body(ProviderChatResponse.class);
+    }
+
+    /**
+     * Extracts the content field from the provider response.
+     */
     private static String extractContent(ProviderChatResponse response) {
         if (response == null || response.choices() == null || response.choices().isEmpty()) {
             throw new QuestionPreAnalysisException("AI provider returned an empty response.");
@@ -249,6 +229,9 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
         return first.message().content();
     }
 
+    /**
+     * Parses the relevance level string, returning a safe default when invalid.
+     */
     private static RelevanceLevel parseRelevance(String value) {
         if (value == null || value.isBlank()) {
             return RelevanceLevel.THREE;
@@ -260,10 +243,16 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
         }
     }
 
+    /**
+     * Returns an empty list when the input is null.
+     */
     private static <T> List<T> nullSafe(List<T> input) {
         return input == null ? Collections.emptyList() : input;
     }
 
+    /**
+     * Maps LLM alternatives to the use case alternative input.
+     */
     private static List<PrepareQuestionSubmissionUseCase.AlternativeInput> mapAlternatives(List<LlmAlternative> alternatives) {
         if (alternatives == null) {
             return List.of();
@@ -274,72 +263,61 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
                 .toList();
     }
 
-    private record PromptInput(
-            String title,
-            String description,
-            Object knowledgeAreas,
-            Object difficultyByCommunity,
-            Object relevanceByCommunity,
-            List<String> alternatives
-    ) {}
+    /**
+     * Tries the LLM call across the configured models, returning the first successful result.
+     */
+    private <T> T executeWithFallback(ModelCall<T> call) {
+        QuestionPreAnalysisException lastException = null;
 
-    private record LlmPreAnalysisOutput(
-            List<String> languageSuggestions,
-            List<String> biasOrAmbiguityWarnings,
-            List<String> distractorSuggestions,
-            String difficultyLevelByLLM,
-            List<String> topicConsistencyNotes
-    ) {}
+        for (String candidate : models) {
+            try {
+                return call.execute(candidate);
+            } catch (QuestionPreAnalysisException ex) {
+                lastException = ex;
+            } catch (RestClientResponseException ex) {
+                lastException = new QuestionPreAnalysisException(
+                        "AI provider error: " + ex.getStatusCode() + " - " + ex.getResponseBodyAsString(), ex);
+            } catch (JsonProcessingException ex) {
+                lastException = new QuestionPreAnalysisException("Failed to parse AI provider response.", ex);
+            }
+        }
 
-    private record SubmissionPreparationInput(
-            SubmissionQuestionDraftInput questionDraft,
-            AcceptedSuggestionsInput acceptedSuggestions
-    ) {}
-
-    private record SubmissionQuestionDraftInput(
-            String title,
-            String description,
-            Object knowledgeAreas,
-            Object difficultyByCommunity,
-            Object relevanceByCommunity,
-            List<PrepareQuestionSubmissionUseCase.AlternativeInput> alternatives
-    ) {}
-
-    private record AcceptedSuggestionsInput(
-            List<String> languageSuggestions,
-            List<String> biasOrAmbiguityWarnings,
-            List<String> distractorSuggestions,
-            String difficultyLevelByLLM,
-            List<String> topicConsistencyNotes
-    ) {}
-
-    private record LlmAlternative(
-            String text,
-            boolean correct
-    ) {}
-
-    private record LlmSubmissionOutput(
-            String title,
-            String description,
-            List<LlmAlternative> alternatives,
-            String relevanceByLLM
-    ) {}
-
-    private record ProviderChatRequest(
-            String model,
-            double temperature,
-//            ResponseFormat response_format,
-            List<Message> messages
-    ) {
-        private record Message(String role, String content) {}
-//        private record ResponseFormat(String type) {}
+        if (lastException != null) {
+            throw lastException;
+        }
+        throw new QuestionPreAnalysisException("AI provider failed across all fallback models.");
     }
 
-    private record ProviderChatResponse(List<Choice> choices) {
-        private record Choice(Message message) {}
-        private record Message(String content) {}
+    /**
+     * Resolves the ordered list of models (principal first, then fallbacks).
+     */
+    private static List<String> resolveModels(String model, String modelsCsv) {
+        List<String> resolved = new ArrayList<>();
+
+        if (modelsCsv != null && !modelsCsv.isBlank()) {
+            resolved.addAll(
+                    Stream.of(modelsCsv.split(","))
+                            .map(String::trim)
+                            .filter(value -> !value.isBlank())
+                            .toList()
+            );
+        }
+
+        if (model != null && !model.isBlank()) {
+            resolved.addFirst(model.trim());
+        }
+
+        List<String> unique = resolved.stream().distinct().toList();
+        if (unique.isEmpty()) {
+            throw new QuestionPreAnalysisException("No AI models configured for HTTP LLM client.");
+        }
+        return unique;
+    }
+
+    /**
+     * Functional interface for executing a model-specific call.
+     */
+    private interface ModelCall<T> {
+        T execute(String model) throws JsonProcessingException;
     }
 }
-
-
-
