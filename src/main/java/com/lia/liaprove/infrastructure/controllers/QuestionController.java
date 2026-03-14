@@ -4,7 +4,9 @@ import com.lia.liaprove.application.services.question.QuestionCreateDto;
 import com.lia.liaprove.application.services.question.QuestionVotingDetails;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
+import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.*;
+import com.lia.liaprove.infrastructure.dtos.question.PreAnalyzeQuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionDetailResponse;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
@@ -34,12 +36,40 @@ public class QuestionController {
     private final QuestionMapper questionMapper;
     private final GetQuestionVotingDetailsUseCase getQuestionVotingDetailsUseCase;
     private final SecurityContextService securityContextService;
+    private final PreAnalyzeQuestionUseCase preAnalyzeQuestionUseCase;
+    private final PrepareQuestionSubmissionUseCase prepareQuestionSubmissionUseCase;
+
+    @PostMapping("/pre-analysis")
+    public ResponseEntity<PreAnalyzeQuestionResponse> preAnalyzeQuestion(@Valid @RequestBody SubmitQuestionRequest request) {
+        UUID authorId = securityContextService.getCurrentUserId();
+
+        QuestionCreateDto dto = questionMapper.toQuestionCreateDto(request, authorId);
+        PreAnalyzeQuestionUseCase.PreAnalysisCommand command = questionMapper.toPreAnalysisCommand(dto);
+
+        PreAnalyzeQuestionUseCase.PreAnalysisResult result = preAnalyzeQuestionUseCase.execute(command);
+        PreAnalyzeQuestionResponse response = questionMapper.toPreAnalysisResponse(result);
+
+        return ResponseEntity.ok(response);
+    }
 
     @PostMapping
     public ResponseEntity<QuestionResponse> submitQuestion(@Valid @RequestBody SubmitQuestionRequest request) {
         UUID authorId = securityContextService.getCurrentUserId();
 
-        QuestionCreateDto dto = questionMapper.toQuestionCreateDto(request, authorId);
+        QuestionCreateDto mappedDto = questionMapper.toQuestionCreateDto(request, authorId);
+
+        PrepareQuestionSubmissionUseCase.PreparationCommand preparationCommand =
+                questionMapper.toPreparationCommand(mappedDto, request);
+
+        PrepareQuestionSubmissionUseCase.PreparedQuestion preparedQuestion =
+                prepareQuestionSubmissionUseCase.execute(preparationCommand);
+
+        QuestionCreateDto dto = questionMapper.toPreparedQuestionCreateDto(
+                authorId,
+                mappedDto,
+                preparedQuestion,
+                request
+        );
         Question submitted = submitQuestionUseCase.submit(dto);
 
         QuestionResponse responseDto = questionMapper.toResponseDto(submitted);
@@ -52,7 +82,7 @@ public class QuestionController {
             @RequestParam(defaultValue = "10") int size) {
 
         ListQuestionsUseCase.ListQuestionsQuery query = new ListQuestionsUseCase.ListQuestionsQuery(
-                null,                  // knowledgeAreas
+                null,    // knowledgeAreas
                 null,                  // difficultyLevel
                 QuestionStatus.VOTING, // status
                 null,                  // authorId

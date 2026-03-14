@@ -23,14 +23,14 @@ import java.util.stream.Collectors;
  * Implementação do caso de uso responsável pela criação de avaliações personalizadas.
  * Permite que recrutadores configurem avaliações com questões específicas, prazos e limites de acesso.
  */
-public class CreatePersonalizedPersonalizedAssessmentUseCaseImpl implements CreatePersonalizedAssessmentUseCase {
+public class CreatePersonalizedAssessmentUseCaseImpl implements CreatePersonalizedAssessmentUseCase {
 
     private final AssessmentGateway assessmentGateway;
     private final QuestionGateway questionGateway;
     private final UserGateway userGateway;
 
-    public CreatePersonalizedPersonalizedAssessmentUseCaseImpl(AssessmentGateway assessmentGateway, QuestionGateway questionGateway,
-                                                               UserGateway userGateway) {
+    public CreatePersonalizedAssessmentUseCaseImpl(AssessmentGateway assessmentGateway, QuestionGateway questionGateway,
+                                                   UserGateway userGateway) {
         this.assessmentGateway = assessmentGateway;
         this.questionGateway = questionGateway;
         this.userGateway = userGateway;

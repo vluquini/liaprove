@@ -10,7 +10,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
@@ -43,5 +45,9 @@ public abstract class SubmitQuestionRequest {
     @NotNull
     private RelevanceLevel relevanceByCommunity;
 
-    private RelevanceLevel relevanceByLLM;
+    private List<String> acceptedLanguageSuggestions = new ArrayList<>();
+    private List<String> acceptedBiasOrAmbiguityWarnings = new ArrayList<>();
+    private List<String> acceptedDistractorSuggestions = new ArrayList<>();
+    private String acceptedDifficultyLevelByLLM;
+    private List<String> acceptedTopicConsistencyNotes = new ArrayList<>();
 }

@@ -3,6 +3,7 @@ package com.lia.liaprove.infrastructure.configs;
 import com.lia.liaprove.application.gateways.metrics.FeedbackGateway;
 import com.lia.liaprove.application.gateways.metrics.VoteGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
+import com.lia.liaprove.application.gateways.ai.QuestionPreAnalysisGateway;
 import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.application.services.metrics.*;
@@ -100,6 +101,16 @@ public class AppConfig {
     @Bean
     public SubmitQuestionUseCase submitQuestionUseCase(QuestionGateway questionGateway, QuestionFactory factory) {
         return new SubmitQuestionUseCaseImpl(questionGateway, factory);
+    }
+
+    @Bean
+    public PreAnalyzeQuestionUseCase preAnalyzeQuestionUseCase(QuestionPreAnalysisGateway questionPreAnalysisGateway) {
+        return new PreAnalyzeQuestionUseCaseImpl(questionPreAnalysisGateway);
+    }
+
+    @Bean
+    public PrepareQuestionSubmissionUseCase prepareQuestionSubmissionUseCase(QuestionPreAnalysisGateway questionPreAnalysisGateway) {
+        return new PrepareQuestionSubmissionUseCaseImpl(questionPreAnalysisGateway);
     }
 
     @Bean

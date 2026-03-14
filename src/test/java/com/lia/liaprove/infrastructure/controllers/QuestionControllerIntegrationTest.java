@@ -5,6 +5,8 @@ import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
+import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
+import com.lia.liaprove.core.usecases.question.PrepareQuestionSubmissionUseCase;
 import com.lia.liaprove.infrastructure.dtos.question.AlternativeRequestDto;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitMultipleChoiceQuestionRequest;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
@@ -19,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -28,6 +31,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -51,6 +56,12 @@ public class QuestionControllerIntegrationTest {
 
     @Autowired
     private QuestionJpaRepository questionJpaRepository;
+
+    @MockitoBean
+    private PreAnalyzeQuestionUseCase preAnalyzeQuestionUseCase;
+
+    @MockitoBean
+    private PrepareQuestionSubmissionUseCase prepareQuestionSubmissionUseCase;
 
     @AfterEach
     void tearDown() {
@@ -82,6 +93,18 @@ public class QuestionControllerIntegrationTest {
                 new AlternativeRequestDto("Wrong Answer Text 2", false)
         ));
 
+        when(prepareQuestionSubmissionUseCase.execute(any())).thenReturn(
+                new PrepareQuestionSubmissionUseCase.PreparedQuestion(
+                        request.getTitle(),
+                        request.getDescription(),
+                        List.of(
+                                new PrepareQuestionSubmissionUseCase.AlternativeInput("Correct Answer Text", true),
+                                new PrepareQuestionSubmissionUseCase.AlternativeInput("Wrong Answer Text 1", false),
+                                new PrepareQuestionSubmissionUseCase.AlternativeInput("Wrong Answer Text 2", false)
+                        ),
+                        RelevanceLevel.FOUR
+                ));
+
         // Act
         mockMvc.perform(post("/api/v1/questions")
                         .header("X-Dev-User-Email", user.getEmail())
@@ -95,6 +118,69 @@ public class QuestionControllerIntegrationTest {
         // Assert
         List<QuestionEntity> questions = questionJpaRepository.findAll();
         assertThat(questions).anyMatch(q -> request.getTitle().equals(q.getTitle()));
+    }
+
+    @Test
+    @DisplayName("Should pre-analyze question successfully when authenticated")
+    void shouldPreAnalyzeQuestionSuccessfully() throws Exception {
+        UserEntity user = getSeededUserEntity("carlos.silva@example.com");
+
+        SubmitMultipleChoiceQuestionRequest request = new SubmitMultipleChoiceQuestionRequest();
+        request.setTitle("New Question Title with minimum length");
+        request.setDescription("New question description that meets the minimum length requirement.");
+        request.setKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
+        request.setDifficultyByCommunity(DifficultyLevel.EASY);
+        request.setRelevanceByCommunity(RelevanceLevel.THREE);
+        request.setAlternatives(List.of(
+                new AlternativeRequestDto("Correct Answer Text", true),
+                new AlternativeRequestDto("Wrong Answer Text 1", false),
+                new AlternativeRequestDto("Wrong Answer Text 2", false)
+        ));
+
+        PreAnalyzeQuestionUseCase.PreAnalysisResult mockedResult = new PreAnalyzeQuestionUseCase.PreAnalysisResult(
+                List.of("Improve clarity in first sentence."),
+                List.of("Potential ambiguity around expected scope."),
+                List.of("Distractor suggestion 1"),
+                "Intermediate complexity.",
+                List.of("Aligned with software development topics.")
+        );
+
+        when(preAnalyzeQuestionUseCase.execute(any())).thenReturn(mockedResult);
+
+        mockMvc.perform(post("/api/v1/questions/pre-analysis")
+                .header("X-Dev-User-Email", user.getEmail())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.languageSuggestions[0]", is("Improve clarity in first sentence.")))
+                .andExpect(jsonPath("$.difficultyLevelByLLM", is("Intermediate complexity.")))
+                .andExpect(jsonPath("$.distractorSuggestions[0]", is("Distractor suggestion 1")));
+    }
+
+    @Test
+    @DisplayName("Should return bad request when pre-analysis payload is invalid")
+    void shouldReturnBadRequestWhenPreAnalysisPayloadIsInvalid() throws Exception {
+        UserEntity user = getSeededUserEntity("carlos.silva@example.com");
+
+        SubmitMultipleChoiceQuestionRequest invalidRequest = new SubmitMultipleChoiceQuestionRequest();
+        invalidRequest.setTitle("short");
+        invalidRequest.setDescription("too short");
+        invalidRequest.setKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
+        invalidRequest.setDifficultyByCommunity(DifficultyLevel.EASY);
+        invalidRequest.setRelevanceByCommunity(RelevanceLevel.THREE);
+        invalidRequest.setAlternatives(List.of(
+                new AlternativeRequestDto("A", true),
+                new AlternativeRequestDto("B", false),
+                new AlternativeRequestDto("C", false)
+        ));
+
+        mockMvc.perform(post("/api/v1/questions/pre-analysis")
+                        .header("X-Dev-User-Email", user.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.title", notNullValue()))
+                .andExpect(jsonPath("$.error.description", notNullValue()));
     }
 
     @Test

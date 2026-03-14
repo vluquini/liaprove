@@ -4,6 +4,8 @@ import com.lia.liaprove.application.services.question.QuestionCreateDto;
 import com.lia.liaprove.application.services.question.QuestionVotingDetails;
 import com.lia.liaprove.core.domain.question.*;
 import com.lia.liaprove.core.domain.user.User;
+import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
+import com.lia.liaprove.core.usecases.question.PrepareQuestionSubmissionUseCase;
 import com.lia.liaprove.core.usecases.question.UpdateQuestionUseCase;
 import com.lia.liaprove.infrastructure.dtos.user.AuthorDto;
 import com.lia.liaprove.infrastructure.dtos.question.*;
@@ -143,13 +145,110 @@ public interface QuestionMapper {
         );
     }
 
+    default PreAnalyzeQuestionUseCase.PreAnalysisCommand toPreAnalysisCommand(QuestionCreateDto dto) {
+        if (dto == null) {
+            throw new IllegalArgumentException("QuestionCreateDto cannot be null.");
+        }
+        List<String> alternatives = dto.alternatives() == null
+                ? Collections.emptyList()
+                : dto.alternatives().stream().map(Alternative::text).toList();
+
+        return new PreAnalyzeQuestionUseCase.PreAnalysisCommand(
+                dto.title(),
+                dto.description(),
+                dto.knowledgeAreas(),
+                dto.difficultyByCommunity(),
+                dto.relevanceByCommunity(),
+                alternatives
+        );
+    }
+
+    default PreAnalyzeQuestionResponse toPreAnalysisResponse(PreAnalyzeQuestionUseCase.PreAnalysisResult result) {
+        if (result == null) {
+            throw new IllegalArgumentException("PreAnalysisResult cannot be null.");
+        }
+        return new PreAnalyzeQuestionResponse(
+                result.languageSuggestions(),
+                result.biasOrAmbiguityWarnings(),
+                result.distractorSuggestions(),
+                result.difficultyLevelByLLM(),
+                result.topicConsistencyNotes()
+        );
+    }
+
+    default PrepareQuestionSubmissionUseCase.PreparationCommand toPreparationCommand(
+            QuestionCreateDto mappedDto, SubmitQuestionRequest request) {
+        if (mappedDto == null || request == null) {
+            throw new IllegalArgumentException("mappedDto and request cannot be null.");
+        }
+        return new PrepareQuestionSubmissionUseCase.PreparationCommand(
+                mappedDto.title(),
+                mappedDto.description(),
+                mappedDto.knowledgeAreas(),
+                mappedDto.difficultyByCommunity(),
+                mappedDto.relevanceByCommunity(),
+                toAlternativeInputs(mappedDto.alternatives()),
+                safeList(request.getAcceptedLanguageSuggestions()),
+                safeList(request.getAcceptedBiasOrAmbiguityWarnings()),
+                safeList(request.getAcceptedDistractorSuggestions()),
+                request.getAcceptedDifficultyLevelByLLM(),
+                safeList(request.getAcceptedTopicConsistencyNotes())
+        );
+    }
+
+    default QuestionCreateDto toPreparedQuestionCreateDto(
+            UUID authorId,
+            QuestionCreateDto mappedDto,
+            PrepareQuestionSubmissionUseCase.PreparedQuestion preparedQuestion,
+            SubmitQuestionRequest request) {
+        if (authorId == null || mappedDto == null || preparedQuestion == null || request == null) {
+            throw new IllegalArgumentException("Arguments cannot be null.");
+        }
+        return new QuestionCreateDto(
+                authorId,
+                preparedQuestion.title(),
+                preparedQuestion.description(),
+                mappedDto.knowledgeAreas(),
+                mappedDto.difficultyByCommunity(),
+                mappedDto.relevanceByCommunity(),
+                preparedQuestion.relevanceByLLM(),
+                request instanceof SubmitProjectQuestionRequest
+                        ? List.of()
+                        : toAlternatives(preparedQuestion.alternatives())
+        );
+    }
+
+    default List<String> safeList(List<String> values) {
+        return values == null ? List.of() : values;
+    }
+
+    default List<PrepareQuestionSubmissionUseCase.AlternativeInput> toAlternativeInputs(List<Alternative> alternatives) {
+        if (alternatives == null) {
+            return List.of();
+        }
+        return alternatives.stream()
+                .map(alt -> new PrepareQuestionSubmissionUseCase.AlternativeInput(alt.text(), alt.correct()))
+                .toList();
+    }
+
+    default List<Alternative> toAlternatives(List<PrepareQuestionSubmissionUseCase.AlternativeInput> alternatives) {
+        if (alternatives == null) {
+            return List.of();
+        }
+        return alternatives.stream()
+                .map(alt -> new Alternative(null, alt.text(), alt.correct()))
+                .toList();
+    }
+
     // MultipleChoice: mapeia alternativas
     @Mapping(target = "authorId", expression = "java(authorId)")
+    @Mapping(target = "relevanceByLLM", ignore = true)
     QuestionCreateDto toQuestionCreateDto(SubmitMultipleChoiceQuestionRequest req, UUID authorId);
 
     // Project: não possui alternatives — ignorar esse target
     @Mapping(target = "authorId", expression = "java(authorId)")
     @Mapping(target = "alternatives", ignore = true)
+    @Mapping(target = "relevanceByLLM", ignore = true)
     QuestionCreateDto toQuestionCreateDto(SubmitProjectQuestionRequest req, UUID authorId);
 
 
