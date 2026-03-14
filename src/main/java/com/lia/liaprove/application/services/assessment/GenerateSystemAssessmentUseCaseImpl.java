@@ -10,7 +10,7 @@ import java.util.*;
  * Implementação do caso de uso responsável por gerar a lista de questões para avaliações do sistema.
  * Seleciona questões aleatoriamente seguindo proporções de dificuldade e áreas de conhecimento escolhidas.
  */
-public class GenerateGenerateSystemAssessmentUseCaseImpl implements GenerateSystemAssessmentUseCase {
+public class GenerateSystemAssessmentUseCaseImpl implements GenerateSystemAssessmentUseCase {
 
     private final QuestionGateway questionGateway;
 
@@ -26,7 +26,7 @@ public class GenerateGenerateSystemAssessmentUseCaseImpl implements GenerateSyst
     private static final double HARD_RATIO_EASY   = 0.1;
     private static final double HARD_RATIO_MEDIUM = 0.3;
 
-    public GenerateGenerateSystemAssessmentUseCaseImpl(QuestionGateway questionGateway) {
+    public GenerateSystemAssessmentUseCaseImpl(QuestionGateway questionGateway) {
         this.questionGateway = questionGateway;
     }
 
