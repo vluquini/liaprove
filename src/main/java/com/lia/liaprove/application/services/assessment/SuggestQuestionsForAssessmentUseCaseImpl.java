@@ -12,20 +12,28 @@ import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 import com.lia.liaprove.core.usecases.algorithms.bayesian.BayesianNetworkUseCase;
 import com.lia.liaprove.core.usecases.assessments.SuggestQuestionsForAssessmentUseCase;
 
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * Implementação do caso de uso para sugerir questões para avaliações personalizadas.
+ * <p>
+ * <b>Nota sobre Paginação e Performance:</b><br>
+ * Atualmente, a paginação é realizada em memória (OFFSET via Stream API) após recuperar um pool de sugestões da Rede Bayesiana.
+ * Para o MVP/TCC com volume limitado de dados, esta abordagem é suficiente e simplifica a implementação.
+ * <p>
+ * Futuramente, para escalar, recomenda-se migrar para:
+ * <ul>
+ *   <li>Paginação via banco de dados (Keyset Pagination) para maior performance com grandes volumes.</li>
+ *   <li>Cache de sessão (ex: Redis) para armazenar os IDs já exibidos/excluídos e evitar reprocessamento bayesiano a cada página.</li>
+ * </ul>
  */
 public class SuggestQuestionsForAssessmentUseCaseImpl implements SuggestQuestionsForAssessmentUseCase {
 
     private final BayesianNetworkUseCase bayesianNetworkUseCase;
     private final UserGateway userGateway;
-    private static final int MAX_SUGGESTIONS_LIMIT = 50; // Para evitar sobrecarga, buscamos um pool maior para depois filtrar.
+    private static final int MAX_SUGGESTIONS_LIMIT = 200; // Aumentado para permitir paginação em memória
 
     public SuggestQuestionsForAssessmentUseCaseImpl(BayesianNetworkUseCase bayesianNetworkUseCase, UserGateway userGateway) {
         this.bayesianNetworkUseCase = bayesianNetworkUseCase;
@@ -42,28 +50,43 @@ public class SuggestQuestionsForAssessmentUseCaseImpl implements SuggestQuestion
             throw new AuthorizationException("Apenas recrutadores ou administradores podem obter sugestões de questões.");
         }
 
-        // 2. Obter sugestões da rede bayesiana
-        // Buscamos um número maior de sugestões para ter margem para o filtro.
+        // 2. Obter sugestões da rede bayesiana (pool maior)
         List<ScoredQuestion> allSuggestions = bayesianNetworkUseCase.suggestQuestionsForRecruiter(recruiterId, MAX_SUGGESTIONS_LIMIT);
 
         // 3. Aplicar filtros
         Stream<ScoredQuestion> filteredStream = allSuggestions.stream();
 
-        // Filtrar por Área de Conhecimento, se especificado
+        // Filtrar por Área de Conhecimento
         if (criteria.getKnowledgeAreas().isPresent()) {
             Set<KnowledgeArea> knowledgeAreas = criteria.getKnowledgeAreas().get();
-            filteredStream = filteredStream.filter(sq -> knowledgeAreas.contains(sq.getQuestion().getKnowledgeAreas()));
+            filteredStream = filteredStream.filter(sq -> 
+                sq.getQuestion().getKnowledgeAreas().stream().anyMatch(knowledgeAreas::contains)
+            );
         }
 
-        // Filtrar por Nível de Dificuldade, se especificado
+        // Filtrar por Nível de Dificuldade
         if (criteria.getDifficultyLevels().isPresent()) {
             Set<DifficultyLevel> difficultyLevels = criteria.getDifficultyLevels().get();
             filteredStream = filteredStream.filter(sq -> difficultyLevels.contains(sq.getQuestion().getDifficultyByCommunity()));
         }
 
-        // 4. Limitar o resultado final e coletar
+        // Filtrar IDs excluídos
+        if (criteria.getExcludeIds() != null && !criteria.getExcludeIds().isEmpty()) {
+            Set<UUID> excludeSet = new HashSet<>(criteria.getExcludeIds());
+            filteredStream = filteredStream.filter(sq -> !excludeSet.contains(sq.getQuestion().getId()));
+        }
+
+        // 4. Ordenação e Paginação
+        // Ordena por Score DESC, e usa ID ASC para desempate (estabilidade)
+        Comparator<ScoredQuestion> comparator = Comparator.comparingDouble(ScoredQuestion::getScore).reversed()
+                .thenComparing(sq -> sq.getQuestion().getId());
+
+        int skip = (criteria.getPage() - 1) * criteria.getPageSize();
+
         return filteredStream
-                .limit(criteria.getLimit())
+                .sorted(comparator)
+                .skip(skip)
+                .limit(criteria.getPageSize())
                 .collect(Collectors.toList());
     }
 }
