@@ -1,6 +1,7 @@
 package com.lia.liaprove.application.services.assessment;
 
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
+import com.lia.liaprove.application.services.assessment.dto.SystemAssessmentType;
 import com.lia.liaprove.core.domain.question.*;
 import com.lia.liaprove.core.usecases.assessments.GenerateSystemAssessmentUseCase;
 
@@ -15,23 +16,28 @@ public class GenerateSystemAssessmentUseCaseImpl implements GenerateSystemAssess
     private final QuestionGateway questionGateway;
 
     // Constantes para facilitar a alteração
-    private static final int    TOTAL_QUESTIONS = 10;
+    private static final int    TOTAL_QUESTIONS     = 10;
     // Easy Assessment
-    private static final double EASY_RATIO_EASY   = 0.7;
-    private static final double EASY_RATIO_MEDIUM = 0.2;
+    private static final double EASY_RATIO_EASY     = 0.7;
+    private static final double EASY_RATIO_MEDIUM   = 0.2;
     // Medium Assessment
     private static final double MEDIUM_RATIO_EASY   = 0.2;
     private static final double MEDIUM_RATIO_MEDIUM = 0.6;
     // Hard Assessment
-    private static final double HARD_RATIO_EASY   = 0.1;
-    private static final double HARD_RATIO_MEDIUM = 0.3;
+    private static final double HARD_RATIO_EASY     = 0.1;
+    private static final double HARD_RATIO_MEDIUM   = 0.3;
 
     public GenerateSystemAssessmentUseCaseImpl(QuestionGateway questionGateway) {
         this.questionGateway = questionGateway;
     }
 
     @Override
-    public List<Question> createQuestions(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel) {
+    public List<Question> createQuestions(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, SystemAssessmentType type) {
+        if (type == SystemAssessmentType.PROJECT) {
+            return questionGateway.findRandomByCriteria(knowledgeAreas, difficultyLevel, 1, ProjectQuestion.class);
+        }
+
+        // Caso MULTIPLE_CHOICE
         List<Question> finalQuestions = switch (difficultyLevel) {
             case EASY -> createEasyAssessmentQuestions(knowledgeAreas);
             case MEDIUM -> createMediumAssessmentQuestions(knowledgeAreas);
@@ -69,9 +75,9 @@ public class GenerateSystemAssessmentUseCaseImpl implements GenerateSystemAssess
     }
 
     private List<Question> fetchAndCombineQuestions(Set<KnowledgeArea> knowledgeAreas, int easyCount, int mediumCount, int hardCount) {
-        List<Question> easyQuestions   = questionGateway.findRandomByCriteria(knowledgeAreas, DifficultyLevel.EASY, easyCount);
-        List<Question> mediumQuestions = questionGateway.findRandomByCriteria(knowledgeAreas, DifficultyLevel.MEDIUM, mediumCount);
-        List<Question> hardQuestions   = questionGateway.findRandomByCriteria(knowledgeAreas, DifficultyLevel.HARD, hardCount);
+        List<Question> easyQuestions   = questionGateway.findRandomByCriteria(knowledgeAreas, DifficultyLevel.EASY, easyCount, MultipleChoiceQuestion.class);
+        List<Question> mediumQuestions = questionGateway.findRandomByCriteria(knowledgeAreas, DifficultyLevel.MEDIUM, mediumCount, MultipleChoiceQuestion.class);
+        List<Question> hardQuestions   = questionGateway.findRandomByCriteria(knowledgeAreas, DifficultyLevel.HARD, hardCount, MultipleChoiceQuestion.class);
 
         List<Question> combined = new ArrayList<>();
         combined.addAll(easyQuestions);

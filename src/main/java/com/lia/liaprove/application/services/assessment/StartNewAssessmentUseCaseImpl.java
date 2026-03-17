@@ -3,6 +3,7 @@ package com.lia.liaprove.application.services.assessment;
 import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
 import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.application.gateways.user.UserGateway;
+import com.lia.liaprove.application.services.assessment.dto.SystemAssessmentType;
 import com.lia.liaprove.core.domain.assessment.*;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
@@ -45,7 +46,7 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
 
     @Override
     public AssessmentAttempt execute(UUID userId, String shareableToken, Set<KnowledgeArea> knowledgeAreas,
-                                     DifficultyLevel difficultyLevel) {
+                                     DifficultyLevel difficultyLevel, SystemAssessmentType systemAssessmentType) {
         User user = userGateway.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
 
@@ -54,7 +55,8 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
         }
 
         if (knowledgeAreas != null && !knowledgeAreas.isEmpty() && difficultyLevel != null) {
-            return startSystemAssessment(user, knowledgeAreas, difficultyLevel);
+            SystemAssessmentType type = systemAssessmentType != null ? systemAssessmentType : SystemAssessmentType.MULTIPLE_CHOICE;
+            return startSystemAssessment(user, knowledgeAreas, difficultyLevel, type);
         } else {
             throw new IllegalArgumentException("Invalid criteria to start the assessment. Provide a token or area of knowledge and difficulty.");
         }
@@ -89,20 +91,20 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
         return attemptGateway.save(attempt);
     }
 
-    private AssessmentAttempt startSystemAssessment(User user, Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel) {
-        List<Question> questions = generateSystemAssessmentUseCase.createQuestions(knowledgeAreas, difficultyLevel);
+    private AssessmentAttempt startSystemAssessment(User user, Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, SystemAssessmentType type) {
+        List<Question> questions = generateSystemAssessmentUseCase.createQuestions(knowledgeAreas, difficultyLevel, type);
         if (questions.isEmpty()) {
             throw new AssessmentNotFoundException("It was not possible to generate an assessment. There are not enough questions for the selected criteria.");
         }
 
-        SystemAssessment assessment = createSystemAssessment(knowledgeAreas, difficultyLevel, questions);
+        SystemAssessment assessment = createSystemAssessment(knowledgeAreas, difficultyLevel, questions, type);
 
         AssessmentAttempt attempt = createAssessmentAttempt(assessment, user, questions);
 
         return attemptGateway.save(attempt);
     }
 
-    private SystemAssessment createSystemAssessment(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, List<Question> questions) {
+    private SystemAssessment createSystemAssessment(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, List<Question> questions, SystemAssessmentType type) {
         return new SystemAssessment(
                 null,             // Null pois JPA gera na camada infra
                 "Avaliação de " + knowledgeAreas.iterator().next().toString(),
@@ -110,13 +112,13 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
                 LocalDateTime.now(),
                 questions,
                 // Lógica de tempo pode ser configurada aqui
-                getTimerForDifficulty(difficultyLevel)
+                getTimerForAssessment(difficultyLevel, type)
         );
     }
 
     private AssessmentAttempt createAssessmentAttempt(Assessment assessment, User user, List<Question> questions) {
         return new AssessmentAttempt(
-                null,             // Null pois JPA gera na camada infra
+                null,                // Null pois JPA gera na camada infra
                 assessment,
                 user,
                 questions,           // A mesma lista, já embaralhada pela factory
@@ -130,7 +132,10 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
         );
     }
 
-    private Duration getTimerForDifficulty(DifficultyLevel difficultyLevel) {
+    private Duration getTimerForAssessment(DifficultyLevel difficultyLevel, SystemAssessmentType type) {
+        if (type == SystemAssessmentType.PROJECT) {
+            return Duration.ofMinutes(60);
+        }
         return switch (difficultyLevel) {
             case EASY   -> Duration.ofMinutes(5);
             case MEDIUM -> Duration.ofMinutes(10);

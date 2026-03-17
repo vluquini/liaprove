@@ -72,12 +72,14 @@ public interface QuestionGateway {
     List<Question> findByStatusAndVotingEndDateBefore(QuestionStatus status, java.time.LocalDateTime dateTime);
 
     /**
-     * Encontra uma quantidade de questões aleatórias que correspondem a um critério.
+     * Encontra uma quantidade de questões aleatórias que correspondem a um critério e a um tipo específico.
      *
      * @param knowledgeAreas As áreas de conhecimento.
      * @param difficultyLevel O nível de dificuldade.
      * @param limit O número de questões a serem retornadas.
-     * @return Uma lista de questões aleatórias.
+     * @param questionType O tipo da questão (MultipleChoiceQuestion.class ou ProjectQuestion.class).
+     * @return Uma lista de questões aleatórias do tipo especificado.
      */
-    List<Question> findRandomByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, int limit);
+    List<Question> findRandomByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, int limit,
+                                        Class<? extends Question> questionType);
 }

@@ -1,5 +1,6 @@
 package com.lia.liaprove.core.usecases.assessments;
 
+import com.lia.liaprove.application.services.assessment.dto.SystemAssessmentType;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.Question;
@@ -17,7 +18,8 @@ public interface GenerateSystemAssessmentUseCase {
      *
      * @param knowledgeAreas As áreas de conhecimento desejadas.
      * @param difficultyLevel O nível de dificuldade da avaliação (EASY, MEDIUM, HARD).
+     * @param type O tipo de avaliação do sistema (MULTIPLE_CHOICE ou PROJECT).
      * @return Uma lista de questões selecionadas e embaralhadas.
      */
-    List<Question> createQuestions(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel);
+    List<Question> createQuestions(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, SystemAssessmentType type);
 }

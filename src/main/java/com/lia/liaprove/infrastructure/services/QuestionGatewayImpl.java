@@ -87,7 +87,8 @@ public class QuestionGatewayImpl implements QuestionGateway {
     }
 
     @Override
-    public List<Question> findRandomByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, int limit) {
+    public List<Question> findRandomByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, int limit,
+                                               Class<? extends Question> questionType){
         return List.of(); // Not yet implemented
     }
 

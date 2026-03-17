@@ -1,6 +1,7 @@
 package com.lia.liaprove.core.usecases.assessments;
 
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
+import com.lia.liaprove.application.services.assessment.dto.SystemAssessmentType;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.exceptions.assessment.AssessmentNotActiveException;
@@ -27,6 +28,7 @@ public interface StartNewAssessmentUseCase {
      * @param shareableToken  Token de acesso para uma avaliação personalizada (opcional).
      * @param knowledgeAreas  Critérios de área para uma avaliação do sistema (opcional).
      * @param difficultyLevel Critério de dificuldade para uma avaliação do sistema (opcional).
+     * @param systemAssessmentType Tipo de avaliação do sistema (MULTIPLE_CHOICE ou PROJECT) (opcional).
      * @return A entidade AssessmentAttempt criada com o status IN_PROGRESS.
      * @throws UserNotFoundException                   Se o usuário não for encontrado.
      * @throws AssessmentNotFoundException             Se a avaliação não for encontrada.
@@ -35,6 +37,6 @@ public interface StartNewAssessmentUseCase {
      * @throws MaxAttemptsReachedException             Se o limite de participantes foi atingido.
      * @throws IllegalArgumentException                Se os parâmetros forem insuficientes.
      */
-    AssessmentAttempt execute(UUID userId, String shareableToken,
-                              Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel);
+    AssessmentAttempt execute(UUID userId, String shareableToken, Set<KnowledgeArea> knowledgeAreas,
+                              DifficultyLevel difficultyLevel, SystemAssessmentType systemAssessmentType);
 }
