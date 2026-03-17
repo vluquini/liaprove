@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.services;
+package com.lia.liaprove.infrastructure.services.question;
 
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;

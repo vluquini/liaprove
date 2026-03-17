@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.services;
+package com.lia.liaprove.infrastructure.services.metrics;
 
 import com.lia.liaprove.application.gateways.metrics.FeedbackGateway;
 import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;

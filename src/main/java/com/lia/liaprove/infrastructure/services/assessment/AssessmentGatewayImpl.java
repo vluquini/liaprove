@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.services;
+package com.lia.liaprove.infrastructure.services.assessment;
 
 import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.core.domain.assessment.Assessment;

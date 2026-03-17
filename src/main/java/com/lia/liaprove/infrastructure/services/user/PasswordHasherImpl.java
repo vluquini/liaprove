@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.services;
+package com.lia.liaprove.infrastructure.services.user;
 
 import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import org.springframework.security.crypto.password.PasswordEncoder;
