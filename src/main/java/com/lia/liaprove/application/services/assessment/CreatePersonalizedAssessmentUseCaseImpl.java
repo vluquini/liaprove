@@ -66,7 +66,7 @@ public class CreatePersonalizedAssessmentUseCaseImpl implements CreatePersonaliz
 
         // 4. Criar o objeto de domínio
         PersonalizedAssessment assessment = new PersonalizedAssessment(
-                UUID.randomUUID(),
+                null,
                 title,
                 description,
                 LocalDateTime.now(),
