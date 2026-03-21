@@ -21,23 +21,23 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 public class PersonalizedAssessmentEntity extends AssessmentEntity {
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by_recruiter_id", nullable = false)
+    @JoinColumn(name = "created_by_recruiter_id")
     private UserRecruiterEntity createdBy;
 
-    @Column(nullable = false)
+    @Column
     private LocalDateTime expirationDate;
 
-    @Column(nullable = false)
+    @Column
     private int totalAttempts;
 
-    @Column(nullable = false)
+    @Column
     private int maxAttempts;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String shareableToken;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 32)
+    @Column(length = 32)
     private PersonalizedAssessmentStatus status;
 }
 
