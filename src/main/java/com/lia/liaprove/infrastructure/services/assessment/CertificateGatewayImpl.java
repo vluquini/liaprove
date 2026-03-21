@@ -2,9 +2,11 @@ package com.lia.liaprove.infrastructure.services.assessment;
 
 import com.lia.liaprove.application.gateways.assessment.CertificateGateway;
 import com.lia.liaprove.core.domain.assessment.Certificate;
+import com.lia.liaprove.infrastructure.entities.assessment.CertificateEntity;
 import com.lia.liaprove.infrastructure.mappers.assessment.CertificateMapper;
 import com.lia.liaprove.infrastructure.repositories.CertificateJpaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -20,13 +22,18 @@ public class CertificateGatewayImpl implements CertificateGateway {
     }
 
     @Override
+    @Transactional
     public Certificate save(Certificate certificate) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        CertificateEntity entity = certificateMapper.toEntity(certificate);
+        CertificateEntity savedEntity = certificateJpaRepository.save(entity);
+        return certificateMapper.toDomain(savedEntity);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Certificate> findByCertificateNumber(String certificateNumber) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return certificateJpaRepository.findByCertificateNumber(certificateNumber)
+                .map(certificateMapper::toDomain);
     }
 }
 

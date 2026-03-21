@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,6 +35,21 @@ public interface QuestionJpaRepository extends JpaRepository<QuestionEntity, UUI
 
     List<QuestionEntity> findByStatusAndVotingEndDateBefore(QuestionStatus status, LocalDateTime votingEndDate);
 
+    @Query("SELECT q.id FROM QuestionEntity q LEFT JOIN q.knowledgeAreas ka " +
+            "WHERE ka IN (:knowledgeAreas) " +
+            "AND q.difficultyByCommunity = :difficultyLevel " +
+            "AND TYPE(q) = :questionType " +
+            "ORDER BY function('RANDOM')")
+    List<UUID> findRandomQuestionIds(
+            @Param("knowledgeAreas") Set<KnowledgeArea> knowledgeAreas,
+            @Param("difficultyLevel") DifficultyLevel difficultyLevel,
+            @Param("questionType") Class<? extends QuestionEntity> questionType,
+            Pageable pageable
+    );
+
+    @Query("SELECT DISTINCT q FROM QuestionEntity q LEFT JOIN FETCH TREAT(q AS MultipleChoiceQuestionEntity).alternatives WHERE q.id IN :ids")
+    List<QuestionEntity> findAllByIdWithAlternatives(@Param("ids") List<UUID> ids);
+
     @Query("SELECT q FROM QuestionEntity q LEFT JOIN FETCH TREAT(q AS MultipleChoiceQuestionEntity).alternatives a WHERE q.id = :id")
-    QuestionEntity findByIdFetchingAlternatives(@Param("id") UUID id);
+    Optional<QuestionEntity> findByIdFetchingAlternatives(@Param("id") UUID id);
 }

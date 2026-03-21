@@ -314,4 +314,13 @@ public interface QuestionMapper {
         };
 
     }
+
+    default Class<? extends QuestionEntity> mapToEntityClass(Class<? extends Question> domainClass) {
+        if (MultipleChoiceQuestion.class.equals(domainClass)) {
+            return MultipleChoiceQuestionEntity.class;
+        } else if (ProjectQuestion.class.equals(domainClass)) {
+            return ProjectQuestionEntity.class;
+        }
+        return QuestionEntity.class;
+    }
 }

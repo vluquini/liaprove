@@ -1,10 +1,7 @@
 package com.lia.liaprove.infrastructure.services.question;
 
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
-import com.lia.liaprove.core.domain.question.DifficultyLevel;
-import com.lia.liaprove.core.domain.question.KnowledgeArea;
-import com.lia.liaprove.core.domain.question.Question;
-import com.lia.liaprove.core.domain.question.QuestionStatus;
+import com.lia.liaprove.core.domain.question.*;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.repositories.QuestionJpaRepository;
@@ -45,8 +42,8 @@ public class QuestionGatewayImpl implements QuestionGateway {
     @Override
     @Transactional(readOnly = true)
     public Optional<Question> findById(UUID id) {
-        QuestionEntity entity = questionJpaRepository.findByIdFetchingAlternatives(id);
-        return Optional.ofNullable(entity).map(questionMapper::toDomain);
+        return questionJpaRepository.findByIdFetchingAlternatives(id)
+                .map(questionMapper::toDomain);
     }
 
     @Override
@@ -88,8 +85,19 @@ public class QuestionGatewayImpl implements QuestionGateway {
 
     @Override
     public List<Question> findRandomByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, int limit,
-                                               Class<? extends Question> questionType){
-        return List.of(); // Not yet implemented
-    }
+                                               Class<? extends Question> questionType) {
+        Class<? extends QuestionEntity> entityClass = questionMapper.mapToEntityClass(questionType);
+        Pageable pageable = PageRequest.of(0, limit);
 
+        List<UUID> randomIds = questionJpaRepository.findRandomQuestionIds(knowledgeAreas, difficultyLevel, entityClass, pageable);
+
+        if (randomIds.isEmpty()) {
+            return List.of();
+        }
+
+        return questionJpaRepository.findAllByIdWithAlternatives(randomIds)
+                .stream()
+                .map(questionMapper::toDomain)
+                .collect(Collectors.toList());
+    }
 }

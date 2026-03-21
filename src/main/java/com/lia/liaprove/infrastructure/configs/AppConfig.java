@@ -1,14 +1,23 @@
 package com.lia.liaprove.infrastructure.configs;
 
+import com.lia.liaprove.application.gateways.algorithms.bayesian.BayesianGateway;
+import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
+import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
+import com.lia.liaprove.application.gateways.assessment.CertificateGateway;
 import com.lia.liaprove.application.gateways.metrics.FeedbackGateway;
 import com.lia.liaprove.application.gateways.metrics.VoteGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.application.gateways.ai.QuestionPreAnalysisGateway;
 import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
+import com.lia.liaprove.application.services.algorithms.bayesian.BayesianNetworkUseCaseImpl;
+import com.lia.liaprove.application.services.assessment.*;
 import com.lia.liaprove.application.services.metrics.*;
 import com.lia.liaprove.application.services.question.*;
 import com.lia.liaprove.application.services.user.*;
+import com.lia.liaprove.core.algorithms.bayesian.BayesianConfig;
+import com.lia.liaprove.core.usecases.algorithms.bayesian.BayesianNetworkUseCase;
+import com.lia.liaprove.core.usecases.assessments.*;
 import com.lia.liaprove.core.usecases.metrics.*;
 import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.core.usecases.user.admin.UserModerationUseCase;
@@ -191,5 +200,60 @@ public class AppConfig {
     @Bean
     public UpdateFeedbackCommentUseCase updateFeedbackCommentUseCase(FeedbackGateway feedbackGateway) {
         return new UpdateFeedbackCommentUseCaseImpl(feedbackGateway);
+    }
+
+    // Assessment Domain
+    @Bean
+    public GenerateSystemAssessmentUseCase generateSystemAssessmentUseCase(QuestionGateway questionGateway) {
+        return new GenerateSystemAssessmentUseCaseImpl(questionGateway);
+    }
+
+    @Bean
+    public CreatePersonalizedAssessmentUseCase createPersonalizedAssessmentUseCase(AssessmentGateway assessmentGateway,
+                                                                                   QuestionGateway questionGateway,
+                                                                                   UserGateway userGateway) {
+        return new CreatePersonalizedAssessmentUseCaseImpl(assessmentGateway, questionGateway, userGateway);
+    }
+
+    @Bean
+    public BayesianConfig bayesianConfig() {
+        // Configuração padrão para o MVP
+        return BayesianConfig.defaults();
+    }
+
+    @Bean
+    public BayesianNetworkUseCase bayesianNetworkUseCase(BayesianGateway bayesianGateway, BayesianConfig bayesianConfig) {
+        return new BayesianNetworkUseCaseImpl(bayesianGateway, bayesianConfig);
+    }
+
+    @Bean
+    public SuggestQuestionsForAssessmentUseCase suggestQuestionsForAssessmentUseCase(BayesianNetworkUseCase bayesianNetworkUseCase,
+                                                                                     UserGateway userGateway) {
+        return new SuggestQuestionsForAssessmentUseCaseImpl(bayesianNetworkUseCase, userGateway);
+    }
+
+    @Bean
+    public StartNewAssessmentUseCase startNewAssessmentUseCase(AssessmentGateway assessmentGateway,
+                                                               AssessmentAttemptGateway assessmentAttemptGateway,
+                                                               UserGateway userGateway,
+                                                               GenerateSystemAssessmentUseCase generateSystemAssessmentUseCase) {
+        return new StartNewAssessmentUseCaseImpl(assessmentGateway, assessmentAttemptGateway, userGateway, generateSystemAssessmentUseCase);
+    }
+
+    @Bean
+    public IssueCertificateUseCase issueCertificateUseCase(CertificateGateway certificateGateway) {
+        return new IssueCertificateUseCaseImpl(certificateGateway, "https://liaprove.com/certificates");
+    }
+
+    @Bean
+    public SubmitAssessmentUseCase submitAssessmentUseCase(AssessmentAttemptGateway assessmentAttemptGateway,
+                                                           IssueCertificateUseCase issueCertificateUseCase) {
+        return new SubmitAssessmentUseCaseImpl(assessmentAttemptGateway, issueCertificateUseCase);
+    }
+
+    @Bean
+    public FinalizeAssessmentAttemptUseCase finalizeAssessmentAttemptUseCase(AssessmentAttemptGateway assessmentAttemptGateway,
+                                                                             UserGateway userGateway) {
+        return new FinalizeAssessmentAttemptUseCaseImpl(assessmentAttemptGateway, userGateway);
     }
 }

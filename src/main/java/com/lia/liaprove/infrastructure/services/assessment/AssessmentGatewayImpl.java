@@ -3,13 +3,17 @@ package com.lia.liaprove.infrastructure.services.assessment;
 import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.core.domain.assessment.Assessment;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
+import com.lia.liaprove.infrastructure.entities.assessment.AssessmentEntity;
+import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
 import com.lia.liaprove.infrastructure.mappers.assessment.AssessmentMapper;
 import com.lia.liaprove.infrastructure.repositories.AssessmentJpaRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AssessmentGatewayImpl implements AssessmentGateway {
@@ -23,23 +27,34 @@ public class AssessmentGatewayImpl implements AssessmentGateway {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Assessment> findById(UUID id) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return assessmentJpaRepository.findById(id)
+                .map(assessmentMapper::toDomain);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<Assessment> findByShareableToken(String token) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return assessmentJpaRepository.findByShareableToken(token)
+                .map(assessmentMapper::toDomain);
     }
 
     @Override
+    @Transactional
     public Assessment save(Assessment assessment) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        AssessmentEntity entity = assessmentMapper.toEntity(assessment);
+        AssessmentEntity savedEntity = assessmentJpaRepository.save(entity);
+        return assessmentMapper.toDomain(savedEntity);
     }
 
     @Override
+    @Transactional
     public void saveAll(List<PersonalizedAssessment> assessments) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        List<PersonalizedAssessmentEntity> entities = assessments.stream()
+                .map(assessmentMapper::toEntity)
+                .collect(Collectors.toList());
+        assessmentJpaRepository.saveAll(entities);
     }
 
     @Override
