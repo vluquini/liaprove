@@ -35,7 +35,7 @@ MERGE INTO questions (
     'FIVE',
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     'FOUR',
     0
     );
@@ -85,7 +85,7 @@ MERGE INTO questions (
     'FIVE',
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     'FIVE',
     0
     );
@@ -134,7 +134,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -183,7 +183,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -225,7 +225,7 @@ MERGE INTO questions (
     3,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     3,
     0
     );
@@ -267,7 +267,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -309,7 +309,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -351,7 +351,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -394,7 +394,7 @@ MERGE INTO questions (
     3,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     3,
     0
     );
@@ -436,7 +436,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -478,7 +478,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -520,7 +520,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -562,7 +562,7 @@ MERGE INTO questions (
     3,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     3,
     0
     );
@@ -604,7 +604,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -646,7 +646,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -688,7 +688,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -730,7 +730,7 @@ MERGE INTO questions (
     3,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     3,
     0
     );
@@ -772,7 +772,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -814,7 +814,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -856,7 +856,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -898,7 +898,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -940,7 +940,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -973,7 +973,7 @@ MERGE INTO questions (
     'FOUR',
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     'FOUR',
     0
     );
@@ -1006,7 +1006,7 @@ MERGE INTO questions (
     'THREE',
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     'THREE',
     0
     );
@@ -1039,7 +1039,7 @@ MERGE INTO questions (
     'FOUR',
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     'FOUR',
     0
     );
@@ -1072,7 +1072,7 @@ MERGE INTO questions (
     'FIVE',
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     'FIVE',
     0
     );
@@ -1105,7 +1105,7 @@ MERGE INTO questions (
     'FOUR',
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     'FOUR',
     0
     );
@@ -1138,7 +1138,7 @@ MERGE INTO questions (
     'FOUR',
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     'FOUR',
     0
     );
@@ -1171,7 +1171,7 @@ MERGE INTO questions (
     'FIVE',
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     'FIVE',
     0
     );
@@ -1204,7 +1204,7 @@ MERGE INTO questions (
     'FOUR',
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     'FOUR',
     0
     );
@@ -1237,7 +1237,7 @@ MERGE INTO questions (
     'FIVE',
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     'FIVE',
     0
     );
@@ -1270,7 +1270,7 @@ MERGE INTO questions (
     'FIVE',
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     'FIVE',
     0
     );
@@ -1304,7 +1304,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1336,7 +1336,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1368,7 +1368,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1400,7 +1400,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -1432,7 +1432,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1464,7 +1464,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1496,7 +1496,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -1528,7 +1528,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -1560,7 +1560,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1592,7 +1592,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1624,7 +1624,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1656,7 +1656,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -1688,7 +1688,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -1721,7 +1721,7 @@ MERGE INTO questions (
     3,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     3,
     0
     );
@@ -1754,7 +1754,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1786,7 +1786,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1818,7 +1818,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1850,7 +1850,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -1882,7 +1882,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1914,7 +1914,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1946,7 +1946,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -1978,7 +1978,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -2010,7 +2010,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -2042,7 +2042,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -2074,7 +2074,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -2106,7 +2106,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -2138,7 +2138,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -2170,7 +2170,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -2202,7 +2202,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -2234,7 +2234,7 @@ MERGE INTO questions (
     3,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     3,
     0
     );
@@ -2266,7 +2266,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -2300,7 +2300,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -2334,7 +2334,7 @@ MERGE INTO questions (
     3,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     3,
     0
     );
@@ -2368,7 +2368,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -2402,7 +2402,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0
     );
@@ -2436,7 +2436,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -2470,7 +2470,7 @@ MERGE INTO questions (
     3,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     3,
     0
     );
@@ -2825,7 +2825,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0
     );
@@ -2863,7 +2863,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 10, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0,
     'http://github.com/example/jwt-api'
@@ -2891,7 +2891,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 14, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0,
     'http://github.com/example/ml-pipeline'
@@ -2918,7 +2918,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 10, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0,
     'http://github.com/example/distributed-cache'
@@ -2945,7 +2945,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0,
     'http://github.com/example/ecommerce-db'
@@ -2972,7 +2972,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 14, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0,
     'http://github.com/example/anomaly-detection'
@@ -2999,7 +2999,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0,
     'http://github.com/example/rate-limiting'
@@ -3026,7 +3026,7 @@ MERGE INTO questions (
     4,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 7, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     4,
     0,
     'http://github.com/example/monitoring-stack'
@@ -3053,7 +3053,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 10, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0,
     'http://github.com/example/rabbitmq-system'
@@ -3080,7 +3080,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 14, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0,
     'http://github.com/example/recommendation-system'
@@ -3107,7 +3107,7 @@ MERGE INTO questions (
     5,
     CURRENT_TIMESTAMP,
     DATEADD('DAY', 14, CURRENT_TIMESTAMP),
-    'APPROVED',
+    'FINISHED',
     5,
     0,
     'http://github.com/example/microservices-architecture'
