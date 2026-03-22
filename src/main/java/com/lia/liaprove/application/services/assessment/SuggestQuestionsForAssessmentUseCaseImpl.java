@@ -5,6 +5,7 @@ import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
 import com.lia.liaprove.application.services.assessment.dto.SuggestionCriteriaDto;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
+import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
@@ -69,6 +70,9 @@ public class SuggestQuestionsForAssessmentUseCaseImpl implements SuggestQuestion
             Set<DifficultyLevel> difficultyLevels = criteria.getDifficultyLevels().get();
             filteredStream = filteredStream.filter(sq -> difficultyLevels.contains(sq.getQuestion().getDifficultyByCommunity()));
         }
+
+        // Filtrar apenas questões FINALIZADAS (aprovadas e prontas para uso)
+        filteredStream = filteredStream.filter(sq -> sq.getQuestion().getStatus() == QuestionStatus.FINISHED);
 
         // Filtrar IDs excluídos
         if (criteria.getExcludeIds() != null && !criteria.getExcludeIds().isEmpty()) {

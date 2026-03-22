@@ -39,11 +39,13 @@ public interface QuestionJpaRepository extends JpaRepository<QuestionEntity, UUI
             "WHERE ka IN (:knowledgeAreas) " +
             "AND q.difficultyByCommunity = :difficultyLevel " +
             "AND TYPE(q) = :questionType " +
+            "AND (:status IS NULL OR q.status = :status) " +
             "ORDER BY function('RANDOM')")
     List<UUID> findRandomQuestionIds(
             @Param("knowledgeAreas") Set<KnowledgeArea> knowledgeAreas,
             @Param("difficultyLevel") DifficultyLevel difficultyLevel,
             @Param("questionType") Class<? extends QuestionEntity> questionType,
+            @Param("status") QuestionStatus status,
             Pageable pageable
     );
 

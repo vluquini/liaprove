@@ -34,7 +34,7 @@ public class GenerateSystemAssessmentUseCaseImpl implements GenerateSystemAssess
     @Override
     public List<Question> createQuestions(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, SystemAssessmentType type) {
         if (type == SystemAssessmentType.PROJECT) {
-            return questionGateway.findRandomByCriteria(knowledgeAreas, difficultyLevel, 1, ProjectQuestion.class);
+            return questionGateway.findRandomByCriteria(knowledgeAreas, difficultyLevel, QuestionStatus.FINISHED, 1, ProjectQuestion.class);
         }
 
         // Caso MULTIPLE_CHOICE
@@ -75,9 +75,12 @@ public class GenerateSystemAssessmentUseCaseImpl implements GenerateSystemAssess
     }
 
     private List<Question> fetchAndCombineQuestions(Set<KnowledgeArea> knowledgeAreas, int easyCount, int mediumCount, int hardCount) {
-        List<Question> easyQuestions   = questionGateway.findRandomByCriteria(knowledgeAreas, DifficultyLevel.EASY, easyCount, MultipleChoiceQuestion.class);
-        List<Question> mediumQuestions = questionGateway.findRandomByCriteria(knowledgeAreas, DifficultyLevel.MEDIUM, mediumCount, MultipleChoiceQuestion.class);
-        List<Question> hardQuestions   = questionGateway.findRandomByCriteria(knowledgeAreas, DifficultyLevel.HARD, hardCount, MultipleChoiceQuestion.class);
+        List<Question> easyQuestions   = questionGateway.findRandomByCriteria(knowledgeAreas, DifficultyLevel.EASY,
+                                         QuestionStatus.FINISHED, easyCount, MultipleChoiceQuestion.class);
+        List<Question> mediumQuestions = questionGateway.findRandomByCriteria(knowledgeAreas, DifficultyLevel.MEDIUM,
+                                         QuestionStatus.FINISHED, mediumCount, MultipleChoiceQuestion.class);
+        List<Question> hardQuestions   = questionGateway.findRandomByCriteria(knowledgeAreas, DifficultyLevel.HARD,
+                                         QuestionStatus.FINISHED, hardCount, MultipleChoiceQuestion.class);
 
         List<Question> combined = new ArrayList<>();
         combined.addAll(easyQuestions);

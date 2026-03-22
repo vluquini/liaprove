@@ -84,12 +84,13 @@ public class QuestionGatewayImpl implements QuestionGateway {
     }
 
     @Override
-    public List<Question> findRandomByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel, int limit,
-                                               Class<? extends Question> questionType) {
+    public List<Question> findRandomByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
+                                               QuestionStatus status, int limit, Class<? extends Question> questionType) {
         Class<? extends QuestionEntity> entityClass = questionMapper.mapToEntityClass(questionType);
         Pageable pageable = PageRequest.of(0, limit);
 
-        List<UUID> randomIds = questionJpaRepository.findRandomQuestionIds(knowledgeAreas, difficultyLevel, entityClass, pageable);
+        List<UUID> randomIds = questionJpaRepository
+                                .findRandomQuestionIds(knowledgeAreas, difficultyLevel, entityClass, status, pageable);
 
         if (randomIds.isEmpty()) {
             return List.of();
