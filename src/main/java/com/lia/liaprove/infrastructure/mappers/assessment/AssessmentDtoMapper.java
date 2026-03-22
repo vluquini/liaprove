@@ -43,12 +43,12 @@ public interface AssessmentDtoMapper {
     ScoredQuestionResponse toScoredQuestionResponse(ScoredQuestion scoredQuestion);
 
     @Named("mapQuestions")
-    default List<AssessmentAttemptResponse.QuestionResponse> mapQuestions(List<Question> questions) {
+    default List<AssessmentAttemptResponse.AttemptQuestionResponse> mapQuestions(List<Question> questions) {
         if (questions == null) return null;
         return questions.stream().map(this::mapQuestion).collect(Collectors.toList());
     }
 
-    default AssessmentAttemptResponse.QuestionResponse mapQuestion(Question question) {
+    default AssessmentAttemptResponse.AttemptQuestionResponse mapQuestion(Question question) {
         if (question == null) return null;
         Object alternatives = null;
         if (question instanceof MultipleChoiceQuestion mcq) {
@@ -56,7 +56,7 @@ public interface AssessmentDtoMapper {
                     .map(alt -> new AlternativeDto(alt.id(), alt.text())) // Using a simple internal record-like representation or just Map
                     .collect(Collectors.toList());
         }
-        return new AssessmentAttemptResponse.QuestionResponse(
+        return new AssessmentAttemptResponse.AttemptQuestionResponse(
                 question.getId(),
                 question.getTitle(),
                 question.getDescription(),

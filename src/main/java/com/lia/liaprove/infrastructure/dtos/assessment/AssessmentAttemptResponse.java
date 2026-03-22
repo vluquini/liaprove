@@ -9,9 +9,9 @@ public record AssessmentAttemptResponse(
     String assessmentTitle,
     LocalDateTime startedAt,
     long evaluationTimerMinutes,
-    List<QuestionResponse> questions
+    List<AttemptQuestionResponse> questions
 ) {
-    public record QuestionResponse(
+    public record AttemptQuestionResponse(
         UUID id,
         String title,
         String description,
