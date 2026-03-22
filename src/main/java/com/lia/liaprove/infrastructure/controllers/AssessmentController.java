@@ -59,7 +59,7 @@ public class AssessmentController {
         AssessmentAttempt attempt = startNewAssessmentUseCase.execute(
                 userId,
                 null,
-                request.knowledgeAreas(),
+                request.knowledgeArea(),
                 request.difficultyLevel(),
                 request.type()
         );

@@ -5,6 +5,7 @@ import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -69,7 +70,7 @@ public interface QuestionGateway {
      * @param dateTime A data e hora de corte. Questões com votingEndDate anterior a este valor serão retornadas.
      * @return Uma lista de questões que correspondem aos critérios.
      */
-    List<Question> findByStatusAndVotingEndDateBefore(QuestionStatus status, java.time.LocalDateTime dateTime);
+    List<Question> findByStatusAndVotingEndDateBefore(QuestionStatus status, LocalDateTime dateTime);
 
     /**
      * Encontra uma quantidade de questões aleatórias que correspondem a um critério e a um tipo específico.

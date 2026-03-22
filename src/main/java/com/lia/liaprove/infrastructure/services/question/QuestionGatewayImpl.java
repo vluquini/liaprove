@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -77,7 +78,7 @@ public class QuestionGatewayImpl implements QuestionGateway {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Question> findByStatusAndVotingEndDateBefore(QuestionStatus status, java.time.LocalDateTime dateTime) {
+    public List<Question> findByStatusAndVotingEndDateBefore(QuestionStatus status, LocalDateTime dateTime) {
         return questionJpaRepository.findByStatusAndVotingEndDateBefore(status, dateTime).stream()
                 .map(questionMapper::toDomain)
                 .collect(Collectors.toList());
