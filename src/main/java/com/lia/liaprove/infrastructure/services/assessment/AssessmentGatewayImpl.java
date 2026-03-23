@@ -29,7 +29,7 @@ public class AssessmentGatewayImpl implements AssessmentGateway {
     @Override
     @Transactional(readOnly = true)
     public Optional<Assessment> findById(UUID id) {
-        return assessmentJpaRepository.findById(id)
+        return assessmentJpaRepository.findByIdWithCreator(id)
                 .map(assessmentMapper::toDomain);
     }
 
@@ -58,8 +58,9 @@ public class AssessmentGatewayImpl implements AssessmentGateway {
     }
 
     @Override
+    @Transactional
     public void deletePersonalizedAssessmentById(UUID assessmentId) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        assessmentJpaRepository.deleteById(assessmentId);
     }
 
     @Override

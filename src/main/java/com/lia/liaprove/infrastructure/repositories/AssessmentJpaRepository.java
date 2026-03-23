@@ -17,6 +17,14 @@ import java.util.UUID;
 public interface AssessmentJpaRepository extends JpaRepository<AssessmentEntity, UUID> {
     Optional<PersonalizedAssessmentEntity> findByShareableToken(String shareableToken);
 
+    @Query("""
+        SELECT a
+        FROM AssessmentEntity a
+        LEFT JOIN FETCH TREAT(a AS PersonalizedAssessmentEntity).createdBy
+        WHERE a.id = :id
+    """)
+    Optional<AssessmentEntity> findByIdWithCreator(@Param("id") UUID id);
+
     @Query("SELECT pa FROM PersonalizedAssessmentEntity pa WHERE pa.status = :status AND pa.expirationDate < :currentDateTime")
     List<PersonalizedAssessmentEntity> findActiveAssessmentsWithPastExpirationDate(
             @Param("status") PersonalizedAssessmentStatus status,

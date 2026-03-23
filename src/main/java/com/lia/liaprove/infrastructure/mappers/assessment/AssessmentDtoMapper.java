@@ -7,6 +7,7 @@ import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentAttemptResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentResultResponse;
+import com.lia.liaprove.infrastructure.dtos.assessment.DeletePersonalizedAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.EvaluateAssessmentAttemptResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.PersonalizedAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.ScoredQuestionResponse;
@@ -40,6 +41,13 @@ public interface AssessmentDtoMapper {
     @Mapping(target = "accuracyRate", source = "accuracyRate")
     @Mapping(target = "message", constant = "Assessment evaluated successfully.")
     EvaluateAssessmentAttemptResponse toEvaluateAttemptResponse(AssessmentAttempt attempt);
+
+    default DeletePersonalizedAssessmentResponse toDeleteResponse(UUID assessmentId) {
+        return new DeletePersonalizedAssessmentResponse(
+                assessmentId,
+                "Assessment deleted successfully."
+        );
+    }
 
     @Mapping(target = "id", source = "question.id")
     @Mapping(target = "title", source = "question.title")

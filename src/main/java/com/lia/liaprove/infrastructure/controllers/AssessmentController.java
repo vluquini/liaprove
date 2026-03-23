@@ -8,6 +8,7 @@ import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.usecases.assessments.CreatePersonalizedAssessmentUseCase;
+import com.lia.liaprove.core.usecases.assessments.DeletePersonalizedAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.EvaluateAssessmentAttemptUseCase;
 import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SubmitAssessmentUseCase;
@@ -35,6 +36,7 @@ public class AssessmentController {
     private final CreatePersonalizedAssessmentUseCase createPersonalizedAssessmentUseCase;
     private final SuggestQuestionsForAssessmentUseCase suggestQuestionsForAssessmentUseCase;
     private final EvaluateAssessmentAttemptUseCase evaluateAssessmentAttemptUseCase;
+    private final DeletePersonalizedAssessmentUseCase deletePersonalizedAssessmentUseCase;
     private final SecurityContextService securityContextService;
     private final AssessmentDtoMapper assessmentDtoMapper;
 
@@ -43,6 +45,7 @@ public class AssessmentController {
                                 CreatePersonalizedAssessmentUseCase createPersonalizedAssessmentUseCase,
                                 SuggestQuestionsForAssessmentUseCase suggestQuestionsForAssessmentUseCase,
                                 EvaluateAssessmentAttemptUseCase evaluateAssessmentAttemptUseCase,
+                                DeletePersonalizedAssessmentUseCase deletePersonalizedAssessmentUseCase,
                                 SecurityContextService securityContextService,
                                 AssessmentDtoMapper assessmentDtoMapper) {
         this.startNewAssessmentUseCase = startNewAssessmentUseCase;
@@ -50,6 +53,7 @@ public class AssessmentController {
         this.createPersonalizedAssessmentUseCase = createPersonalizedAssessmentUseCase;
         this.suggestQuestionsForAssessmentUseCase = suggestQuestionsForAssessmentUseCase;
         this.evaluateAssessmentAttemptUseCase = evaluateAssessmentAttemptUseCase;
+        this.deletePersonalizedAssessmentUseCase = deletePersonalizedAssessmentUseCase;
         this.securityContextService = securityContextService;
         this.assessmentDtoMapper = assessmentDtoMapper;
     }
@@ -185,5 +189,17 @@ public class AssessmentController {
         );
 
         return ResponseEntity.ok(assessmentDtoMapper.toEvaluateAttemptResponse(updatedAttempt));
+    }
+
+    @DeleteMapping("/personalized/{assessmentId}")
+    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
+    public ResponseEntity<DeletePersonalizedAssessmentResponse> deletePersonalizedAssessment(
+            @PathVariable UUID assessmentId) {
+
+        UUID requesterId = securityContextService.getCurrentUserId();
+
+        deletePersonalizedAssessmentUseCase.execute(assessmentId, requesterId);
+
+        return ResponseEntity.ok(assessmentDtoMapper.toDeleteResponse(assessmentId));
     }
 }

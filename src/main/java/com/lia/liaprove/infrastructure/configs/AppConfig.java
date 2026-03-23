@@ -216,6 +216,13 @@ public class AppConfig {
     }
 
     @Bean
+    public DeletePersonalizedAssessmentUseCase deletePersonalizedAssessmentUseCase(AssessmentGateway assessmentGateway,
+                                                                                   AssessmentAttemptGateway assessmentAttemptGateway,
+                                                                                   UserGateway userGateway) {
+        return new DeletePersonalizedAssessmentUseCaseImpl(assessmentGateway, assessmentAttemptGateway, userGateway);
+    }
+
+    @Bean
     public BayesianConfig bayesianConfig() {
         // Configuração padrão para o MVP
         return BayesianConfig.defaults();
