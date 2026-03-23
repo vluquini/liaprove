@@ -1,11 +1,14 @@
 package com.lia.liaprove.infrastructure.mappers.assessment;
 
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
+import com.lia.liaprove.infrastructure.entities.assessment.AnswerEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(
@@ -20,5 +23,15 @@ public interface AssessmentAttemptMapper {
 
     @Mapping(target = "feedbacks", expression = "java(new java.util.ArrayList<>())")
     AssessmentAttempt toDomain(AssessmentAttemptEntity entity);
+
+    @AfterMapping
+    default void linkAnswers(@MappingTarget AssessmentAttemptEntity entity) {
+        if (entity == null || entity.getAnswers() == null) {
+            return;
+        }
+        for (AnswerEntity answer : entity.getAnswers()) {
+            answer.setAttempt(entity);
+        }
+    }
 }
 

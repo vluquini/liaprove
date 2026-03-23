@@ -52,7 +52,7 @@ public class AssessmentAttemptGatewayImpl implements AssessmentAttemptGateway {
     @Override
     @Transactional(readOnly = true)
     public Optional<AssessmentAttempt> findById(UUID id) {
-        return assessmentAttemptJpaRepository.findById(id)
+        return assessmentAttemptJpaRepository.findByIdWithAssessmentAndCreator(id)
                 .map(assessmentAttemptMapper::toDomain);
     }
 

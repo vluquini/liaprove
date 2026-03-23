@@ -8,6 +8,7 @@ import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.usecases.assessments.CreatePersonalizedAssessmentUseCase;
+import com.lia.liaprove.core.usecases.assessments.EvaluateAssessmentAttemptUseCase;
 import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SubmitAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SuggestQuestionsForAssessmentUseCase;
@@ -33,6 +34,7 @@ public class AssessmentController {
     private final SubmitAssessmentUseCase submitAssessmentUseCase;
     private final CreatePersonalizedAssessmentUseCase createPersonalizedAssessmentUseCase;
     private final SuggestQuestionsForAssessmentUseCase suggestQuestionsForAssessmentUseCase;
+    private final EvaluateAssessmentAttemptUseCase evaluateAssessmentAttemptUseCase;
     private final SecurityContextService securityContextService;
     private final AssessmentDtoMapper assessmentDtoMapper;
 
@@ -40,12 +42,14 @@ public class AssessmentController {
                                 SubmitAssessmentUseCase submitAssessmentUseCase,
                                 CreatePersonalizedAssessmentUseCase createPersonalizedAssessmentUseCase,
                                 SuggestQuestionsForAssessmentUseCase suggestQuestionsForAssessmentUseCase,
+                                EvaluateAssessmentAttemptUseCase evaluateAssessmentAttemptUseCase,
                                 SecurityContextService securityContextService,
                                 AssessmentDtoMapper assessmentDtoMapper) {
         this.startNewAssessmentUseCase = startNewAssessmentUseCase;
         this.submitAssessmentUseCase = submitAssessmentUseCase;
         this.createPersonalizedAssessmentUseCase = createPersonalizedAssessmentUseCase;
         this.suggestQuestionsForAssessmentUseCase = suggestQuestionsForAssessmentUseCase;
+        this.evaluateAssessmentAttemptUseCase = evaluateAssessmentAttemptUseCase;
         this.securityContextService = securityContextService;
         this.assessmentDtoMapper = assessmentDtoMapper;
     }
@@ -164,5 +168,22 @@ public class AssessmentController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{attemptId}/evaluate")
+    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
+    public ResponseEntity<EvaluateAssessmentAttemptResponse> evaluateAssessmentAttempt(
+            @PathVariable UUID attemptId,
+            @RequestBody @Valid EvaluateAssessmentAttemptRequest request) {
+
+        UUID requesterId = securityContextService.getCurrentUserId();
+
+        AssessmentAttempt updatedAttempt = evaluateAssessmentAttemptUseCase.execute(
+                attemptId,
+                requesterId,
+                request.finalStatus()
+        );
+
+        return ResponseEntity.ok(assessmentDtoMapper.toEvaluateAttemptResponse(updatedAttempt));
     }
 }

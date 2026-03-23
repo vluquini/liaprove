@@ -7,6 +7,7 @@ import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentAttemptResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentResultResponse;
+import com.lia.liaprove.infrastructure.dtos.assessment.EvaluateAssessmentAttemptResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.PersonalizedAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.ScoredQuestionResponse;
 import org.mapstruct.Mapper;
@@ -34,6 +35,11 @@ public interface AssessmentDtoMapper {
     @Mapping(target = "shareableToken", source = "shareableToken")
     @Mapping(target = "status", expression = "java(assessment.getStatus().name())")
     PersonalizedAssessmentResponse toPersonalizedResponse(PersonalizedAssessment assessment);
+
+    @Mapping(target = "status", source = "status")
+    @Mapping(target = "accuracyRate", source = "accuracyRate")
+    @Mapping(target = "message", constant = "Assessment evaluated successfully.")
+    EvaluateAssessmentAttemptResponse toEvaluateAttemptResponse(AssessmentAttempt attempt);
 
     @Mapping(target = "id", source = "question.id")
     @Mapping(target = "title", source = "question.title")

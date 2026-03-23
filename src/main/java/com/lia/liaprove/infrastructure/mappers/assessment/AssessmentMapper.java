@@ -8,6 +8,7 @@ import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmen
 import com.lia.liaprove.infrastructure.entities.assessment.SystemAssessmentEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import org.hibernate.Hibernate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.ReportingPolicy;
@@ -37,11 +38,17 @@ public interface AssessmentMapper {
     PersonalizedAssessmentEntity toEntity(PersonalizedAssessment domain);
 
     default Assessment toDomain(AssessmentEntity entity) {
-        return switch (entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        Object unproxied = Hibernate.unproxy(entity);
+
+        return switch (unproxied) {
             case null -> null;
             case SystemAssessmentEntity systemAssessmentEntity -> toDomain(systemAssessmentEntity);
             case PersonalizedAssessmentEntity personalizedAssessmentEntity -> toDomain(personalizedAssessmentEntity);
-            default -> throw new IllegalArgumentException("Unknown AssessmentEntity subtype: " + entity.getClass());
+            default -> throw new IllegalArgumentException("Unknown AssessmentEntity subtype: " + unproxied.getClass());
         };
     }
 
