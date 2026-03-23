@@ -9,9 +9,10 @@ import com.lia.liaprove.core.exceptions.assessment.InvalidAttemptStatusException
 import java.util.UUID;
 
 /**
- * Caso de uso para um Recrutador ou Admin finalizar manualmente uma tentativa de avaliação personalizada.
+ * Caso de uso para um Recrutador ou Admin avaliar manualmente uma avaliação personalizada,
+ * aprovando ou reprovando a tentativa de um profissional.
  */
-public interface FinalizeAssessmentAttemptUseCase {
+public interface EvaluateAssessmentAttemptUseCase {
 
     /**
      * Define o status final de uma tentativa como APPROVED ou FAILED.

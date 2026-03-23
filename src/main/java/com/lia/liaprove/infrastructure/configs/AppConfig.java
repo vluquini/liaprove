@@ -252,8 +252,8 @@ public class AppConfig {
     }
 
     @Bean
-    public FinalizeAssessmentAttemptUseCase finalizeAssessmentAttemptUseCase(AssessmentAttemptGateway assessmentAttemptGateway,
+    public EvaluateAssessmentAttemptUseCase finalizeAssessmentAttemptUseCase(AssessmentAttemptGateway assessmentAttemptGateway,
                                                                              UserGateway userGateway) {
-        return new FinalizeAssessmentAttemptUseCaseImpl(assessmentAttemptGateway, userGateway);
+        return new EvaluateAssessmentAttemptUseCaseImpl(assessmentAttemptGateway, userGateway);
     }
 }

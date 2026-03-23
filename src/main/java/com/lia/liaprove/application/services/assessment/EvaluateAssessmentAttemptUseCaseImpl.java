@@ -12,19 +12,19 @@ import com.lia.liaprove.core.exceptions.assessment.AssessmentNotFoundException;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
 import com.lia.liaprove.core.exceptions.assessment.InvalidAttemptStatusException;
 import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
-import com.lia.liaprove.core.usecases.assessments.FinalizeAssessmentAttemptUseCase;
+import com.lia.liaprove.core.usecases.assessments.EvaluateAssessmentAttemptUseCase;
 
 import java.util.UUID;
 
 /**
- * Implementação do caso de uso para finalizar manualmente uma tentativa de avaliação.
+ * Implementação do caso de uso para avaliar manualmente um tentativa de avaliação.
  */
-public class FinalizeAssessmentAttemptUseCaseImpl implements FinalizeAssessmentAttemptUseCase {
+public class EvaluateAssessmentAttemptUseCaseImpl implements EvaluateAssessmentAttemptUseCase {
 
     private final AssessmentAttemptGateway attemptGateway;
     private final UserGateway userGateway;
 
-    public FinalizeAssessmentAttemptUseCaseImpl(AssessmentAttemptGateway attemptGateway, UserGateway userGateway) {
+    public EvaluateAssessmentAttemptUseCaseImpl(AssessmentAttemptGateway attemptGateway, UserGateway userGateway) {
         this.attemptGateway = attemptGateway;
         this.userGateway = userGateway;
     }
