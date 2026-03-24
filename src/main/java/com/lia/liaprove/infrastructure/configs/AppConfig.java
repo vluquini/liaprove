@@ -276,6 +276,12 @@ public class AppConfig {
     }
 
     @Bean
+    public ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase(AssessmentGateway assessmentGateway,
+                                                                                 AssessmentAttemptGateway assessmentAttemptGateway) {
+        return new ListAttemptsForMyAssessmentUseCaseImpl(assessmentGateway, assessmentAttemptGateway);
+    }
+
+    @Bean
     public GetAssessmentAttemptDetailsUseCase getAssessmentAttemptDetailsUseCase(AssessmentAttemptGateway assessmentAttemptGateway,
                                                                                  UserGateway userGateway) {
         return new GetAssessmentAttemptDetailsUseCaseImpl(assessmentAttemptGateway, userGateway);

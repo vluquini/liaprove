@@ -16,6 +16,15 @@ public interface AssessmentAttemptJpaRepository extends JpaRepository<Assessment
         JpaSpecificationExecutor<AssessmentAttemptEntity> {
     List<AssessmentAttemptEntity> findByAssessmentId(UUID assessmentId);
 
+    @Query("""
+        SELECT a
+        FROM AssessmentAttemptEntity a
+        JOIN FETCH a.user u
+        JOIN FETCH a.assessment ass
+        WHERE ass.id = :assessmentId
+    """)
+    List<AssessmentAttemptEntity> findSummariesByAssessmentId(@Param("assessmentId") UUID assessmentId);
+
     long countByAssessmentId(UUID assessmentId);
 
     boolean existsByAssessmentIdAndUserId(UUID assessmentId, UUID userId);

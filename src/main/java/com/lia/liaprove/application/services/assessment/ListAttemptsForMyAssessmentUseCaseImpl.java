@@ -41,6 +41,6 @@ public class ListAttemptsForMyAssessmentUseCaseImpl implements ListAttemptsForMy
         }
 
         // 3. Buscar e retornar as tentativas
-        return attemptGateway.findByAssessmentId(assessmentId);
+        return attemptGateway.findSummariesByAssessmentId(assessmentId);
     }
 }

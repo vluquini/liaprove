@@ -38,6 +38,13 @@ public interface AssessmentAttemptGateway {
      * @return Uma lista de tentativas.
      */
     List<AssessmentAttempt> findByAssessmentId(UUID assessmentId);
+
+    /**
+     * Busca tentativas de avaliação em modo resumo, evitando carregar perguntas/respostas.
+     * @param assessmentId O ID da avaliação.
+     * @return Lista de tentativas em modo resumo.
+     */
+    List<AssessmentAttempt> findSummariesByAssessmentId(UUID assessmentId);
     
     /**
      * Busca todas as tentativas de avaliação com base em critérios de filtro.

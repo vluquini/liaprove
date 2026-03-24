@@ -77,6 +77,14 @@ public class AssessmentAttemptGatewayImpl implements AssessmentAttemptGateway {
 
     @Override
     @Transactional(readOnly = true)
+    public List<AssessmentAttempt> findSummariesByAssessmentId(UUID assessmentId) {
+        return assessmentAttemptJpaRepository.findSummariesByAssessmentId(assessmentId).stream()
+                .map(assessmentAttemptMapper::toDomainSummary)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<AssessmentAttempt> findAllByCriteria(ListAttemptsFilterDto filter) {
         Specification<AssessmentAttemptEntity> spec = Specification.where(null);
 
