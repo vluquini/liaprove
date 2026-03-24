@@ -253,6 +253,11 @@ public class AppConfig {
     }
 
     @Bean
+    public GetCertificateByNumberUseCase getCertificateByNumberUseCase(CertificateGateway certificateGateway) {
+        return new GetCertificateByNumberUseCaseImpl(certificateGateway);
+    }
+
+    @Bean
     public SubmitAssessmentUseCase submitAssessmentUseCase(AssessmentAttemptGateway assessmentAttemptGateway,
                                                            IssueCertificateUseCase issueCertificateUseCase) {
         return new SubmitAssessmentUseCaseImpl(assessmentAttemptGateway, issueCertificateUseCase);

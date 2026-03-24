@@ -62,6 +62,13 @@ public class AssessmentAttemptGatewayImpl implements AssessmentAttemptGateway {
 
     @Override
     @Transactional(readOnly = true)
+    public Optional<AssessmentAttempt> findByCertificateNumber(String certificateNumber) {
+        return assessmentAttemptJpaRepository.findByCertificateNumber(certificateNumber)
+                .map(assessmentAttemptMapper::toDomainSummary);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<AssessmentAttempt> findByAssessmentId(UUID assessmentId) {
         return assessmentAttemptJpaRepository.findByAssessmentId(assessmentId).stream()
                 .map(assessmentAttemptMapper::toDomain)

@@ -28,4 +28,13 @@ public interface AssessmentAttemptJpaRepository extends JpaRepository<Assessment
         WHERE a.id = :id
     """)
     Optional<AssessmentAttemptEntity> findByIdWithAssessmentAndCreator(@Param("id") UUID id);
+
+    @Query("""
+        SELECT a
+        FROM AssessmentAttemptEntity a
+        JOIN FETCH a.user u
+        JOIN FETCH a.certificate c
+        WHERE c.certificateNumber = :certificateNumber
+    """)
+    Optional<AssessmentAttemptEntity> findByCertificateNumber(@Param("certificateNumber") String certificateNumber);
 }
