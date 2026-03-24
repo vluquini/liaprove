@@ -2,6 +2,7 @@ package com.lia.liaprove.infrastructure.repositories;
 
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface AssessmentAttemptJpaRepository extends JpaRepository<AssessmentAttemptEntity, UUID> {
+public interface AssessmentAttemptJpaRepository extends JpaRepository<AssessmentAttemptEntity, UUID>,
+        JpaSpecificationExecutor<AssessmentAttemptEntity> {
     List<AssessmentAttemptEntity> findByAssessmentId(UUID assessmentId);
 
     long countByAssessmentId(UUID assessmentId);
@@ -27,4 +29,3 @@ public interface AssessmentAttemptJpaRepository extends JpaRepository<Assessment
     """)
     Optional<AssessmentAttemptEntity> findByIdWithAssessmentAndCreator(@Param("id") UUID id);
 }
-

@@ -24,6 +24,11 @@ public interface AssessmentAttemptMapper {
     @Mapping(target = "feedbacks", expression = "java(new java.util.ArrayList<>())")
     AssessmentAttempt toDomain(AssessmentAttemptEntity entity);
 
+    @Mapping(target = "questions", ignore = true)
+    @Mapping(target = "answers", ignore = true)
+    @Mapping(target = "feedbacks", expression = "java(new java.util.ArrayList<>())")
+    AssessmentAttempt toDomainSummary(AssessmentAttemptEntity entity);
+
     @AfterMapping
     default void linkAnswers(@MappingTarget AssessmentAttemptEntity entity) {
         if (entity == null || entity.getAnswers() == null) {

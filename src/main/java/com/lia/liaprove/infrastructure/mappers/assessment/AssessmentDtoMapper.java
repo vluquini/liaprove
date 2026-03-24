@@ -10,6 +10,7 @@ import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentAttemptDetailsResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentAttemptResponse;
+import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentAttemptSummaryResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentResultResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.DeletePersonalizedAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.EvaluateAssessmentAttemptResponse;
@@ -79,6 +80,30 @@ public interface AssessmentDtoMapper {
                 assessmentSummary,
                 candidate,
                 questions
+        );
+    }
+
+    default AssessmentAttemptSummaryResponse toAttemptSummaryResponse(AssessmentAttempt attempt) {
+        if (attempt == null) {
+            return null;
+        }
+
+        Assessment assessment = attempt.getAssessment();
+        AssessmentAttemptSummaryResponse.AssessmentSummary assessmentSummary =
+                new AssessmentAttemptSummaryResponse.AssessmentSummary(
+                        assessment != null ? assessment.getId() : null,
+                        assessment != null ? assessment.getTitle() : null,
+                        assessment instanceof PersonalizedAssessment
+                );
+
+        return new AssessmentAttemptSummaryResponse(
+                attempt.getId(),
+                attempt.getStatus(),
+                attempt.getAccuracyRate(),
+                attempt.getStartedAt(),
+                attempt.getFinishedAt(),
+                assessmentSummary,
+                toUserResponseDto(attempt.getUser())
         );
     }
 

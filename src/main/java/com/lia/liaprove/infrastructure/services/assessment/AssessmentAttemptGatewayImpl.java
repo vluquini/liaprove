@@ -5,9 +5,13 @@ import com.lia.liaprove.application.services.assessment.dto.ListAttemptsFilterDt
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentEntity;
+import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
+import com.lia.liaprove.infrastructure.entities.assessment.SystemAssessmentEntity;
 import com.lia.liaprove.infrastructure.mappers.assessment.AssessmentAttemptMapper;
 import com.lia.liaprove.infrastructure.repositories.AssessmentAttemptJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.AssessmentJpaRepository;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,8 +69,35 @@ public class AssessmentAttemptGatewayImpl implements AssessmentAttemptGateway {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<AssessmentAttempt> findAllByCriteria(ListAttemptsFilterDto filter) {
-        throw new UnsupportedOperationException("Not yet implemented");
+        Specification<AssessmentAttemptEntity> spec = Specification.where(null);
+
+        if (filter.isPersonalized().isPresent()) {
+            boolean isPersonalized = filter.isPersonalized().get();
+            spec = spec.and((root, query, cb) -> {
+                if (isPersonalized) {
+                    return cb.equal(root.get("assessment").type(), PersonalizedAssessmentEntity.class);
+                }
+                return cb.equal(root.get("assessment").type(), SystemAssessmentEntity.class);
+            });
+        }
+
+        if (filter.startDate().isPresent()) {
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("startedAt"), filter.startDate().get()));
+        }
+
+        if (filter.endDate().isPresent()) {
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("startedAt"), filter.endDate().get()));
+        }
+
+        if (filter.statuses().isPresent() && !filter.statuses().get().isEmpty()) {
+            spec = spec.and((root, query, cb) -> root.get("status").in(filter.statuses().get()));
+        }
+
+        return assessmentAttemptJpaRepository.findAll(spec, Sort.by(Sort.Direction.DESC, "startedAt")).stream()
+                .map(assessmentAttemptMapper::toDomainSummary)
+                .collect(Collectors.toList());
     }
 
     @Override
