@@ -282,6 +282,12 @@ public class AppConfig {
     }
 
     @Bean
+    public UpdatePersonalizedAssessmentUseCase updatePersonalizedAssessmentUseCase(AssessmentGateway assessmentGateway,
+                                                                                   UserGateway userGateway) {
+        return new UpdatePersonalizedAssessmentUseCaseImpl(assessmentGateway, userGateway);
+    }
+
+    @Bean
     public GetAssessmentAttemptDetailsUseCase getAssessmentAttemptDetailsUseCase(AssessmentAttemptGateway assessmentAttemptGateway,
                                                                                  UserGateway userGateway) {
         return new GetAssessmentAttemptDetailsUseCaseImpl(assessmentAttemptGateway, userGateway);

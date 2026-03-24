@@ -3,6 +3,7 @@ package com.lia.liaprove.infrastructure.controllers;
 import com.lia.liaprove.application.services.assessment.dto.SubmitAssessmentAnswersDto;
 import com.lia.liaprove.application.services.assessment.dto.SuggestionCriteriaDto;
 import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
+import com.lia.liaprove.core.domain.assessment.Assessment;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
@@ -15,6 +16,7 @@ import com.lia.liaprove.core.usecases.assessments.ListAttemptsForMyAssessmentUse
 import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SubmitAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SuggestQuestionsForAssessmentUseCase;
+import com.lia.liaprove.core.usecases.assessments.UpdatePersonalizedAssessmentUseCase;
 import com.lia.liaprove.infrastructure.dtos.assessment.*;
 import com.lia.liaprove.infrastructure.mappers.assessment.AssessmentDtoMapper;
 import com.lia.liaprove.infrastructure.security.SecurityContextService;
@@ -41,6 +43,7 @@ public class AssessmentController {
     private final DeletePersonalizedAssessmentUseCase deletePersonalizedAssessmentUseCase;
     private final GetAssessmentAttemptDetailsUseCase getAssessmentAttemptDetailsUseCase;
     private final ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase;
+    private final UpdatePersonalizedAssessmentUseCase updatePersonalizedAssessmentUseCase;
     private final SecurityContextService securityContextService;
     private final AssessmentDtoMapper assessmentDtoMapper;
 
@@ -52,6 +55,7 @@ public class AssessmentController {
                                 DeletePersonalizedAssessmentUseCase deletePersonalizedAssessmentUseCase,
                                 GetAssessmentAttemptDetailsUseCase getAssessmentAttemptDetailsUseCase,
                                 ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase,
+                                UpdatePersonalizedAssessmentUseCase updatePersonalizedAssessmentUseCase,
                                 SecurityContextService securityContextService,
                                 AssessmentDtoMapper assessmentDtoMapper) {
         this.startNewAssessmentUseCase = startNewAssessmentUseCase;
@@ -62,6 +66,7 @@ public class AssessmentController {
         this.deletePersonalizedAssessmentUseCase = deletePersonalizedAssessmentUseCase;
         this.getAssessmentAttemptDetailsUseCase = getAssessmentAttemptDetailsUseCase;
         this.listAttemptsForMyAssessmentUseCase = listAttemptsForMyAssessmentUseCase;
+        this.updatePersonalizedAssessmentUseCase = updatePersonalizedAssessmentUseCase;
         this.securityContextService = securityContextService;
         this.assessmentDtoMapper = assessmentDtoMapper;
     }
@@ -236,5 +241,26 @@ public class AssessmentController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/personalized/{assessmentId}")
+    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
+    public ResponseEntity<UpdatePersonalizedAssessmentResponse> updatePersonalizedAssessment(
+            @PathVariable UUID assessmentId,
+            @RequestBody @Valid UpdatePersonalizedAssessmentRequest request) {
+
+        UUID requesterId = securityContextService.getCurrentUserId();
+
+        Assessment updated = updatePersonalizedAssessmentUseCase.execute(
+                assessmentId,
+                requesterId,
+                java.util.Optional.ofNullable(request.expirationDate()),
+                java.util.Optional.ofNullable(request.maxAttempts()),
+                java.util.Optional.ofNullable(request.status())
+        );
+
+        return ResponseEntity.ok(
+                assessmentDtoMapper.toUpdatePersonalizedResponse((PersonalizedAssessment) updated)
+        );
     }
 }

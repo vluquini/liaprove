@@ -16,6 +16,7 @@ import com.lia.liaprove.infrastructure.dtos.assessment.DeletePersonalizedAssessm
 import com.lia.liaprove.infrastructure.dtos.assessment.EvaluateAssessmentAttemptResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.PersonalizedAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.ScoredQuestionResponse;
+import com.lia.liaprove.infrastructure.dtos.assessment.UpdatePersonalizedAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.user.UserResponseDto;
 import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
 import org.mapstruct.Mapper;
@@ -104,6 +105,18 @@ public interface AssessmentDtoMapper {
                 attempt.getFinishedAt(),
                 assessmentSummary,
                 toUserResponseDto(attempt.getUser())
+        );
+    }
+
+    default UpdatePersonalizedAssessmentResponse toUpdatePersonalizedResponse(PersonalizedAssessment assessment) {
+        if (assessment == null) {
+            return null;
+        }
+        return new UpdatePersonalizedAssessmentResponse(
+                assessment.getId(),
+                assessment.getExpirationDate(),
+                assessment.getMaxAttempts(),
+                assessment.getStatus()
         );
     }
 
