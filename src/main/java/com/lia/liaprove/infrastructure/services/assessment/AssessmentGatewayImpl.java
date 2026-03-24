@@ -3,6 +3,7 @@ package com.lia.liaprove.infrastructure.services.assessment;
 import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.core.domain.assessment.Assessment;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
+import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
 import com.lia.liaprove.infrastructure.mappers.assessment.AssessmentMapper;
@@ -10,6 +11,7 @@ import com.lia.liaprove.infrastructure.repositories.AssessmentJpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -65,7 +67,12 @@ public class AssessmentGatewayImpl implements AssessmentGateway {
 
     @Override
     public List<PersonalizedAssessment> findActiveAssessmentsWithPastExpirationDate() {
-        throw new UnsupportedOperationException("Not yet implemented");
+        return assessmentJpaRepository.findActiveAssessmentsWithPastExpirationDate(
+                        PersonalizedAssessmentStatus.ACTIVE,
+                        LocalDateTime.now()
+                ).stream()
+                .map(assessmentMapper::toDomain)
+                .collect(Collectors.toList());
     }
 }
 

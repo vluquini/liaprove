@@ -288,6 +288,11 @@ public class AppConfig {
     }
 
     @Bean
+    public UpdateExpiredAssessmentsStatusUseCase updateExpiredAssessmentsStatusUseCase(AssessmentGateway assessmentGateway) {
+        return new UpdateExpiredAssessmentsStatusUseCaseImpl(assessmentGateway);
+    }
+
+    @Bean
     public GetAssessmentAttemptDetailsUseCase getAssessmentAttemptDetailsUseCase(AssessmentAttemptGateway assessmentAttemptGateway,
                                                                                  UserGateway userGateway) {
         return new GetAssessmentAttemptDetailsUseCaseImpl(assessmentAttemptGateway, userGateway);
