@@ -1,6 +1,8 @@
 package com.lia.liaprove.infrastructure.configs;
 
 import com.lia.liaprove.application.gateways.algorithms.bayesian.BayesianGateway;
+import com.lia.liaprove.application.gateways.algorithms.genetic.GeneticGateway;
+import com.lia.liaprove.application.gateways.algorithms.genetic.VoteMultiplierGateway;
 import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
 import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.application.gateways.assessment.CertificateGateway;
@@ -11,15 +13,22 @@ import com.lia.liaprove.application.gateways.ai.QuestionPreAnalysisGateway;
 import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.application.services.algorithms.bayesian.BayesianNetworkUseCaseImpl;
+import com.lia.liaprove.application.services.algorithms.genetic.DefaultFitnessEvaluatorImpl;
+import com.lia.liaprove.application.services.algorithms.genetic.GeneticAlgorithmUseCaseImpl;
+import com.lia.liaprove.application.services.algorithms.genetic.ManageVoteWeightUseCaseImpl;
 import com.lia.liaprove.application.services.assessment.*;
 import com.lia.liaprove.application.services.metrics.*;
 import com.lia.liaprove.application.services.question.*;
 import com.lia.liaprove.application.services.user.*;
 import com.lia.liaprove.core.algorithms.bayesian.BayesianConfig;
+import com.lia.liaprove.core.algorithms.genetic.FitnessEvaluator;
+import com.lia.liaprove.core.algorithms.genetic.GeneticConfig;
 import com.lia.liaprove.core.usecases.algorithms.bayesian.BayesianNetworkUseCase;
+import com.lia.liaprove.core.usecases.algorithms.genetic.GeneticAlgorithmUseCase;
 import com.lia.liaprove.core.usecases.assessments.*;
 import com.lia.liaprove.core.usecases.metrics.*;
 import com.lia.liaprove.core.usecases.question.*;
+import com.lia.liaprove.core.usecases.user.admin.ManageVoteWeightUseCase;
 import com.lia.liaprove.core.usecases.user.admin.UserModerationUseCase;
 import com.lia.liaprove.core.usecases.user.users.*;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
@@ -38,6 +47,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Random;
 
 @Configuration
 @EnableScheduling
@@ -226,6 +237,31 @@ public class AppConfig {
     public BayesianConfig bayesianConfig() {
         // Configuração padrão para o MVP
         return BayesianConfig.defaults();
+    }
+
+    @Bean
+    public GeneticConfig geneticConfig() {
+        return GeneticConfig.defaults();
+    }
+
+    @Bean
+    public FitnessEvaluator fitnessEvaluator(GeneticConfig geneticConfig) {
+        return DefaultFitnessEvaluatorImpl.defaultEvaluator(geneticConfig);
+    }
+
+    @Bean
+    public GeneticAlgorithmUseCase geneticAlgorithmUseCase(GeneticConfig geneticConfig,
+                                                           FitnessEvaluator fitnessEvaluator,
+                                                           GeneticGateway geneticGateway) {
+        return new GeneticAlgorithmUseCaseImpl(geneticConfig, fitnessEvaluator, geneticGateway, new Random());
+    }
+
+    @Bean
+    public ManageVoteWeightUseCase manageVoteWeightUseCase(GeneticAlgorithmUseCase geneticAlgorithmUseCase,
+                                                           UserGateway userGateway,
+                                                           VoteMultiplierGateway voteMultiplierGateway,
+                                                           GeneticConfig geneticConfig) {
+        return new ManageVoteWeightUseCaseImpl(geneticAlgorithmUseCase, userGateway, voteMultiplierGateway, geneticConfig);
     }
 
     @Bean

@@ -54,4 +54,7 @@ public interface QuestionJpaRepository extends JpaRepository<QuestionEntity, UUI
 
     @Query("SELECT q FROM QuestionEntity q LEFT JOIN FETCH TREAT(q AS MultipleChoiceQuestionEntity).alternatives a WHERE q.id = :id")
     Optional<QuestionEntity> findByIdFetchingAlternatives(@Param("id") UUID id);
+
+    @Query("SELECT q.authorId, COUNT(q) FROM QuestionEntity q WHERE q.status = :status GROUP BY q.authorId")
+    List<Object[]> countByAuthorAndStatus(@Param("status") QuestionStatus status);
 }

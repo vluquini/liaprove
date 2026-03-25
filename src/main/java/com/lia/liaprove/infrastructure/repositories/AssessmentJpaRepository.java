@@ -30,5 +30,16 @@ public interface AssessmentJpaRepository extends JpaRepository<AssessmentEntity,
             @Param("status") PersonalizedAssessmentStatus status,
             @Param("currentDateTime") LocalDateTime currentDateTime
     );
+
+    @Query("SELECT pa.createdBy.id, COUNT(pa) " +
+            "FROM PersonalizedAssessmentEntity pa " +
+            "GROUP BY pa.createdBy.id")
+    List<Object[]> countAssessmentsByRecruiter();
+
+    @Query("SELECT pa.createdBy.id, COUNT(pa) " +
+            "FROM PersonalizedAssessmentEntity pa " +
+            "WHERE pa.creationDate >= :since " +
+            "GROUP BY pa.createdBy.id")
+    List<Object[]> countRecentAssessmentsByRecruiter(@Param("since") LocalDateTime since);
 }
 

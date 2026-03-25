@@ -1,5 +1,6 @@
 package com.lia.liaprove.infrastructure.repositories;
 
+import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -46,4 +47,15 @@ public interface AssessmentAttemptJpaRepository extends JpaRepository<Assessment
         WHERE c.certificateNumber = :certificateNumber
     """)
     Optional<AssessmentAttemptEntity> findByCertificateNumber(@Param("certificateNumber") String certificateNumber);
+
+    @Query("""
+        SELECT pa.createdBy.id, AVG(a.accuracyRate)
+        FROM AssessmentAttemptEntity a
+        JOIN a.assessment ass
+        JOIN TREAT(ass AS PersonalizedAssessmentEntity) pa
+        WHERE a.accuracyRate IS NOT NULL
+          AND a.status IN :finalStatuses
+        GROUP BY pa.createdBy.id
+    """)
+    List<Object[]> avgAccuracyByRecruiter(@Param("finalStatuses") List<AssessmentAttemptStatus> finalStatuses);
 }
