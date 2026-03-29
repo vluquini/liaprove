@@ -6,6 +6,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+/**
+ * Scheduler para atualizar pesos de votos dos usuários Recruiters.
+ */
 @Component
 public class GeneticVoteWeightScheduler {
 
