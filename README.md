@@ -13,7 +13,7 @@ Plataforma colaborativa onde usuários (profissionais de TI e recrutadores) pode
 
 A plataforma permite que profissionais de TI e recrutadores criem e submetam questões e mini projetos para validar conhecimentos técnicos. As submissões passam por pré-avaliação feita por uma LLM (por exemplo, ChatGPT via API) e, depois, por votação da comunidade; cada usuário pode atribuir notas a cada questão.
 
-Após a submissão e a votação, uma **Rede Bayesiana** apura os votos e decide se a questão será incorporada às avaliações da plataforma. **Algoritmos Genéticos** monitoram e ajustam semanalmente o peso dos votos dos recrutadores, aumentando ou diminuindo conforme o uso desses recrutadores na plataforma — ou seja, com base em quantas avaliações personalizadas eles criam/usam. A Rede Bayesiana também irá auxiliar os recrutadores ao sugerir questões frequentemente escolhidas por outros recrutadores no momento da criação de avaliações personalizadas.
+Após a submissão e a votação, uma **Rede Bayesiana** apura os votos e decide se a questão será incorporada às avaliações da plataforma. **Algoritmos Genéticos** monitoram e ajustam periodicamente o peso dos votos dos recrutadores, aumentando ou diminuindo conforme sinais de uso e qualidade. Hoje, o ajuste considera: uso recente (avaliações criadas/usadas no período), média das avaliações (rating médio das assessments), quantidade de questões aprovadas, razão de likes em comentários (likes/(likes+dislikes)) e o peso atual para estabilidade. A Rede Bayesiana também irá auxiliar os recrutadores ao sugerir questões frequentemente escolhidas por outros recrutadores no momento da criação de avaliações personalizadas.
 
 ### 2.1.1 - Visão do Usuário Profissional
 
@@ -77,7 +77,7 @@ Os usuários terão uma área para visualizar todas as questões submetidas, ava
     
 - Os votos dos recrutadores têm maior peso — pois o objetivo é alinhar a plataforma às necessidades do mercado de trabalho — mas a decisão final usa uma Rede Bayesiana que combina todos os votos para evitar viés excessivo.
     
-- O peso dos votos dos recrutadores é atualizado por Algoritmos Genéticos periodicamente (diariamente ou semanalmente), com base em métricas de uso — por exemplo, quantas avaliações personalizadas eles criam ou utilizam. Essa métrica ajuda a medir a eficiência e a aderência da plataforma.
+- O peso dos votos dos recrutadores é atualizado por Algoritmos Genéticos periodicamente, com base em um conjunto de sinais: uso recente (avaliações criadas/usadas), média de avaliações, quantidade de questões aprovadas, razão de likes em comentários e o peso atual para estabilidade. Esses sinais ajudam a medir eficiência, qualidade e aderência à plataforma.
     
 
 ### 2.1.6 - Certificação
