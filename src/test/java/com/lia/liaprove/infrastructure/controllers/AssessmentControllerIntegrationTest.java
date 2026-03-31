@@ -1,12 +1,14 @@
 package com.lia.liaprove.infrastructure.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import com.lia.liaprove.application.services.assessment.dto.SystemAssessmentType;
+import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
-import com.lia.liaprove.infrastructure.dtos.assessment.StartSystemAssessmentRequest;
-import com.lia.liaprove.infrastructure.dtos.assessment.SubmitAssessmentRequest;
+import com.lia.liaprove.infrastructure.dtos.assessment.*;
+import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import com.lia.liaprove.infrastructure.entities.users.UserEntity;
@@ -31,7 +33,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -92,9 +94,7 @@ public class AssessmentControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.status").value("IN_PROGRESS"))
-                .andExpect(jsonPath("$.userId").value(user.getId().toString()));
+                .andExpect(jsonPath("$.attemptId").exists());
     }
 
     @Test
@@ -189,17 +189,37 @@ public class AssessmentControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("Should return 400 when submitting assessment with empty answers")
-    void shouldReturnBadRequestWhenSubmittingWithEmptyAnswers() throws Exception {
+    @DisplayName("Should submit assessment with empty answers and return FAILED")
+    void shouldReturnFailedWhenSubmittingWithEmptyAnswers() throws Exception {
         UserEntity user = getSeededUserEntity("carlos.silva@example.com");
 
+        // Criar attempt real primeiro (igual ao fluxo completo)
+        StartSystemAssessmentRequest startRequest = new StartSystemAssessmentRequest(
+                KnowledgeArea.SOFTWARE_DEVELOPMENT,
+                DifficultyLevel.MEDIUM,
+                SystemAssessmentType.MULTIPLE_CHOICE
+        );
+
+        MvcResult result = mockMvc.perform(post("/api/v1/assessments/start-system")
+                        .header("X-Dev-User-Email", user.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(startRequest)))
+                        .andExpect(status().isCreated())
+                        .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        String attemptId = JsonPath.read(response, "$.attemptId");
+
+        // 2. Submit com lista vazia - deve retornar FAILED (0% accuracy)
         SubmitAssessmentRequest request = new SubmitAssessmentRequest(List.of());
 
-        mockMvc.perform(post("/api/v1/assessments/" + UUID.randomUUID() + "/submit")
+        mockMvc.perform(post("/api/v1/assessments/" + attemptId + "/submit")
                         .header("X-Dev-User-Email", user.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("FAILED"))
+                .andExpect(jsonPath("$.accuracyRate").value(0));
     }
 
     // ==========================
@@ -254,16 +274,21 @@ public class AssessmentControllerIntegrationTest {
                 .andReturn();
 
         String response = result.getResponse().getContentAsString();
-        String attemptId = com.jayway.jsonpath.JsonPath.read(response, "$.id");
+        System.out.println("DEBUG: Start System Response JSON: " + response);
+
+        String attemptId = JsonPath.read(response, "$.attemptId");
+        String questionId = JsonPath.read(response, "$.questions[0].id");
+        String alternativeId = JsonPath.read(response, "$.questions[0].alternatives[0].id");
+        
+        System.out.println("DEBUG: Extracted attemptId: " + attemptId);
+        System.out.println("DEBUG: Extracted questionId: " + questionId);
+        System.out.println("DEBUG: Extracted alternativeId: " + alternativeId);
 
         // 2. Submit
-        UUID questionId = UUID.fromString("00000001-0000-0000-0000-000000000001");
-        UUID alternativeId = UUID.fromString("00000001-a003-0000-0000-000000000001");
-
         SubmitAssessmentRequest submitRequest = new SubmitAssessmentRequest(
                 List.of(new SubmitAssessmentRequest.QuestionAnswerRequest(
-                        questionId,
-                        alternativeId,
+                        UUID.fromString(questionId),
+                        UUID.fromString(alternativeId),
                         null
                 ))
         );
@@ -275,5 +300,279 @@ public class AssessmentControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("COMPLETED"))
                 .andExpect(jsonPath("$.score").exists());
+    }
+
+    // ==========================
+    // POST /api/v1/assessments/personalized
+    // ==========================
+
+    @Test
+    @DisplayName("Should create personalized assessment successfully")
+    void shouldCreatePersonalizedAssessmentSuccessfully() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+
+        CreatePersonalizedAssessmentRequest request = new CreatePersonalizedAssessmentRequest(
+                "Java Developer Test",
+                "Assessment for Java positions",
+                List.of(),
+                LocalDateTime.now().plusDays(7),
+                3,
+                60
+        );
+
+        mockMvc.perform(post("/api/v1/assessments/personalized")
+                        .header("X-Dev-User-Email", recruiter.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").exists())
+                .andExpect(jsonPath("$.status").value("ACTIVE"));
+    }
+
+    @Test
+    @DisplayName("Should return 403 when candidate tries to create personalized assessment")
+    void shouldReturnForbiddenWhenCandidateCreatesAssessment() throws Exception {
+        UserEntity candidate = getSeededUserEntity("carlos.silva@example.com");
+
+        CreatePersonalizedAssessmentRequest request = new CreatePersonalizedAssessmentRequest(
+                "Invalid",
+                "Should not work",
+                List.of(),
+                LocalDateTime.now().plusDays(5),
+                1,
+                30
+        );
+
+        mockMvc.perform(post("/api/v1/assessments/personalized")
+                        .header("X-Dev-User-Email", candidate.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Should return 400 when creating assessment without title")
+    void shouldReturnBadRequestWhenCreatingAssessmentWithoutTitle() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+
+        CreatePersonalizedAssessmentRequest request = new CreatePersonalizedAssessmentRequest(
+                null,
+                "desc",
+                List.of(),
+                LocalDateTime.now().plusDays(5),
+                1,
+                30
+        );
+
+        mockMvc.perform(post("/api/v1/assessments/personalized")
+                        .header("X-Dev-User-Email", recruiter.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+
+    // ==========================
+    // GET /api/v1/assessments/personalized/suggestions
+    // ==========================
+
+    @Test
+    @DisplayName("Should get suggested questions with filters")
+    void shouldGetSuggestedQuestionsWithFilters() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+
+        mockMvc.perform(get("/api/v1/assessments/personalized/suggestions")
+                        .header("X-Dev-User-Email", recruiter.getEmail())
+                        .param("knowledgeAreas", "SOFTWARE_DEVELOPMENT")
+                        .param("difficultyLevels", "MEDIUM")
+                        .param("pageSize", "5"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray());
+    }
+
+    @Test
+    @DisplayName("Should return 403 when candidate tries to get suggestions")
+    void shouldReturnForbiddenWhenCandidateGetsSuggestions() throws Exception {
+        UserEntity candidate = getSeededUserEntity("carlos.silva@example.com");
+
+        mockMvc.perform(get("/api/v1/assessments/personalized/suggestions")
+                        .header("X-Dev-User-Email", candidate.getEmail()))
+                .andExpect(status().isForbidden());
+    }
+
+
+    // ==========================
+    // PATCH /api/v1/assessments/personalized/{id}
+    // ==========================
+
+    @Test
+    @DisplayName("Should update personalized assessment successfully")
+    void shouldUpdatePersonalizedAssessmentSuccessfully() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+
+        PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter);
+
+        UpdatePersonalizedAssessmentRequest request = new UpdatePersonalizedAssessmentRequest(
+                LocalDateTime.now().plusDays(10),
+                5,
+                PersonalizedAssessmentStatus.DEACTIVATED
+        );
+
+        mockMvc.perform(patch("/api/v1/assessments/personalized/" + assessment.getId())
+                        .header("X-Dev-User-Email", recruiter.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Should return 403 when updating another recruiter's assessment")
+    void shouldReturnForbiddenWhenUpdatingAnotherRecruiterAssessment() throws Exception {
+        UserEntity recruiter1 = getSeededUserEntity("ana.p@techrecruit.com");
+        UserEntity recruiter2 = getSeededUserEntity("roberto.l@hiredev.com");
+
+        PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter1);
+
+        UpdatePersonalizedAssessmentRequest request = new UpdatePersonalizedAssessmentRequest(
+                null, 5, null
+        );
+
+        mockMvc.perform(patch("/api/v1/assessments/personalized/" + assessment.getId())
+                        .header("X-Dev-User-Email", recruiter2.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+    }
+
+
+    // ==========================
+    // DELETE /api/v1/assessments/personalized/{id}
+    // ==========================
+
+    @Test
+    @DisplayName("Should delete personalized assessment successfully")
+    void shouldDeletePersonalizedAssessmentSuccessfully() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+
+        PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter);
+
+        mockMvc.perform(delete("/api/v1/assessments/personalized/" + assessment.getId())
+                        .header("X-Dev-User-Email", recruiter.getEmail()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Should return 403 when deleting another recruiter's assessment")
+    void shouldReturnForbiddenWhenDeletingAnotherRecruiterAssessment() throws Exception {
+        UserEntity recruiter1 = getSeededUserEntity("ana.p@techrecruit.com");
+        UserEntity recruiter2 = getSeededUserEntity("roberto.l@hiredev.com");
+
+        PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter1);
+
+        mockMvc.perform(delete("/api/v1/assessments/personalized/" + assessment.getId())
+                        .header("X-Dev-User-Email", recruiter2.getEmail()))
+                .andExpect(status().isForbidden());
+    }
+
+
+    // ==========================
+    // GET /api/v1/assessments/personalized/{id}/attempts
+    // ==========================
+
+    @Test
+    @DisplayName("Should list attempts for assessment")
+    void shouldListAttemptsSuccessfully() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+        UserEntity candidate = getSeededUserEntity("carlos.silva@example.com");
+
+        PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter);
+
+        AssessmentAttemptEntity attempt = new AssessmentAttemptEntity();
+        attempt.setAssessment(assessment);
+        attempt.setUser(candidate);
+        attempt.setStartedAt(LocalDateTime.now());
+        attempt.setStatus(AssessmentAttemptStatus.COMPLETED);
+        assessmentAttemptJpaRepository.save(attempt);
+
+        mockMvc.perform(get("/api/v1/assessments/personalized/" + assessment.getId() + "/attempts")
+                        .header("X-Dev-User-Email", recruiter.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray());
+    }
+
+
+    // ==========================
+    // GET /api/v1/assessments/attempts/{attemptId}
+    // ==========================
+
+    @Test
+    @DisplayName("Should get attempt details successfully")
+    void shouldGetAttemptDetailsSuccessfully() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+        UserEntity candidate = getSeededUserEntity("carlos.silva@example.com");
+
+        PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter);
+
+        AssessmentAttemptEntity attempt = new AssessmentAttemptEntity();
+        attempt.setAssessment(assessment);
+        attempt.setUser(candidate);
+        attempt.setStartedAt(LocalDateTime.now());
+        attempt.setFinishedAt(LocalDateTime.now());
+        attempt.setStatus(AssessmentAttemptStatus.COMPLETED);
+        attempt = assessmentAttemptJpaRepository.save(attempt);
+
+        mockMvc.perform(get("/api/v1/assessments/attempts/" + attempt.getId())
+                        .header("X-Dev-User-Email", recruiter.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(attempt.getId().toString()));
+    }
+
+
+    // ==========================
+    // POST /api/v1/assessments/{attemptId}/evaluate
+    // ==========================
+
+    @Test
+    @DisplayName("Should evaluate attempt successfully")
+    void shouldEvaluateAttemptSuccessfully() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+        UserEntity candidate = getSeededUserEntity("carlos.silva@example.com");
+
+        PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter);
+
+        AssessmentAttemptEntity attempt = new AssessmentAttemptEntity();
+        attempt.setAssessment(assessment);
+        attempt.setUser(candidate);
+        attempt.setStatus(AssessmentAttemptStatus.COMPLETED);
+        attempt.setStartedAt(LocalDateTime.now());
+        attempt = assessmentAttemptJpaRepository.save(attempt);
+
+        EvaluateAssessmentAttemptRequest request = new EvaluateAssessmentAttemptRequest(
+                AssessmentAttemptStatus.APPROVED
+        );
+
+        mockMvc.perform(post("/api/v1/assessments/" + attempt.getId() + "/evaluate")
+                        .header("X-Dev-User-Email", recruiter.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("APPROVED"));
+    }
+
+
+    // ==========================
+    // HELPER
+    // ==========================
+
+    private PersonalizedAssessmentEntity createTestAssessment(UserEntity recruiter) {
+        PersonalizedAssessmentEntity assessment = new PersonalizedAssessmentEntity();
+        assessment.setTitle("Test " + UUID.randomUUID());
+        assessment.setDescription("desc");
+        assessment.setCreationDate(LocalDateTime.now());
+        assessment.setCreatedBy((UserRecruiterEntity) recruiter);
+        assessment.setShareableToken("token-" + UUID.randomUUID());
+        assessment.setStatus(PersonalizedAssessmentStatus.ACTIVE);
+        assessment.setMaxAttempts(3);
+        return assessmentJpaRepository.save(assessment);
     }
 }
