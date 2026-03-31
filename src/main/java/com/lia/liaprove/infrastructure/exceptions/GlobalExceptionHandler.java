@@ -1,5 +1,6 @@
 package com.lia.liaprove.infrastructure.exceptions;
 
+import com.lia.liaprove.core.exceptions.assessment.AssessmentNotFoundException;
 import com.lia.liaprove.core.exceptions.metrics.FeedbackNotFoundException;
 import com.lia.liaprove.core.exceptions.question.QuestionPreAnalysisException;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
@@ -102,6 +103,14 @@ public class GlobalExceptionHandler {
         log.warn("QuestionPreAnalysisException: {}", ex.getMessage());
         Map<String, Object> body = createErrorBody(HttpStatus.BAD_GATEWAY, ex.getMessage(), req.getRequestURI());
         return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(body);
+    }
+
+    @ExceptionHandler(AssessmentNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleAssessmentNotFoundException(
+            AssessmentNotFoundException ex, HttpServletRequest req) {
+        log.warn("AssessmentNotFoundException: {}", ex.getMessage());
+        Map<String, Object> body = createErrorBody(HttpStatus.NOT_FOUND, "Not Found: " + ex.getMessage(), req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }
 }
 
