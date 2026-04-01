@@ -26,6 +26,13 @@ public interface AssessmentAttemptGateway {
     Optional<AssessmentAttempt> findById(UUID id);
 
     /**
+     * Recupera uma tentativa de avaliação pelo seu ID, incluindo detalhes do criador da avaliação.
+     * @param id O ID da tentativa.
+     * @return Um Optional contendo a tentativa encontrada, ou vazio se não existir.
+     */
+    Optional<AssessmentAttempt> findByIdWithCreator(UUID id);
+
+    /**
      * Busca uma tentativa de avaliação associada a um certificado.
      * @param certificateNumber Número do certificado.
      * @return Tentativa correspondente, se encontrada.

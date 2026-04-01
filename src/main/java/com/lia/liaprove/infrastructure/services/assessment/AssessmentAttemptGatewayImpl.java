@@ -56,6 +56,13 @@ public class AssessmentAttemptGatewayImpl implements AssessmentAttemptGateway {
     @Override
     @Transactional(readOnly = true)
     public Optional<AssessmentAttempt> findById(UUID id) {
+        return assessmentAttemptJpaRepository.findByIdFetchingAssessment(id)
+                .map(assessmentAttemptMapper::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<AssessmentAttempt> findByIdWithCreator(UUID id) {
         return assessmentAttemptJpaRepository.findByIdWithAssessmentAndCreator(id)
                 .map(assessmentAttemptMapper::toDomain);
     }

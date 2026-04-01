@@ -30,7 +30,7 @@ public class GetAssessmentAttemptDetailsUseCaseImpl implements GetAssessmentAtte
     @Override
     public AssessmentAttempt execute(UUID attemptId, UUID requesterId) {
         // 1. Buscar a tentativa
-        AssessmentAttempt attempt = attemptGateway.findById(attemptId)
+        AssessmentAttempt attempt = attemptGateway.findByIdWithCreator(attemptId)
                 .orElseThrow(() -> new AssessmentNotFoundException("Evaluation attempt with ID " + attemptId + " not found."));
 
         // 2. Buscar o usuário solicitante para checar a role

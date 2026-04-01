@@ -34,6 +34,14 @@ public interface AssessmentAttemptJpaRepository extends JpaRepository<Assessment
         SELECT a
         FROM AssessmentAttemptEntity a
         LEFT JOIN FETCH a.assessment ass
+        WHERE a.id = :id
+    """)
+    Optional<AssessmentAttemptEntity> findByIdFetchingAssessment(@Param("id") UUID id);
+
+    @Query("""
+        SELECT a
+        FROM AssessmentAttemptEntity a
+        LEFT JOIN FETCH a.assessment ass
         LEFT JOIN FETCH TREAT(ass AS PersonalizedAssessmentEntity).createdBy
         WHERE a.id = :id
     """)

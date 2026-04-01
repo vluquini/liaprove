@@ -37,7 +37,7 @@ public class EvaluateAssessmentAttemptUseCaseImpl implements EvaluateAssessmentA
         }
 
         // 2. Buscar a tentativa
-        AssessmentAttempt attempt = attemptGateway.findById(attemptId)
+        AssessmentAttempt attempt = attemptGateway.findByIdWithCreator(attemptId)
                 .orElseThrow(() -> new AssessmentNotFoundException("Assessment attempt with ID " + attemptId + " not found."));
 
         // 3. Autorizar o solicitante
