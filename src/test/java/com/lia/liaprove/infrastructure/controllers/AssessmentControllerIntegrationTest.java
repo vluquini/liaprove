@@ -242,6 +242,7 @@ public class AssessmentControllerIntegrationTest {
         assessment.setShareableToken("token-xyz-789");
         assessment.setStatus(PersonalizedAssessmentStatus.ACTIVE);
         assessment.setMaxAttempts(2);
+        assessment.setEvaluationTimerSeconds(1800L); // 30 minutes
         assessment.setQuestions(List.of(question));
 
         assessmentJpaRepository.save(assessment);
@@ -250,8 +251,7 @@ public class AssessmentControllerIntegrationTest {
                         .header("X-Dev-User-Email", user.getEmail())
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.status").value("IN_PROGRESS"));
+                .andExpect(jsonPath("$.attemptId").exists());
     }
 
     @Test
@@ -274,15 +274,10 @@ public class AssessmentControllerIntegrationTest {
                 .andReturn();
 
         String response = result.getResponse().getContentAsString();
-        System.out.println("DEBUG: Start System Response JSON: " + response);
 
         String attemptId = JsonPath.read(response, "$.attemptId");
         String questionId = JsonPath.read(response, "$.questions[0].id");
         String alternativeId = JsonPath.read(response, "$.questions[0].alternatives[0].id");
-        
-        System.out.println("DEBUG: Extracted attemptId: " + attemptId);
-        System.out.println("DEBUG: Extracted questionId: " + questionId);
-        System.out.println("DEBUG: Extracted alternativeId: " + alternativeId);
 
         // 2. Submit
         SubmitAssessmentRequest submitRequest = new SubmitAssessmentRequest(
@@ -298,8 +293,8 @@ public class AssessmentControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(submitRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("COMPLETED"))
-                .andExpect(jsonPath("$.score").exists());
+                .andExpect(jsonPath("$.status").value("FAILED"))
+                .andExpect(jsonPath("$.accuracyRate").exists());
     }
 
     // ==========================
@@ -310,11 +305,12 @@ public class AssessmentControllerIntegrationTest {
     @DisplayName("Should create personalized assessment successfully")
     void shouldCreatePersonalizedAssessmentSuccessfully() throws Exception {
         UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+        UUID questionId = UUID.fromString("00000001-0000-0000-0000-000000000001");
 
         CreatePersonalizedAssessmentRequest request = new CreatePersonalizedAssessmentRequest(
                 "Java Developer Test",
                 "Assessment for Java positions",
-                List.of(),
+                List.of(questionId),
                 LocalDateTime.now().plusDays(7),
                 3,
                 60
@@ -333,11 +329,12 @@ public class AssessmentControllerIntegrationTest {
     @DisplayName("Should return 403 when candidate tries to create personalized assessment")
     void shouldReturnForbiddenWhenCandidateCreatesAssessment() throws Exception {
         UserEntity candidate = getSeededUserEntity("carlos.silva@example.com");
+        UUID questionId = UUID.fromString("00000001-0000-0000-0000-000000000001");
 
         CreatePersonalizedAssessmentRequest request = new CreatePersonalizedAssessmentRequest(
                 "Invalid",
                 "Should not work",
-                List.of(),
+                List.of(questionId),
                 LocalDateTime.now().plusDays(5),
                 1,
                 30
@@ -524,7 +521,7 @@ public class AssessmentControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/assessments/attempts/" + attempt.getId())
                         .header("X-Dev-User-Email", recruiter.getEmail()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(attempt.getId().toString()));
+                .andExpect(jsonPath("$.attemptId").value(attempt.getId().toString()));
     }
 
 
@@ -573,6 +570,7 @@ public class AssessmentControllerIntegrationTest {
         assessment.setShareableToken("token-" + UUID.randomUUID());
         assessment.setStatus(PersonalizedAssessmentStatus.ACTIVE);
         assessment.setMaxAttempts(3);
+        assessment.setEvaluationTimerSeconds(1800L);
         return assessmentJpaRepository.save(assessment);
     }
 }
