@@ -7,7 +7,7 @@ import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.usecases.algorithms.genetic.GeneticAlgorithmUseCase;
-import com.lia.liaprove.core.usecases.user.admin.ManageVoteWeightUseCase;
+import com.lia.liaprove.core.usecases.algorithms.genetic.ManageVoteWeightUseCase;
 
 import java.util.*;
 

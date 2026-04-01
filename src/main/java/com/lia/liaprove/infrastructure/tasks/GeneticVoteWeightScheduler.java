@@ -1,6 +1,6 @@
 package com.lia.liaprove.infrastructure.tasks;
 
-import com.lia.liaprove.core.usecases.user.admin.ManageVoteWeightUseCase;
+import com.lia.liaprove.core.usecases.algorithms.genetic.ManageVoteWeightUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;

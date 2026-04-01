@@ -28,7 +28,7 @@ import com.lia.liaprove.core.usecases.algorithms.genetic.GeneticAlgorithmUseCase
 import com.lia.liaprove.core.usecases.assessments.*;
 import com.lia.liaprove.core.usecases.metrics.*;
 import com.lia.liaprove.core.usecases.question.*;
-import com.lia.liaprove.core.usecases.user.admin.ManageVoteWeightUseCase;
+import com.lia.liaprove.core.usecases.algorithms.genetic.ManageVoteWeightUseCase;
 import com.lia.liaprove.core.usecases.user.admin.UserModerationUseCase;
 import com.lia.liaprove.core.usecases.user.users.*;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;

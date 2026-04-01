@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.usecases.user.admin;
+package com.lia.liaprove.core.usecases.algorithms.genetic;
 
 import com.lia.liaprove.core.domain.user.UserRole;
 

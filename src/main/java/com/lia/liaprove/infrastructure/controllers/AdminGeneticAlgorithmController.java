@@ -1,7 +1,7 @@
 package com.lia.liaprove.infrastructure.controllers;
 
 import com.lia.liaprove.core.domain.user.UserRole;
-import com.lia.liaprove.core.usecases.user.admin.ManageVoteWeightUseCase;
+import com.lia.liaprove.core.usecases.algorithms.genetic.ManageVoteWeightUseCase;
 import com.lia.liaprove.infrastructure.dtos.algorithms.genetic.AdjustGeneticWeightsRequest;
 import com.lia.liaprove.infrastructure.dtos.algorithms.genetic.UpdateMultiplierRequest;
 import com.lia.liaprove.infrastructure.dtos.algorithms.genetic.UpdateVoteWeightRequest;
