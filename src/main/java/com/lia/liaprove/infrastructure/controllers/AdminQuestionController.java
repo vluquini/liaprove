@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -104,7 +103,7 @@ public class AdminQuestionController {
             @Valid @RequestBody ModerateQuestionRequest request) {
 
         ModerateQuestionUseCase.ModerateQuestionCommand command =
-                new ModerateQuestionUseCase.ModerateQuestionCommand(request.newStatus(), Optional.empty());
+                new ModerateQuestionUseCase.ModerateQuestionCommand(request.newStatus());
 
         Question moderatedQuestion = moderateQuestionUseCase.execute(questionId, command)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found"));
