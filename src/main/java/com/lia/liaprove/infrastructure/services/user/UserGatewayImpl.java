@@ -44,17 +44,17 @@ public class UserGatewayImpl implements UserGateway {
     }
 
     @Override
-    public List<User> search(Optional<String> name, Optional<UserRole> role, int page, int size) {
+    public List<User> search(String name, UserRole role, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Specification<UserEntity> spec = Specification.where(null);
 
-        if (name.isPresent() && !name.get().isEmpty()) {
+        if (name != null && !name.isEmpty()) {
             spec = spec.and((root, query, cb) ->
-                    cb.like(cb.lower(root.get("name")), "%" + name.get().toLowerCase() + "%"));
+                    cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
         }
 
-        if (role.isPresent()) {
-            spec = spec.and((root, query, cb) -> cb.equal(root.get("role"), role.get()));
+        if (role != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("role"), role));
         }
 
         return userRepository.findAll(spec, pageable).getContent().stream()

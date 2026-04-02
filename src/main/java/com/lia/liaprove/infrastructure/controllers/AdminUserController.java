@@ -14,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -37,7 +36,7 @@ public class AdminUserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size
     ) {
-        List<User> users = findUsersUseCase.findByName(Optional.ofNullable(name), Optional.ofNullable(role), page, size);
+        List<User> users = findUsersUseCase.findByName(name, role, page, size);
         List<UserResponseDto> userResponseDtos = users.stream()
                 .map(userMapper::toResponseDto)
                 .collect(Collectors.toList());

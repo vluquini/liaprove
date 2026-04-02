@@ -18,7 +18,7 @@ public interface UserGateway {
 
     void deleteById(UUID id);
 
-    List<User> search(Optional<String> name, Optional<UserRole> role, int page, int size);
+    List<User> search(String name, UserRole role, int page, int size);
 
     /**
      * Busca usuários por um conjunto de ids retornando um mapa id->User.
