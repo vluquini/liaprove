@@ -22,5 +22,4 @@ public interface AlternativeMapper {
     AlternativeEntity toEntity(Alternative domain);
 
     AlternativeDto toAlternativeDto(Alternative domain);
-//    List<AlternativeDto> toAlternativeDtoList(List<Alternative> domainList);
 }

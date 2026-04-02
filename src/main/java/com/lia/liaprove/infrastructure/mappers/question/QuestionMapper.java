@@ -23,6 +23,8 @@ import java.util.*;
         uses = {AlternativeMapper.class, FeedbackQuestionMapper.class, UserMapper.class})
 public interface QuestionMapper {
 
+    // ######################################## DOMAIN -> JPA #############################################
+
     AuthorDto toAuthorDto(User user);
 
     // Dispatcher evita retorno abstrato/ambiguidade
@@ -39,14 +41,16 @@ public interface QuestionMapper {
 
     ProjectQuestionEntity toEntity(ProjectQuestion domain);
 
-    // Inversos gerados pelo MapStruct (herdam as @Mapping via @InheritInverseConfiguration)
+    List<AlternativeEntity> alternativeListToEntity(List<Alternative> domainList);
+
+    // ######################################## JPA -> DOMAIN #############################################
+
     @InheritInverseConfiguration(name = "toEntity")
     MultipleChoiceQuestion toDomain(MultipleChoiceQuestionEntity entity);
 
     @InheritInverseConfiguration(name = "toEntity")
     ProjectQuestion toDomain(ProjectQuestionEntity entity);
 
-    // Dispatcher para toDomain
     default Question toDomain(QuestionEntity entity) {
         return switch (entity) {
             case null -> null;
@@ -56,13 +60,10 @@ public interface QuestionMapper {
         };
     }
 
-    // Helpers for mapping lists of alternatives (MapStruct will generate implementations)
-    List<AlternativeEntity> alternativeListToEntity(List<Alternative> domainList);
     List<Alternative> alternativeListToDomain(List<AlternativeEntity> embList);
 
-    // Update methods using @MappingTarget
-    // Ignore fields that must be preserved by JPA (id, submissionDate, etc.)
-    // Also ignore 'alternatives' here so we can control collection mutation behavior in the default dispatcher.
+    // ######################################## UPDATE (MERGE) ############################################
+
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "submissionDate", ignore = true)
@@ -78,34 +79,24 @@ public interface QuestionMapper {
     @Mapping(target = "recruiterUsageCount", ignore = true)
     void updateEntityFromDomain(ProjectQuestion domain, @MappingTarget ProjectQuestionEntity entity);
 
-    /**
-     * Dispatcher that safely updates a managed QuestionEntity from a domain Question.
-     * - preserves JPA-managed fields (id, submissionDate, ...)
-     * - ignores nulls from the source (so partial updates are possible)
-     * - controls how element collections are mutated (clear + addAll) to avoid losing the entity identity
-     */
     default void updateEntityFromDomain(Question domain, @MappingTarget QuestionEntity entity) {
         if (domain == null || entity == null) return;
 
         final String s = "Mismatched types: domain=" + domain.getClass() + " entity=" + entity.getClass();
 
-        // Dispatch by runtime type of the entity (we are updating an existing managed entity)
         switch (entity) {
             case MultipleChoiceQuestionEntity mce -> {
                 if (!(domain instanceof MultipleChoiceQuestion mc)) {
                     throw new IllegalArgumentException(s);
                 }
 
-                // First let MapStruct copy scalar properties (ignoring collections as configured)
                 updateEntityFromDomain(mc, mce);
 
-                // Handle alternatives using the entity's own helper methods for safety
                 List<Alternative> sourceAlternatives = mc.getAlternatives();
 
                 if (sourceAlternatives != null) {
                     List<AlternativeEntity> convertedAlternatives = alternativeListToEntity(sourceAlternatives);
 
-                    // Use a copy to avoid ConcurrentModificationException while iterating
                     new ArrayList<>(mce.getAlternatives()).forEach(mce::removeAlternative);
 
                     if (convertedAlternatives != null) {
@@ -120,7 +111,9 @@ public interface QuestionMapper {
                 }
                 updateEntityFromDomain(pq, pqe);
             }
-            default -> throw new IllegalArgumentException("Unsupported QuestionEntity subtype: " + entity.getClass());
+
+            default -> throw new IllegalArgumentException("Unsupported QuestionEntity subtype: " + entity.getClass()
+            );
         }
     }
 
@@ -131,11 +124,14 @@ public interface QuestionMapper {
         }
     }
 
+    // ######################################## REQUEST -> COMMAND ########################################
+
     default UpdateQuestionUseCase.UpdateQuestionCommand toUpdateCommand(UpdateQuestionRequest request) {
         if (request == null) {
             // If the whole request is null, return a command with all fields empty.
-            return new UpdateQuestionUseCase.UpdateQuestionCommand(Optional.empty(), Optional.empty(),
-                                                    Optional.empty(), Optional.empty());
+            return new UpdateQuestionUseCase.UpdateQuestionCommand(
+                    Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty()
+            );
         }
         return new UpdateQuestionUseCase.UpdateQuestionCommand(
                 Optional.ofNullable(request.title()),
@@ -149,6 +145,7 @@ public interface QuestionMapper {
         if (dto == null) {
             throw new IllegalArgumentException("QuestionCreateDto cannot be null.");
         }
+
         List<String> alternatives = dto.alternatives() == null
                 ? Collections.emptyList()
                 : dto.alternatives().stream().map(Alternative::text).toList();
@@ -163,24 +160,12 @@ public interface QuestionMapper {
         );
     }
 
-    default PreAnalyzeQuestionResponse toPreAnalysisResponse(PreAnalyzeQuestionUseCase.PreAnalysisResult result) {
-        if (result == null) {
-            throw new IllegalArgumentException("PreAnalysisResult cannot be null.");
-        }
-        return new PreAnalyzeQuestionResponse(
-                result.languageSuggestions(),
-                result.biasOrAmbiguityWarnings(),
-                result.distractorSuggestions(),
-                result.difficultyLevelByLLM(),
-                result.topicConsistencyNotes()
-        );
-    }
-
     default PrepareQuestionSubmissionUseCase.PreparationCommand toPreparationCommand(
             QuestionCreateDto mappedDto, SubmitQuestionRequest request) {
         if (mappedDto == null || request == null) {
             throw new IllegalArgumentException("mappedDto and request cannot be null.");
         }
+
         return new PrepareQuestionSubmissionUseCase.PreparationCommand(
                 mappedDto.title(),
                 mappedDto.description(),
@@ -196,6 +181,22 @@ public interface QuestionMapper {
         );
     }
 
+    // ######################################## COMMAND -> DTO ############################################
+
+    default PreAnalyzeQuestionResponse toPreAnalysisResponse(PreAnalyzeQuestionUseCase.PreAnalysisResult result) {
+        if (result == null) {
+            throw new IllegalArgumentException("PreAnalysisResult cannot be null.");
+        }
+
+        return new PreAnalyzeQuestionResponse(
+                result.languageSuggestions(),
+                result.biasOrAmbiguityWarnings(),
+                result.distractorSuggestions(),
+                result.difficultyLevelByLLM(),
+                result.topicConsistencyNotes()
+        );
+    }
+
     default QuestionCreateDto toPreparedQuestionCreateDto(
             UUID authorId,
             QuestionCreateDto mappedDto,
@@ -204,6 +205,7 @@ public interface QuestionMapper {
         if (authorId == null || mappedDto == null || preparedQuestion == null || request == null) {
             throw new IllegalArgumentException("Arguments cannot be null.");
         }
+
         return new QuestionCreateDto(
                 authorId,
                 preparedQuestion.title(),
@@ -218,63 +220,34 @@ public interface QuestionMapper {
         );
     }
 
-    default List<String> safeList(List<String> values) {
-        return values == null ? List.of() : values;
-    }
+    // ######################################## REQUEST -> DTO ############################################
 
-    default List<PrepareQuestionSubmissionUseCase.AlternativeInput> toAlternativeInputs(List<Alternative> alternatives) {
-        if (alternatives == null) {
-            return List.of();
-        }
-        return alternatives.stream()
-                .map(alt -> new PrepareQuestionSubmissionUseCase.AlternativeInput(alt.text(), alt.correct()))
-                .toList();
-    }
-
-    default List<Alternative> toAlternatives(List<PrepareQuestionSubmissionUseCase.AlternativeInput> alternatives) {
-        if (alternatives == null) {
-            return List.of();
-        }
-        return alternatives.stream()
-                .map(alt -> new Alternative(null, alt.text(), alt.correct()))
-                .toList();
-    }
-
-    // MultipleChoice: mapeia alternativas
     @Mapping(target = "authorId", expression = "java(authorId)")
     @Mapping(target = "relevanceByLLM", ignore = true)
     QuestionCreateDto toQuestionCreateDto(SubmitMultipleChoiceQuestionRequest req, UUID authorId);
 
-    // Project: não possui alternatives — ignorar esse target
     @Mapping(target = "authorId", expression = "java(authorId)")
     @Mapping(target = "alternatives", ignore = true)
     @Mapping(target = "relevanceByLLM", ignore = true)
     QuestionCreateDto toQuestionCreateDto(SubmitProjectQuestionRequest req, UUID authorId);
 
-
-    // Dispatcher genérico
     default QuestionCreateDto toQuestionCreateDto(SubmitQuestionRequest req, UUID authorId) {
         if (req instanceof SubmitMultipleChoiceQuestionRequest mc) return toQuestionCreateDto(mc, authorId);
         if (req instanceof SubmitProjectQuestionRequest p) return toQuestionCreateDto(p, authorId);
         throw new IllegalArgumentException("Unknown SubmitQuestionRequest subtype: " + req.getClass());
     }
 
-    // ####################################################################################################
-    // ############################# MAPPINGS FROM DOMAIN TO DTO RESPONSE (NEW) ###########################
-    // ####################################################################################################
+    // ######################################## DOMAIN -> RESPONSE DTO ####################################
 
     @Mapping(source = "authorId", target = "authorId")
     QuestionSummaryResponse toSummaryResponseDto(Question domain);
-    List<QuestionSummaryResponse> toSummaryResponseDtoList(List<Question> domainList);
-
 
     @Mapping(source = "details.question.id", target = "id")
     @Mapping(source = "details.question.title", target = "title")
     @Mapping(source = "details.question.description", target = "description")
     @Mapping(source = "details.question.knowledgeAreas", target = "knowledgeAreas")
     @Mapping(source = "details.question.submissionDate", target = "submissionDate")
-    @Mapping(source = "details.author", target = "author") // Corrected source
-//    @Mapping(target = "alternatives", ignore = true) // Ignore direct mapping
+    @Mapping(source = "details.author", target = "author")
     @Mapping(source = "details.question", target = "alternatives")
     @Mapping(source = "details.approveVotes", target = "voteSummary.approves")
     @Mapping(source = "details.rejectVotes", target = "voteSummary.rejects")
@@ -282,15 +255,6 @@ public interface QuestionMapper {
     @Mapping(source = "details.question.relevanceByLLM", target = "relevanceByLLM")
     QuestionDetailResponse toQuestionDetailResponseDto(QuestionVotingDetails details);
 
-
-    /**
-     * Helper que MapStruct irá invocar automaticamente para preencher
-     * List<AlternativeDto> a partir de Question.
-     *
-     * - É Default para conter a lógica de decisão (instanceof) de forma testável e type-safe.
-     * - Delegamos a conversão da lista para o método abstrato abaixo,
-     *   que o MapStruct implementará (e que por sua vez pode usar AlternativeMapper).
-     */
     default List<AlternativeDto> mapAlternatives(Question question) {
         if (question instanceof MultipleChoiceQuestion mc) {
             List<Alternative> alts = mc.getAlternatives();
@@ -312,7 +276,28 @@ public interface QuestionMapper {
             case ProjectQuestion pq -> toResponseDto(pq);
             default -> throw new IllegalArgumentException("Unknown Question subtype: " + domain.getClass().getName());
         };
+    }
 
+    // ######################################## HELPERS ###################################################
+
+    default List<String> safeList(List<String> values) {
+        return values == null ? List.of() : values;
+    }
+
+    default List<PrepareQuestionSubmissionUseCase.AlternativeInput> toAlternativeInputs(List<Alternative> alternatives) {
+        if (alternatives == null) return List.of();
+
+        return alternatives.stream()
+                .map(alt -> new PrepareQuestionSubmissionUseCase.AlternativeInput(alt.text(), alt.correct()))
+                .toList();
+    }
+
+    default List<Alternative> toAlternatives(List<PrepareQuestionSubmissionUseCase.AlternativeInput> alternatives) {
+        if (alternatives == null) return List.of();
+
+        return alternatives.stream()
+                .map(alt -> new Alternative(null, alt.text(), alt.correct()))
+                .toList();
     }
 
     default Class<? extends QuestionEntity> mapToEntityClass(Class<? extends Question> domainClass) {
