@@ -16,7 +16,7 @@ public class DefaultQuestionFactory implements QuestionFactory {
 
     @Override
     public Question createMultipleChoice(QuestionCreateDto dto) {
-        validateFields(dto);
+        QuestionValidator.validate(dto);
 
         // Map DTO alternatives -> domain Alternative (JPA will generate id)
         List<Alternative> domainAlternatives = dto.alternatives() == null ? List.of()
@@ -38,7 +38,7 @@ public class DefaultQuestionFactory implements QuestionFactory {
 
     @Override
     public Question createProject(QuestionCreateDto dto) {
-        validateFields(dto);
+        QuestionValidator.validate(dto);
 
         ProjectQuestion question = new ProjectQuestion();
 
@@ -127,36 +127,6 @@ public class DefaultQuestionFactory implements QuestionFactory {
         normalized = normalized.replaceAll("\\p{M}", "");       // remove diacríticos
         normalized = normalized.replaceAll("\\s+", " ").trim(); // normaliza espaços
         return normalized.toLowerCase(Locale.ROOT);
-    }
-
-    /**
-     * Valida os campos básicos comuns à criação de qualquer tipo de questão.
-     *
-     * As validações realizadas garantem que os dados mínimos necessários
-     * para a criação de uma questão válida estejam presentes.
-     *
-     * @param dto dados fornecidos para criação da questão
-     * @throws InvalidUserDataException caso algum campo obrigatório esteja ausente ou inválido
-     * @throws NullPointerException caso o DTO seja nulo
-     */
-    private void validateFields(QuestionCreateDto dto) {
-        Objects.requireNonNull(dto, "Question creation data cannot be null");
-
-        if (dto.title() == null || dto.title().isBlank()) {
-            throw new InvalidUserDataException("Title must not be empty");
-        }
-        if (dto.description() == null || dto.description().isBlank()) {
-            throw new InvalidUserDataException("Description must not be empty");
-        }
-        if (dto.knowledgeAreas() == null || dto.knowledgeAreas().isEmpty()) {
-            throw new InvalidUserDataException("Knowledge areas must not be empty");
-        }
-        if (dto.difficultyByCommunity() == null) {
-            throw new InvalidUserDataException("Difficulty level mus be provided.");
-        }
-        if (dto.relevanceByCommunity() == null) {
-            throw new InvalidUserDataException("Relevance level mus be provided.");
-        }
     }
 
     /**

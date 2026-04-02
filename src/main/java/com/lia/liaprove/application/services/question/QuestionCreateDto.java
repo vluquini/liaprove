@@ -4,6 +4,7 @@ import com.lia.liaprove.core.domain.question.Alternative;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
+import com.lia.liaprove.core.domain.question.QuestionContent;
 
 import java.util.List;
 import java.util.Set;
@@ -23,6 +24,6 @@ public record QuestionCreateDto(
         RelevanceLevel relevanceByCommunity,
         RelevanceLevel relevanceByLLM,
         List<Alternative> alternatives
-) {}
+) implements QuestionContent {}
 
 
