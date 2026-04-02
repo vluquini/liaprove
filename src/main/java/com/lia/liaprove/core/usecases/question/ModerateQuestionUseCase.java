@@ -25,8 +25,7 @@ public interface ModerateQuestionUseCase {
      * Objeto de comando (DTO) para a moderação de uma questão.
      */
     record ModerateQuestionCommand(
-            QuestionStatus newStatus,
-            Optional<String> moderationReason
+            QuestionStatus newStatus
     ) {}
 
 }
