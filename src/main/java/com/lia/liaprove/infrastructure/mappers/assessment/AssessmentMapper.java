@@ -7,7 +7,7 @@ import com.lia.liaprove.infrastructure.entities.assessment.AssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.SystemAssessmentEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
-import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import org.hibernate.Hibernate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

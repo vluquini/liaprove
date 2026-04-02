@@ -18,7 +18,7 @@ import com.lia.liaprove.infrastructure.dtos.assessment.PersonalizedAssessmentRes
 import com.lia.liaprove.infrastructure.dtos.assessment.ScoredQuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.UpdatePersonalizedAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.user.UserResponseDto;
-import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;

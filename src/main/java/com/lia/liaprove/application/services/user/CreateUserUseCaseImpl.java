@@ -4,8 +4,8 @@ import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.user.*;
 import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
-import com.lia.liaprove.core.usecases.user.users.CreateUserUseCase;
-import com.lia.liaprove.core.usecases.user.users.UserFactory;
+import com.lia.liaprove.core.usecases.user.CreateUserUseCase;
+import com.lia.liaprove.core.usecases.user.UserFactory;
 
 /**
  * Implementação do caso de uso "CreateUser".

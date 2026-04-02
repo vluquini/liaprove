@@ -3,7 +3,7 @@ package com.lia.liaprove.application.services.user;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
-import com.lia.liaprove.core.usecases.user.users.GetUserByIdUseCase;
+import com.lia.liaprove.core.usecases.user.GetUserByIdUseCase;
 
 import java.util.Objects;
 import java.util.UUID;

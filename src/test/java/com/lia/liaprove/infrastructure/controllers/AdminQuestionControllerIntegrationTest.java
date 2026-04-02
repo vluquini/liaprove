@@ -6,7 +6,7 @@ import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.infrastructure.dtos.question.ModerateQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.UpdateQuestionRequest;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
-import com.lia.liaprove.infrastructure.entities.users.UserEntity;
+import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import com.lia.liaprove.infrastructure.repositories.QuestionJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.FeedbackQuestionJpaRepository;

@@ -2,7 +2,7 @@ package com.lia.liaprove.infrastructure.entities.assessment;
 
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
-import com.lia.liaprove.infrastructure.entities.users.UserEntity;
+import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

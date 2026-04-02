@@ -2,7 +2,7 @@ package com.lia.liaprove.infrastructure.entities.metrics;
 
 import com.lia.liaprove.core.domain.metrics.VoteType;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
-import com.lia.liaprove.infrastructure.entities.users.UserEntity;
+import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;

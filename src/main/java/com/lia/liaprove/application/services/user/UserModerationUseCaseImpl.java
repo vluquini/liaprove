@@ -6,7 +6,7 @@ import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.domain.user.UserStatus;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
 import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
-import com.lia.liaprove.core.usecases.user.admin.UserModerationUseCase;
+import com.lia.liaprove.core.usecases.user.UserModerationUseCase;
 
 import java.util.Objects;
 import java.util.UUID;

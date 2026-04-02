@@ -1,7 +1,7 @@
 package com.lia.liaprove.infrastructure.entities.metrics;
 
 import com.lia.liaprove.core.domain.metrics.ReactionType;
-import com.lia.liaprove.infrastructure.entities.users.UserEntity;
+import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;

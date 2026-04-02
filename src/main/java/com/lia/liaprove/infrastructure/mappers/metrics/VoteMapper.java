@@ -4,7 +4,7 @@ import com.lia.liaprove.core.domain.metrics.Vote;
 import com.lia.liaprove.infrastructure.dtos.metrics.VoteResponseDto;
 import com.lia.liaprove.infrastructure.entities.metrics.VoteEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
-import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

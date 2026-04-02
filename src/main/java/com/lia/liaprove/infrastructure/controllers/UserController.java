@@ -1,12 +1,14 @@
 package com.lia.liaprove.infrastructure.controllers;
 
 import com.lia.liaprove.core.domain.user.User;
-import com.lia.liaprove.core.usecases.user.admin.UserModerationUseCase;
-import com.lia.liaprove.core.usecases.user.users.*;
+import com.lia.liaprove.core.usecases.user.ChangePasswordUseCase;
+import com.lia.liaprove.core.usecases.user.GetUserByIdUseCase;
+import com.lia.liaprove.core.usecases.user.UpdateUserProfileUseCase;
+import com.lia.liaprove.core.usecases.user.UserModerationUseCase;
 import com.lia.liaprove.infrastructure.dtos.user.ChangePasswordRequest;
 import com.lia.liaprove.infrastructure.dtos.user.UpdateUserRequest;
 import com.lia.liaprove.infrastructure.dtos.user.UserResponseDto;
-import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

@@ -5,7 +5,7 @@ import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
 import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
-import com.lia.liaprove.core.usecases.user.users.UpdateUserProfileUseCase;
+import com.lia.liaprove.core.usecases.user.UpdateUserProfileUseCase;
 
 import java.util.Objects;
 import java.util.UUID;

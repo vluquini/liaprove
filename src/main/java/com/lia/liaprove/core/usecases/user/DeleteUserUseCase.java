@@ -1,4 +1,4 @@
-package com.lia.liaprove.core.usecases.user.users;
+package com.lia.liaprove.core.usecases.user;
 
 import java.util.UUID;
 

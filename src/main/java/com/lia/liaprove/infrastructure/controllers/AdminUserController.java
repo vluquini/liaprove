@@ -2,11 +2,11 @@ package com.lia.liaprove.infrastructure.controllers;
 
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRole;
-import com.lia.liaprove.core.usecases.user.admin.UserModerationUseCase;
-import com.lia.liaprove.core.usecases.user.users.DeleteUserUseCase;
-import com.lia.liaprove.core.usecases.user.users.FindUsersUseCase;
+import com.lia.liaprove.core.usecases.user.UserModerationUseCase;
+import com.lia.liaprove.core.usecases.user.DeleteUserUseCase;
+import com.lia.liaprove.core.usecases.user.FindUsersUseCase;
 import com.lia.liaprove.infrastructure.dtos.user.UserResponseDto;
-import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

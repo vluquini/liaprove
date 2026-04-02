@@ -12,7 +12,7 @@ import com.lia.liaprove.infrastructure.dtos.metrics.ReactToFeedbackRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.UpdateFeedbackCommentRequest;
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
-import com.lia.liaprove.infrastructure.entities.users.UserEntity;
+import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.repositories.FeedbackQuestionJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.QuestionJpaRepository;

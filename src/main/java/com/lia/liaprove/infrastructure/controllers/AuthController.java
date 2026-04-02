@@ -2,7 +2,7 @@ package com.lia.liaprove.infrastructure.controllers;
 
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserStatus;
-import com.lia.liaprove.core.usecases.user.users.CreateUserUseCase;
+import com.lia.liaprove.core.usecases.user.CreateUserUseCase;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.infrastructure.dtos.user.AuthenticationRequest;
 import com.lia.liaprove.infrastructure.dtos.user.AuthenticationResponse;

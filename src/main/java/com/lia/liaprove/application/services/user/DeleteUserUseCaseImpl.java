@@ -5,7 +5,7 @@ import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
-import com.lia.liaprove.core.usecases.user.users.DeleteUserUseCase;
+import com.lia.liaprove.core.usecases.user.DeleteUserUseCase;
 
 import java.util.Objects;
 import java.util.UUID;

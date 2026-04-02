@@ -6,7 +6,7 @@ import com.lia.liaprove.infrastructure.dtos.metrics.FeedbackQuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.metrics.FeedbackReactionResponse;
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackReactionEntity;
-import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

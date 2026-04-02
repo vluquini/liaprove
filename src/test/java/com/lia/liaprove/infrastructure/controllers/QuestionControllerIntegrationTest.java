@@ -10,7 +10,7 @@ import com.lia.liaprove.core.usecases.question.PrepareQuestionSubmissionUseCase;
 import com.lia.liaprove.infrastructure.dtos.question.AlternativeRequestDto;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitMultipleChoiceQuestionRequest;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
-import com.lia.liaprove.infrastructure.entities.users.UserEntity;
+import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import com.lia.liaprove.infrastructure.repositories.QuestionJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
 import org.junit.jupiter.api.AfterEach;

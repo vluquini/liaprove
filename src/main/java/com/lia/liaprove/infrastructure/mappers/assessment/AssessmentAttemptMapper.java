@@ -4,7 +4,7 @@ import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.infrastructure.entities.assessment.AnswerEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
-import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

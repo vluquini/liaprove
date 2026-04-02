@@ -1,7 +1,7 @@
 package com.lia.liaprove.infrastructure.entities.assessment;
 
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
-import com.lia.liaprove.infrastructure.entities.users.UserRecruiterEntity;
+import com.lia.liaprove.infrastructure.entities.user.UserRecruiterEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;

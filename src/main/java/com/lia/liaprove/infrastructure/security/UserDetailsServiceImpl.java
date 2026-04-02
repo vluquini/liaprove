@@ -1,8 +1,8 @@
 package com.lia.liaprove.infrastructure.security;
 
 import com.lia.liaprove.core.domain.user.User;
-import com.lia.liaprove.infrastructure.entities.users.UserEntity;
-import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import com.lia.liaprove.infrastructure.entities.user.UserEntity;
+import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;

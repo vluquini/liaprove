@@ -10,7 +10,7 @@ import com.lia.liaprove.core.usecases.question.UpdateQuestionUseCase;
 import com.lia.liaprove.infrastructure.dtos.user.AuthorDto;
 import com.lia.liaprove.infrastructure.dtos.question.*;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
-import com.lia.liaprove.infrastructure.mappers.users.UserMapper;
+import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import com.lia.liaprove.infrastructure.entities.question.AlternativeEntity;
 import com.lia.liaprove.infrastructure.entities.question.MultipleChoiceQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.ProjectQuestionEntity;

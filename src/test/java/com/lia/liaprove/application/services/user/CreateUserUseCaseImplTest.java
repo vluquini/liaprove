@@ -4,7 +4,7 @@ import com.lia.liaprove.application.gateways.user.PasswordHasher;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.user.*;
 import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
-import com.lia.liaprove.core.usecases.user.users.UserFactory;
+import com.lia.liaprove.core.usecases.user.UserFactory;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

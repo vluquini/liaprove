@@ -5,7 +5,7 @@ import com.lia.liaprove.core.algorithms.genetic.RecruiterMetrics;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
 import com.lia.liaprove.core.domain.metrics.ReactionType;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
-import com.lia.liaprove.infrastructure.entities.users.UserRecruiterEntity;
+import com.lia.liaprove.infrastructure.entities.user.UserRecruiterEntity;
 import com.lia.liaprove.infrastructure.repositories.AssessmentAttemptJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.AssessmentJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.FeedbackQuestionJpaRepository;
