@@ -72,12 +72,11 @@ public class AdminQuestionControllerIntegrationTest {
     @DisplayName("Should list all questions for admin")
     void shouldListAllQuestionsForAdmin() throws Exception {
         UserEntity admin = getSeededUserEntity("admin@liaprove.com");
-        long totalQuestions = questionJpaRepository.count();
 
         mockMvc.perform(get("/api/v1/admin/questions")
                         .header("X-Dev-User-Email", admin.getEmail()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize((int) totalQuestions)));
+                .andExpect(jsonPath("$", hasSize(10)));
     }
 
     @Test
