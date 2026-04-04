@@ -2,6 +2,7 @@ package com.lia.liaprove.infrastructure.exceptions;
 
 import com.lia.liaprove.core.exceptions.assessment.AssessmentNotFoundException;
 import com.lia.liaprove.core.exceptions.metrics.FeedbackNotFoundException;
+import com.lia.liaprove.core.exceptions.question.QuestionNotFoundException;
 import com.lia.liaprove.core.exceptions.question.QuestionPreAnalysisException;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
 import com.lia.liaprove.core.exceptions.user.InvalidCredentialsException;
@@ -78,6 +79,14 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleFeedbackNotFoundException(
         FeedbackNotFoundException ex, HttpServletRequest req) {
         log.warn("FeedbackNotFoundException: {}", ex.getMessage());
+        Map<String, Object> body = createErrorBody(HttpStatus.NOT_FOUND, "Not Found: " + ex.getMessage(), req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(QuestionNotFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleQuestionNotFoundException(
+        QuestionNotFoundException ex, HttpServletRequest req) {
+        log.warn("QuestionNotFoundException: {}", ex.getMessage());
         Map<String, Object> body = createErrorBody(HttpStatus.NOT_FOUND, "Not Found: " + ex.getMessage(), req.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
     }

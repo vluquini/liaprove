@@ -65,8 +65,8 @@ public class FeedbackGatewayImpl implements FeedbackGateway {
             managedEntity.setComment(feedback.getComment());
             managedEntity.setUpdatedAt(feedback.getUpdatedAt());
 
-            // Update reactions collection. This involves clearing the managed collection
-            // and re-populating it with entities derived from the domain object's reactions.
+            // Update reactions collection.
+            // Clear existing reactions and add new ones derived from the domain object.
             managedEntity.getReactions().clear();
             feedback.getReactions().stream()
                     .map(feedbackQuestionMapper::reactionToEntity) // Converts domain Reaction to ReactionEntity
@@ -74,10 +74,10 @@ public class FeedbackGatewayImpl implements FeedbackGateway {
 
         } else {
             // This is a creation scenario. Create a new entity from the domain object.
-            // The mapper will ignore 'question' and 'reactions', so we set them manually.
             managedEntity = feedbackQuestionMapper.toEntity(feedback);
             managedEntity.setQuestion(questionMapper.toEntity(feedback.getQuestion()));
 
+            // Map and add reactions for the new entity.
             feedback.getReactions().stream()
                     .map(feedbackQuestionMapper::reactionToEntity)
                     .forEach(managedEntity::addReaction);
@@ -93,3 +93,4 @@ public class FeedbackGatewayImpl implements FeedbackGateway {
         }
     }
 }
+

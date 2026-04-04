@@ -1,24 +1,16 @@
 package com.lia.liaprove.infrastructure.controllers;
 
-import com.lia.liaprove.core.domain.metrics.FeedbackQuestion;
-import com.lia.liaprove.core.domain.metrics.Vote;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
-import com.lia.liaprove.core.usecases.metrics.ListFeedbacksForQuestionUseCase;
-import com.lia.liaprove.core.usecases.metrics.ListVotesForQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.GetQuestionByIdUseCase;
 import com.lia.liaprove.core.usecases.question.ListQuestionsUseCase;
 import com.lia.liaprove.core.usecases.question.ModerateQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.UpdateQuestionUseCase;
-import com.lia.liaprove.infrastructure.dtos.metrics.FeedbackQuestionResponse;
-import com.lia.liaprove.infrastructure.dtos.metrics.VoteResponseDto;
 import com.lia.liaprove.infrastructure.dtos.question.ModerateQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.question.UpdateQuestionRequest;
-import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
-import com.lia.liaprove.infrastructure.mappers.metrics.VoteMapper;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import jakarta.validation.Valid;
@@ -44,11 +36,7 @@ public class AdminQuestionController {
     private final GetQuestionByIdUseCase getQuestionByIdUseCase;
     private final UpdateQuestionUseCase updateQuestionUseCase;
     private final ModerateQuestionUseCase moderateQuestionUseCase;
-    private final ListVotesForQuestionUseCase listVotesForQuestionUseCase;
-    private final ListFeedbacksForQuestionUseCase listFeedbacksForQuestionUseCase;
     private final QuestionMapper questionMapper;
-    private final FeedbackQuestionMapper feedbackQuestionMapper;
-    private final VoteMapper voteMapper;
     private final SecurityContextService securityContextService;
 
     // Question Domain
@@ -116,21 +104,5 @@ public class AdminQuestionController {
 
     // TODO: Consider creating a separate public endpoint (e.g., /questions/{questionId}/vote-summary)
     // that returns only aggregate vote counts (e.g., total approves, total rejects) for non-admin users.
-    @GetMapping("/{questionId}/votes")
-    public ResponseEntity<List<VoteResponseDto>> listVotesForQuestion(@PathVariable UUID questionId) {
-        List<Vote> votes = listVotesForQuestionUseCase.listVotesForQuestion(questionId);
-        List<VoteResponseDto> response = votes.stream()
-                .map(voteMapper::toResponseDto)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(response);
-    }
 
-    // Metrics Domain - Feedbacks
-
-    @GetMapping("/{questionId}/feedbacks")
-    public ResponseEntity<List<FeedbackQuestionResponse>> listFeedbacksForQuestion(@PathVariable UUID questionId) {
-        List<FeedbackQuestion> feedbacks = listFeedbacksForQuestionUseCase.listFeedbacksForQuestion(questionId);
-        List<FeedbackQuestionResponse> response = feedbackQuestionMapper.toResponseDto(feedbacks);
-        return ResponseEntity.ok(response);
-    }
 }
