@@ -32,7 +32,7 @@ public class FeedbackReaction {
     public UUID getId() { return id; }
 
     public void setId(UUID id) {
-        if (this.id != null) {
+        if (this.id != null && !this.id.equals(id)) {
             throw new IllegalStateException("ID has already been set and cannot be changed.");
         }
         this.id = id;
@@ -41,7 +41,7 @@ public class FeedbackReaction {
     public User getUser() { return user; }
 
     public void setUser(User user) {
-        if (this.user != null) {
+        if (this.user != null && !this.user.equals(user)) {
             throw new IllegalStateException("Reaction user has already been set and cannot be changed.");
         }
         this.user = Objects.requireNonNull(user, "User cannot be null when setting reaction user.");
@@ -52,7 +52,7 @@ public class FeedbackReaction {
     public LocalDateTime getCreatedAt() { return createdAt; }
 
     public void setCreatedAt(LocalDateTime createdAt) {
-        if (this.createdAt != null) {
+        if (this.createdAt != null && !this.createdAt.equals(createdAt)) {
             throw new IllegalStateException("Creation timestamp has already been set and cannot be changed.");
         }
         this.createdAt = createdAt;

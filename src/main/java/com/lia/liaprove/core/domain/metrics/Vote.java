@@ -19,6 +19,7 @@ public class Vote {
     private Question question;
     private VoteType voteType;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public Vote() {
         // Required for frameworks like JPA and MapStruct
@@ -29,6 +30,7 @@ public class Vote {
         this.question = Objects.requireNonNull(question, "question cannot be null");
         this.voteType = Objects.requireNonNull(voteType, "voteType cannot be null");
         this.createdAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
     }
     
     public UUID getId() {
@@ -36,7 +38,7 @@ public class Vote {
     }
 
     public void setId(UUID id) {
-        if (this.id != null) {
+        if (this.id != null && !this.id.equals(id)) {
             throw new IllegalStateException("ID has already been set and cannot be changed.");
         }
         this.id = id;
@@ -47,7 +49,7 @@ public class Vote {
     }
 
     public void setUser(User user) {
-        if (this.user != null) {
+        if (this.user != null && !this.user.equals(user)) {
             throw new IllegalStateException("User has already been set and cannot be changed.");
         }
         this.user = user;
@@ -58,7 +60,7 @@ public class Vote {
     }
 
     public void setQuestion(Question question) {
-        if (this.question != null) {
+        if (this.question != null && !this.question.equals(question)) {
             throw new IllegalStateException("Question has already been set and cannot be changed.");
         }
         this.question = question;
@@ -69,10 +71,10 @@ public class Vote {
     }
 
     public void setVoteType(VoteType voteType) {
-        if (this.voteType != null) {
-            throw new IllegalStateException("VoteType has already been set and cannot be changed.");
+        if (this.voteType != voteType) {
+            this.voteType = voteType;
+            touchUpdatedAt();
         }
-        this.voteType = voteType;
     }
 
     public LocalDateTime getCreatedAt() {
@@ -80,10 +82,22 @@ public class Vote {
     }
 
     public void setCreatedAt(LocalDateTime createdAt) {
-        if (this.createdAt != null) {
+        if (this.createdAt != null && !this.createdAt.equals(createdAt)) {
             throw new IllegalStateException("CreatedAt has already been set and cannot be changed.");
         }
         this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    protected void touchUpdatedAt() {
+        this.updatedAt = LocalDateTime.now();
     }
 
     @Override

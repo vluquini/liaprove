@@ -33,7 +33,7 @@ public abstract class Feedback {
     }
 
     public void setId(UUID id) {
-        if (this.id != null) {
+        if (this.id != null && !this.id.equals(id)) {
             throw new IllegalStateException("ID has already been set and cannot be changed.");
         }
         this.id = id;
@@ -44,7 +44,7 @@ public abstract class Feedback {
     }
 
     public void setUser(User user) {
-        if (this.user != null) {
+        if (this.user != null && !this.user.equals(user)) {
             throw new IllegalStateException("User has already been set and cannot be changed.");
         }
         this.user = user;
@@ -63,7 +63,7 @@ public abstract class Feedback {
     }
 
     public void setSubmissionDate(LocalDateTime submissionDate) {
-        if (this.submissionDate != null) {
+        if (this.submissionDate != null && !this.submissionDate.equals(submissionDate)) {
             throw new IllegalStateException("Submission date has already been set and cannot be changed.");
         }
         this.submissionDate = submissionDate;
