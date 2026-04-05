@@ -1,11 +1,13 @@
 package com.lia.liaprove.infrastructure.controllers;
 
+import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnAssessmentUseCase;
 import com.lia.liaprove.core.usecases.metrics.CastVoteUseCase;
 import com.lia.liaprove.core.usecases.metrics.ReactToFeedbackUseCase;
 import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase;
 import com.lia.liaprove.core.usecases.metrics.UpdateFeedbackCommentUseCase;
 import com.lia.liaprove.infrastructure.dtos.metrics.CastVoteRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.ReactToFeedbackRequest;
+import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackOnAssessmentRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.UpdateFeedbackCommentRequest;
 import com.lia.liaprove.infrastructure.security.SecurityContextService;
@@ -25,6 +27,7 @@ import java.util.UUID;
 public class MetricsController {
 
     private final SubmitFeedbackOnQuestionUseCase submitFeedbackOnQuestionUseCase;
+    private final SubmitFeedbackOnAssessmentUseCase submitFeedbackOnAssessmentUseCase;
     private final CastVoteUseCase castVoteUseCase;
     private final ReactToFeedbackUseCase reactToFeedbackUseCase;
     private final UpdateFeedbackCommentUseCase updateFeedbackCommentUseCase;
@@ -54,6 +57,20 @@ public class MetricsController {
                 request.getDifficultyLevel(),
                 request.getKnowledgeArea(),
                 request.getRelevanceLevel()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    // New endpoint for submitting feedback on an assessment
+    @PostMapping("/assessments/{assessmentId}/feedback")
+    public ResponseEntity<Void> submitFeedbackOnAssessment(@PathVariable UUID assessmentId,
+                                                           @Valid @RequestBody SubmitFeedbackOnAssessmentRequest request) {
+        UUID userId = securityContextService.getCurrentUserId();
+
+        submitFeedbackOnAssessmentUseCase.submitFeedback(
+                userId,
+                assessmentId,
+                request.comment()
         );
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }

@@ -30,10 +30,12 @@ import com.lia.liaprove.core.usecases.metrics.*;
 import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.core.usecases.algorithms.genetic.ManageVoteWeightUseCase;
 import com.lia.liaprove.core.usecases.user.*;
+import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackAssessmentMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.VoteMapper;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
+import com.lia.liaprove.infrastructure.repositories.FeedbackAssessmentJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.FeedbackQuestionJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.VoteJpaRepository;
@@ -168,9 +170,12 @@ public class AppConfig {
     // Metrics Domain - Feedback
     @Bean
     public FeedbackGateway feedbackGateway(FeedbackQuestionJpaRepository feedbackQuestionJpaRepository,
+                                           FeedbackAssessmentJpaRepository feedbackAssessmentJpaRepository, // Added FeedbackAssessmentJpaRepository
                                            FeedbackQuestionMapper feedbackQuestionMapper,
+                                           FeedbackAssessmentMapper feedbackAssessmentMapper, // Added FeedbackAssessmentMapper
                                            QuestionMapper questionMapper) {
-        return new FeedbackGatewayImpl(feedbackQuestionJpaRepository, feedbackQuestionMapper, questionMapper);
+        // Updated constructor to include new dependencies
+        return new FeedbackGatewayImpl(feedbackQuestionJpaRepository, feedbackAssessmentJpaRepository, feedbackQuestionMapper, feedbackAssessmentMapper, questionMapper);
     }
 
     @Bean
@@ -178,6 +183,14 @@ public class AppConfig {
                                                                            UserGateway userGateway,
                                                                            QuestionGateway questionGateway) {
         return new SubmitFeedbackOnQuestionUseCaseImpl(feedbackGateway, userGateway, questionGateway);
+    }
+
+    @Bean
+    public SubmitFeedbackOnAssessmentUseCase submitFeedbackOnAssessmentUseCase(
+            FeedbackGateway feedbackGateway,
+            UserGateway userGateway,
+            AssessmentGateway assessmentGateway) {
+        return new SubmitFeedbackOnAssessmentUseCaseImpl(feedbackGateway, userGateway, assessmentGateway);
     }
 
     @Bean

@@ -3,9 +3,12 @@ package com.lia.liaprove.infrastructure.services.metrics;
 import com.lia.liaprove.application.gateways.metrics.FeedbackGateway;
 import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
 import com.lia.liaprove.core.domain.metrics.FeedbackQuestion;
+import com.lia.liaprove.infrastructure.entities.metrics.FeedbackAssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackQuestionEntity;
+import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackAssessmentMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
+import com.lia.liaprove.infrastructure.repositories.FeedbackAssessmentJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.FeedbackQuestionJpaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
@@ -20,20 +23,29 @@ import java.util.stream.Collectors;
 public class FeedbackGatewayImpl implements FeedbackGateway {
 
     private final FeedbackQuestionJpaRepository feedbackQuestionJpaRepository;
+    private final FeedbackAssessmentJpaRepository feedbackAssessmentJpaRepository;
     private final FeedbackQuestionMapper feedbackQuestionMapper;
+    private final FeedbackAssessmentMapper feedbackAssessmentMapper;
     private final QuestionMapper questionMapper;
-    // Potentially other mappers/repositories for AssessmentFeedback if implemented later
 
-    public FeedbackGatewayImpl(FeedbackQuestionJpaRepository feedbackQuestionJpaRepository, FeedbackQuestionMapper feedbackQuestionMapper, QuestionMapper questionMapper) {
+    public FeedbackGatewayImpl(FeedbackQuestionJpaRepository feedbackQuestionJpaRepository,
+                               FeedbackAssessmentJpaRepository feedbackAssessmentJpaRepository,
+                               FeedbackQuestionMapper feedbackQuestionMapper,
+                               FeedbackAssessmentMapper feedbackAssessmentMapper,
+                               QuestionMapper questionMapper) {
         this.feedbackQuestionJpaRepository = feedbackQuestionJpaRepository;
+        this.feedbackAssessmentJpaRepository = feedbackAssessmentJpaRepository;
         this.feedbackQuestionMapper = feedbackQuestionMapper;
+        this.feedbackAssessmentMapper = feedbackAssessmentMapper;
         this.questionMapper = questionMapper;
     }
 
     @Override
     public void saveAssessmentFeedback(FeedbackAssessment feedback) {
-        // TODO: Implement this when FeedbackAssessmentEntity and its mapper are created
-        throw new UnsupportedOperationException("Not yet implemented");
+        // Map the domain object to its JPA entity representation
+        FeedbackAssessmentEntity entity = feedbackAssessmentMapper.toEntity(feedback);
+        // Save the entity to the database
+        feedbackAssessmentJpaRepository.save(entity);
     }
 
     @Override
