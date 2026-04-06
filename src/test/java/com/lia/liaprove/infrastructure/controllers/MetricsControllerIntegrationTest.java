@@ -8,12 +8,19 @@ import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
+import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
+import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackOnAssessmentRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.ReactToFeedbackRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.UpdateFeedbackCommentRequest;
+import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
+import com.lia.liaprove.infrastructure.entities.metrics.FeedbackAssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
+import com.lia.liaprove.infrastructure.entities.user.UserRecruiterEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
+import com.lia.liaprove.infrastructure.repositories.AssessmentJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.FeedbackAssessmentJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.FeedbackQuestionJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.QuestionJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
@@ -65,12 +72,20 @@ public class MetricsControllerIntegrationTest {
     private VoteJpaRepository voteJpaRepository;
 
     @Autowired
+    private AssessmentJpaRepository assessmentJpaRepository;
+
+    @Autowired
+    private FeedbackAssessmentJpaRepository feedbackAssessmentJpaRepository;
+
+    @Autowired
     private QuestionMapper questionMapper;
 
     @AfterEach
     void tearDown() {
         voteJpaRepository.deleteAll();
+        feedbackAssessmentJpaRepository.deleteAll();
         feedbackQuestionJpaRepository.deleteAll();
+        assessmentJpaRepository.deleteAll();
         questionJpaRepository.deleteAll();
         userJpaRepository.deleteAll();
     }
@@ -112,6 +127,20 @@ public class MetricsControllerIntegrationTest {
         feedback.setComment("This is a test feedback comment.");
         feedback.setSubmissionDate(LocalDateTime.now());
         return feedbackQuestionJpaRepository.save(feedback);
+    }
+
+    private PersonalizedAssessmentEntity createTestAssessment(UserEntity recruiter) {
+        PersonalizedAssessmentEntity assessment = new PersonalizedAssessmentEntity();
+        assessment.setTitle("Assessment " + UUID.randomUUID());
+        assessment.setDescription("Assessment description");
+        assessment.setCreationDate(LocalDateTime.now());
+        assessment.setCreatedBy((UserRecruiterEntity) recruiter);
+        assessment.setShareableToken("token-" + UUID.randomUUID());
+        assessment.setStatus(PersonalizedAssessmentStatus.ACTIVE);
+        assessment.setMaxAttempts(3);
+        assessment.setTotalAttempts(0);
+        assessment.setEvaluationTimerSeconds(1800L);
+        return assessmentJpaRepository.save(assessment);
     }
 
     @Test
@@ -343,9 +372,9 @@ public class MetricsControllerIntegrationTest {
                         assertThat(feedbacks.get(0).getComment()).isEqualTo("This is a new feedback from an integration test.");
                         assertThat(feedbacks.get(0).getUser().getId()).isEqualTo(user.getId());            }
         
-            @Test
-            @DisplayName("Should cast a vote on a question successfully")
-            void shouldCastVoteSuccessfully() throws Exception {
+    @Test
+    @DisplayName("Should cast a vote on a question successfully")
+    void shouldCastVoteSuccessfully() throws Exception {
                 // Setup
                 UserEntity user = getSeededUserEntity("mariana.costa@example.com");
                 QuestionEntity question = questionJpaRepository.findAll().get(0); // Get a seeded question
@@ -366,5 +395,90 @@ public class MetricsControllerIntegrationTest {
                 // Vote vote = voteRepository.findByUserIdAndQuestionId(...).orElseThrow();
                 // assertThat(vote.getVoteType()).isEqualTo(VoteType.APPROVE);
             }
+
+    @Test
+    @DisplayName("Should submit feedback on an assessment successfully")
+    void shouldSubmitFeedbackOnAssessmentSuccessfully() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+        UserEntity author = getSeededUserEntity("carlos.silva@example.com");
+        PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter);
+
+        SubmitFeedbackOnAssessmentRequest request = new SubmitFeedbackOnAssessmentRequest(
+                null,
+                null,
+                "This assessment feedback was created by an integration test."
+        );
+
+        mockMvc.perform(post("/api/v1/assessments/{assessmentId}/feedback", assessment.getId())
+                        .header("X-Dev-User-Email", author.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+
+        List<FeedbackAssessmentEntity> savedFeedbacks = feedbackAssessmentJpaRepository.findAll();
+        assertThat(savedFeedbacks).hasSize(1);
+
+        FeedbackAssessmentEntity savedFeedback = savedFeedbacks.get(0);
+        assertThat(savedFeedback.getAssessmentId()).isEqualTo(assessment.getId());
+        assertThat(savedFeedback.getUser().getId()).isEqualTo(author.getId());
+        assertThat(savedFeedback.getComment()).isEqualTo("This assessment feedback was created by an integration test.");
+        assertThat(savedFeedback.isVisible()).isTrue();
+        assertThat(savedFeedback.getSubmissionDate()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("Should return NOT_FOUND when submitting feedback to non-existent assessment")
+    void shouldReturnNotFoundWhenSubmittingFeedbackToNonExistentAssessment() throws Exception {
+        UserEntity author = getSeededUserEntity("carlos.silva@example.com");
+
+        SubmitFeedbackOnAssessmentRequest request = new SubmitFeedbackOnAssessmentRequest(
+                null,
+                null,
+                "Trying to submit feedback for a missing assessment."
+        );
+
+        mockMvc.perform(post("/api/v1/assessments/{assessmentId}/feedback", UUID.randomUUID())
+                        .header("X-Dev-User-Email", author.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Should return BAD_REQUEST when submitting feedback on assessment with blank comment")
+    void shouldReturnBadRequestWhenSubmittingFeedbackOnAssessmentWithBlankComment() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+        UserEntity author = getSeededUserEntity("carlos.silva@example.com");
+        PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter);
+
+        SubmitFeedbackOnAssessmentRequest request = new SubmitFeedbackOnAssessmentRequest(
+                null,
+                null,
+                ""
+        );
+
+        mockMvc.perform(post("/api/v1/assessments/{assessmentId}/feedback", assessment.getId())
+                        .header("X-Dev-User-Email", author.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Should return UNAUTHORIZED when submitting feedback on assessment without authentication")
+    void shouldReturnUnauthorizedWhenSubmittingFeedbackOnAssessmentWithoutAuthentication() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+        PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter);
+
+        SubmitFeedbackOnAssessmentRequest request = new SubmitFeedbackOnAssessmentRequest(
+                null,
+                null,
+                "Anonymous user should not submit this feedback."
+        );
+
+        mockMvc.perform(post("/api/v1/assessments/{assessmentId}/feedback", assessment.getId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnauthorized());
+    }
         }
-        
