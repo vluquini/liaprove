@@ -1,6 +1,6 @@
 package com.lia.liaprove.core.domain.metrics;
 
-import com.lia.liaprove.core.domain.assessment.Assessment;
+import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.user.User;
 
 import java.time.LocalDateTime;
@@ -14,16 +14,23 @@ import java.time.LocalDateTime;
  *   ao recruiter e administradores) enquanto comentários de questões são públicos.
  */
 public class FeedbackAssessment extends Feedback {
-    private Assessment assessment;
+    private AssessmentAttempt assessmentAttempt;
 
-    public FeedbackAssessment(User user, Assessment assessment, String comment,
+    public FeedbackAssessment() {
+        super();
+    }
+
+    public FeedbackAssessment(User user, AssessmentAttempt assessmentAttempt, String comment,
                               LocalDateTime submissionDate, boolean visible) {
         super(user, comment, submissionDate, visible);
-        this.assessment = assessment;
+        this.assessmentAttempt = assessmentAttempt;
     }
 
-    public Assessment getAssessment() {
-        return assessment;
+    public AssessmentAttempt getAssessmentAttempt() {
+        return assessmentAttempt;
     }
 
+    public void setAssessmentAttempt(AssessmentAttempt assessmentAttempt) {
+        this.assessmentAttempt = assessmentAttempt;
+    }
 }

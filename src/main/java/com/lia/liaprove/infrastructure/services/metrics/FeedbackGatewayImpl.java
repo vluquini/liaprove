@@ -49,6 +49,11 @@ public class FeedbackGatewayImpl implements FeedbackGateway {
     }
 
     @Override
+    public boolean existsAssessmentFeedbackByUserIdAndAttemptId(UUID userId, UUID attemptId) {
+        return feedbackAssessmentJpaRepository.existsByUserIdAndAssessmentAttemptId(userId, attemptId);
+    }
+
+    @Override
     public List<FeedbackQuestion> findFeedbacksByQuestionId(UUID questionId) {
         List<FeedbackQuestionEntity> entities = feedbackQuestionJpaRepository.findWithDetailsByQuestionId(questionId);
         return entities.stream()

@@ -189,8 +189,8 @@ public class AppConfig {
     public SubmitFeedbackOnAssessmentUseCase submitFeedbackOnAssessmentUseCase(
             FeedbackGateway feedbackGateway,
             UserGateway userGateway,
-            AssessmentGateway assessmentGateway) {
-        return new SubmitFeedbackOnAssessmentUseCaseImpl(feedbackGateway, userGateway, assessmentGateway);
+            AssessmentAttemptGateway assessmentAttemptGateway) {
+        return new SubmitFeedbackOnAssessmentUseCaseImpl(feedbackGateway, userGateway, assessmentAttemptGateway);
     }
 
     @Bean

@@ -14,6 +14,8 @@ public interface FeedbackGateway {
      */
     void saveAssessmentFeedback(FeedbackAssessment feedback);
 
+    boolean existsAssessmentFeedbackByUserIdAndAttemptId(UUID userId, UUID attemptId);
+
     /**
      * Encontra e retorna uma lista de feedbacks de questão para um ID de questão específico.
      * @param questionId O ID da questão.

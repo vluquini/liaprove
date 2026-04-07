@@ -13,7 +13,6 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Data
 public class FeedbackAssessmentEntity extends FeedbackEntity {
-    // Placeholder for the actual relation to an AssessmentEntity
-    @Column(name = "assessment_id")
-    private UUID assessmentId;
+    @Column(name = "assessment_attempt_id")
+    private UUID assessmentAttemptId;
 }

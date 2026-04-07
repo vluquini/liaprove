@@ -7,4 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface FeedbackAssessmentJpaRepository extends JpaRepository<FeedbackAssessmentEntity, UUID> {}
+public interface FeedbackAssessmentJpaRepository extends JpaRepository<FeedbackAssessmentEntity, UUID> {
+    boolean existsByUserIdAndAssessmentAttemptId(UUID userId, UUID assessmentAttemptId);
+}
