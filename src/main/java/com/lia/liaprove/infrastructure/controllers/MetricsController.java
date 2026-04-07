@@ -1,11 +1,15 @@
 package com.lia.liaprove.infrastructure.controllers;
 
 import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnAssessmentUseCase;
+import com.lia.liaprove.core.usecases.metrics.CastVoteOnAssessmentAttemptUseCase;
 import com.lia.liaprove.core.usecases.metrics.CastVoteUseCase;
+import com.lia.liaprove.core.usecases.metrics.ListPublicMiniProjectAttemptsUseCase;
 import com.lia.liaprove.core.usecases.metrics.ReactToFeedbackUseCase;
 import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase;
 import com.lia.liaprove.core.usecases.metrics.UpdateFeedbackCommentUseCase;
+import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.infrastructure.dtos.metrics.CastVoteRequest;
+import com.lia.liaprove.infrastructure.dtos.metrics.PublicMiniProjectAttemptResponse;
 import com.lia.liaprove.infrastructure.dtos.metrics.ReactToFeedbackRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackOnAssessmentRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackQuestionRequest;
@@ -18,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,6 +34,8 @@ public class MetricsController {
     private final SubmitFeedbackOnQuestionUseCase submitFeedbackOnQuestionUseCase;
     private final SubmitFeedbackOnAssessmentUseCase submitFeedbackOnAssessmentUseCase;
     private final CastVoteUseCase castVoteUseCase;
+    private final CastVoteOnAssessmentAttemptUseCase castVoteOnAssessmentAttemptUseCase;
+    private final ListPublicMiniProjectAttemptsUseCase listPublicMiniProjectAttemptsUseCase;
     private final ReactToFeedbackUseCase reactToFeedbackUseCase;
     private final UpdateFeedbackCommentUseCase updateFeedbackCommentUseCase;
     private final SecurityContextService securityContextService;
@@ -42,6 +49,26 @@ public class MetricsController {
                 questionId,
                 request.getVoteType()
         );
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/assessment-attempts/mini-project/public")
+    public ResponseEntity<List<PublicMiniProjectAttemptResponse>> listPublicMiniProjectAttempts() {
+        UUID userId = securityContextService.getCurrentUserId();
+
+        List<PublicMiniProjectAttemptResponse> response = listPublicMiniProjectAttemptsUseCase.list(userId).stream()
+                .map(this::toPublicMiniProjectAttemptResponse)
+                .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/assessment-attempts/{attemptId}/vote")
+    public ResponseEntity<Void> castVoteOnAssessmentAttempt(@PathVariable UUID attemptId,
+                                                            @Valid @RequestBody CastVoteRequest request) {
+        UUID userId = securityContextService.getCurrentUserId();
+
+        castVoteOnAssessmentAttemptUseCase.castVote(userId, attemptId, request.getVoteType());
         return ResponseEntity.ok().build();
     }
 
@@ -61,18 +88,17 @@ public class MetricsController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    // New endpoint for submitting feedback on an assessment
-    @PostMapping("/assessments/{assessmentId}/feedback")
-    public ResponseEntity<Void> submitFeedbackOnAssessment(@PathVariable UUID assessmentId,
+    @PostMapping("/assessment-attempts/{attemptId}/feedback")
+    public ResponseEntity<Void> submitFeedbackOnAssessment(@PathVariable UUID attemptId,
                                                            @Valid @RequestBody SubmitFeedbackOnAssessmentRequest request) {
         UUID userId = securityContextService.getCurrentUserId();
 
         submitFeedbackOnAssessmentUseCase.submitFeedback(
                 userId,
-                assessmentId,
+                attemptId,
                 request.comment()
         );
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/feedbacks/{feedbackId}/react")
@@ -95,5 +121,22 @@ public class MetricsController {
 
         updateFeedbackCommentUseCase.execute(actorId, feedbackId, request.getComment());
         return ResponseEntity.ok().build();
+    }
+
+    private PublicMiniProjectAttemptResponse toPublicMiniProjectAttemptResponse(AssessmentAttempt attempt) {
+        String authorName = attempt.getUser() != null ? attempt.getUser().getName() : null;
+        String repositoryLink = attempt.getAnswers() == null ? null : attempt.getAnswers().stream()
+                .map(answer -> answer.getProjectUrl())
+                .filter(url -> url != null && !url.isBlank())
+                .findFirst()
+                .orElse(null);
+
+        return new PublicMiniProjectAttemptResponse(
+                attempt.getId(),
+                attempt.getAssessment() != null ? attempt.getAssessment().getTitle() : null,
+                authorName,
+                repositoryLink,
+                attempt.getFinishedAt()
+        );
     }
 }

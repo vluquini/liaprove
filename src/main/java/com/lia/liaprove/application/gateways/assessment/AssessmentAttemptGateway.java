@@ -60,6 +60,8 @@ public interface AssessmentAttemptGateway {
      */
     List<AssessmentAttempt> findAllByCriteria(ListAttemptsFilterDto filter);
 
+    List<AssessmentAttempt> findPublicSystemProjectAttemptsExcludingUser(UUID userId);
+
     /**
      * Conta o número de tentativas para uma avaliação específica.
      * @param assessmentId O ID da avaliação.

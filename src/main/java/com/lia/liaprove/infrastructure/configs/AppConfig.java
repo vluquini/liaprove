@@ -6,6 +6,7 @@ import com.lia.liaprove.application.gateways.algorithms.genetic.VoteMultiplierGa
 import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
 import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.application.gateways.assessment.CertificateGateway;
+import com.lia.liaprove.application.gateways.metrics.AssessmentAttemptVoteGateway;
 import com.lia.liaprove.application.gateways.metrics.FeedbackGateway;
 import com.lia.liaprove.application.gateways.metrics.VoteGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
@@ -30,15 +31,18 @@ import com.lia.liaprove.core.usecases.metrics.*;
 import com.lia.liaprove.core.usecases.question.*;
 import com.lia.liaprove.core.usecases.algorithms.genetic.ManageVoteWeightUseCase;
 import com.lia.liaprove.core.usecases.user.*;
+import com.lia.liaprove.infrastructure.mappers.metrics.AssessmentAttemptVoteMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackAssessmentMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.VoteMapper;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
+import com.lia.liaprove.infrastructure.repositories.AssessmentAttemptVoteJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.FeedbackAssessmentJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.FeedbackQuestionJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.VoteJpaRepository;
+import com.lia.liaprove.infrastructure.services.metrics.AssessmentAttemptVoteGatewayImpl;
 import com.lia.liaprove.infrastructure.services.metrics.FeedbackGatewayImpl;
 import com.lia.liaprove.infrastructure.services.user.PasswordHasherImpl;
 import com.lia.liaprove.infrastructure.services.user.UserGatewayImpl;
@@ -191,6 +195,27 @@ public class AppConfig {
             UserGateway userGateway,
             AssessmentAttemptGateway assessmentAttemptGateway) {
         return new SubmitFeedbackOnAssessmentUseCaseImpl(feedbackGateway, userGateway, assessmentAttemptGateway);
+    }
+
+    @Bean
+    public AssessmentAttemptVoteGateway assessmentAttemptVoteGateway(
+            AssessmentAttemptVoteJpaRepository assessmentAttemptVoteJpaRepository,
+            AssessmentAttemptVoteMapper assessmentAttemptVoteMapper) {
+        return new AssessmentAttemptVoteGatewayImpl(assessmentAttemptVoteJpaRepository, assessmentAttemptVoteMapper);
+    }
+
+    @Bean
+    public CastVoteOnAssessmentAttemptUseCase castVoteOnAssessmentAttemptUseCase(
+            UserGateway userGateway,
+            AssessmentAttemptGateway assessmentAttemptGateway,
+            AssessmentAttemptVoteGateway assessmentAttemptVoteGateway) {
+        return new CastVoteOnAssessmentAttemptUseCaseImpl(userGateway, assessmentAttemptGateway, assessmentAttemptVoteGateway);
+    }
+
+    @Bean
+    public ListPublicMiniProjectAttemptsUseCase listPublicMiniProjectAttemptsUseCase(
+            AssessmentAttemptGateway assessmentAttemptGateway) {
+        return new ListPublicMiniProjectAttemptsUseCaseImpl(assessmentAttemptGateway);
     }
 
     @Bean
