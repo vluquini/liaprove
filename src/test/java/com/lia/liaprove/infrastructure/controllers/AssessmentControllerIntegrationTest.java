@@ -222,6 +222,45 @@ public class AssessmentControllerIntegrationTest {
                 .andExpect(jsonPath("$.accuracyRate").value(0));
     }
 
+    @Test
+    @DisplayName("Should submit system project assessment and keep status as COMPLETED")
+    void shouldKeepCompletedStatusWhenSubmittingSystemProjectAssessment() throws Exception {
+        UserEntity user = getSeededUserEntity("carlos.silva@example.com");
+
+        StartSystemAssessmentRequest startRequest = new StartSystemAssessmentRequest(
+                KnowledgeArea.SOFTWARE_DEVELOPMENT,
+                DifficultyLevel.MEDIUM,
+                SystemAssessmentType.PROJECT
+        );
+
+        MvcResult result = mockMvc.perform(post("/api/v1/assessments/start-system")
+                        .header("X-Dev-User-Email", user.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(startRequest)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String response = result.getResponse().getContentAsString();
+        String attemptId = JsonPath.read(response, "$.attemptId");
+        String questionId = JsonPath.read(response, "$.questions[0].id");
+
+        SubmitAssessmentRequest request = new SubmitAssessmentRequest(
+                List.of(new SubmitAssessmentRequest.QuestionAnswerRequest(
+                        UUID.fromString(questionId),
+                        null,
+                        "https://github.com/acme/project-community-review"
+                ))
+        );
+
+        mockMvc.perform(post("/api/v1/assessments/" + attemptId + "/submit")
+                        .header("X-Dev-User-Email", user.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value("COMPLETED"))
+                .andExpect(jsonPath("$.accuracyRate").value(0));
+    }
+
     // ==========================
 
     @Test
