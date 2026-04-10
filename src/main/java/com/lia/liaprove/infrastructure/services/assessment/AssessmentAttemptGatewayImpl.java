@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -126,6 +127,14 @@ public class AssessmentAttemptGatewayImpl implements AssessmentAttemptGateway {
     @Transactional(readOnly = true)
     public List<AssessmentAttempt> findPublicSystemProjectAttemptsExcludingUser(UUID userId) {
         return assessmentAttemptJpaRepository.findPublicSystemProjectAttemptsExcludingUser(userId).stream()
+                .map(assessmentAttemptMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AssessmentAttempt> findCompletedSystemProjectAttemptsReadyForCommunityDecision(LocalDateTime cutoff) {
+        return assessmentAttemptJpaRepository.findCompletedSystemProjectAttemptsReadyForCommunityDecision(cutoff).stream()
                 .map(assessmentAttemptMapper::toDomain)
                 .collect(Collectors.toList());
     }

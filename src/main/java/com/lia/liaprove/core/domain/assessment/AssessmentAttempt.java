@@ -53,7 +53,7 @@ public class AssessmentAttempt {
         this.answers = submittedAnswers;
 
         if (this.assessment instanceof SystemAssessment) {
-            calculateSystemAssessmentResult();
+            calculateSystemAssessmentResult(submittedAnswers);
         } else if (this.assessment instanceof PersonalizedAssessment) {
             // Para avaliações personalizadas, o status é COMPLETED (aguardando revisão do Recruiter)
             // Mas ainda calculamos a nota das questões de múltipla escolha para referência
@@ -62,7 +62,13 @@ public class AssessmentAttempt {
         }
     }
 
-    private void calculateSystemAssessmentResult() {
+    private void calculateSystemAssessmentResult(List<Answer> submittedAnswers) {
+        if (hasProjectSubmission(submittedAnswers)) {
+            calculatePartialScore();
+            this.status = AssessmentAttemptStatus.COMPLETED;
+            return;
+        }
+
         int correctAnswers = countCorrectAnswers();
         int totalQuestions = questions.size();
 
@@ -78,6 +84,11 @@ public class AssessmentAttempt {
         } else {
             this.status = AssessmentAttemptStatus.FAILED;
         }
+    }
+
+    private boolean hasProjectSubmission(List<Answer> submittedAnswers) {
+        return submittedAnswers != null && submittedAnswers.stream()
+                .anyMatch(answer -> answer.getProjectUrl() != null && !answer.getProjectUrl().isBlank());
     }
 
     private void calculatePartialScore() {

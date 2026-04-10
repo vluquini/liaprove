@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -70,6 +71,21 @@ public interface AssessmentAttemptJpaRepository extends JpaRepository<Assessment
         ORDER BY a.finishedAt DESC
     """)
     List<AssessmentAttemptEntity> findPublicSystemProjectAttemptsExcludingUser(@Param("userId") UUID userId);
+
+    @Query("""
+        SELECT DISTINCT a
+        FROM AssessmentAttemptEntity a
+        JOIN FETCH a.assessment ass
+        JOIN FETCH a.user u
+        JOIN FETCH a.answers ans
+        WHERE TYPE(ass) = SystemAssessmentEntity
+          AND a.status = AssessmentAttemptStatus.COMPLETED
+          AND a.finishedAt IS NOT NULL
+          AND a.finishedAt <= :cutoff
+          AND ans.projectUrl IS NOT NULL
+          AND ans.projectUrl <> ''
+    """)
+    List<AssessmentAttemptEntity> findCompletedSystemProjectAttemptsReadyForCommunityDecision(@Param("cutoff") LocalDateTime cutoff);
 
     @Query("""
         SELECT pa.createdBy.id, AVG(a.accuracyRate)

@@ -343,6 +343,12 @@ public class AppConfig {
     }
 
     @Bean
+    public EvaluateCommunityReviewAssessmentAttemptUseCase evaluateCommunityReviewAssessmentAttemptUseCase(
+            AssessmentAttemptGateway assessmentAttemptGateway) {
+        return new MockEvaluateCommunityReviewAssessmentAttemptUseCaseImpl(assessmentAttemptGateway);
+    }
+
+    @Bean
     public ListAllAssessmentAttemptsUseCase listAllAssessmentAttemptsUseCase(UserGateway userGateway,
                                                                              AssessmentAttemptGateway assessmentAttemptGateway) {
         return new ListAllAssessmentAttemptsUseCaseImpl(userGateway, assessmentAttemptGateway);

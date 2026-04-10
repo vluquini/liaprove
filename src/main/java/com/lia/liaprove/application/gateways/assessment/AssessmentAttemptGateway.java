@@ -4,6 +4,7 @@ import com.lia.liaprove.application.services.assessment.dto.ListAttemptsFilterDt
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 
 import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -61,6 +62,8 @@ public interface AssessmentAttemptGateway {
     List<AssessmentAttempt> findAllByCriteria(ListAttemptsFilterDto filter);
 
     List<AssessmentAttempt> findPublicSystemProjectAttemptsExcludingUser(UUID userId);
+
+    List<AssessmentAttempt> findCompletedSystemProjectAttemptsReadyForCommunityDecision(LocalDateTime cutoff);
 
     /**
      * Conta o número de tentativas para uma avaliação específica.
