@@ -7,6 +7,7 @@ import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
 import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 import com.lia.liaprove.core.usecases.user.UpdateUserProfileUseCase;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -26,7 +27,8 @@ public class UpdateUserProfileUseCaseImpl implements UpdateUserProfileUseCase {
 
     @Override
     public User updateProfile(UUID userId, String name, String email, String occupation, String bio,
-                              ExperienceLevel experienceLevel) throws UserNotFoundException, InvalidUserDataException {
+                              ExperienceLevel experienceLevel, List<String> hardSkills, List<String> softSkills)
+            throws UserNotFoundException, InvalidUserDataException {
 
         Objects.requireNonNull(userId, "userId must not be null");
 
@@ -36,8 +38,10 @@ public class UpdateUserProfileUseCaseImpl implements UpdateUserProfileUseCase {
         boolean hasOccupation = occupation != null && !occupation.isBlank();
         boolean hasBio = bio != null; // Bio pode ser uma string vazia para limpar
         boolean hasExperience = experienceLevel != null;
+        boolean hasHardSkills = hardSkills != null;
+        boolean hasSoftSkills = softSkills != null;
 
-        if (!hasName && !hasEmail && !hasOccupation && !hasBio && !hasExperience) {
+        if (!hasName && !hasEmail && !hasOccupation && !hasBio && !hasExperience && !hasHardSkills && !hasSoftSkills) {
             throw new InvalidUserDataException("At least one field must be provided to update the profile");
         }
 
@@ -55,6 +59,9 @@ public class UpdateUserProfileUseCaseImpl implements UpdateUserProfileUseCase {
 
         // Delega a lógica de atualização para a entidade User
         user.updateProfile(name, email, occupation, bio, experienceLevel);
+        if (user instanceof com.lia.liaprove.core.domain.user.UserProfessional professional) {
+            professional.updateSkills(hardSkills, softSkills);
+        }
 
         return userGateway.save(user);
     }

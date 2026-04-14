@@ -192,3 +192,23 @@ MERGE INTO users (
     25,
     'PLENO'
     );
+
+MERGE INTO user_professional_hard_skills (user_id, skill_order, skill)
+KEY (user_id, skill_order)
+VALUES
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 0, 'Java'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 1, 'Spring Boot'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 0, 'Python'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 1, 'Machine Learning'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 0, 'React'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 1, 'TypeScript');
+
+MERGE INTO user_professional_soft_skills (user_id, skill_order, skill)
+KEY (user_id, skill_order)
+VALUES
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 0, 'Leadership'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 1, 'Mentoring'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 0, 'Analytical Thinking'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 1, 'Communication'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 0, 'Collaboration'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 1, 'Adaptability');

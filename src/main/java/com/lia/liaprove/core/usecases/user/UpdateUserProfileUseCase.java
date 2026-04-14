@@ -3,6 +3,7 @@ package com.lia.liaprove.core.usecases.user;
 import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.User;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -13,5 +14,6 @@ import java.util.UUID;
  * - {@code InvalidUserDataException} se os dados fornecidos forem inválidos.
  */
 public interface UpdateUserProfileUseCase {
-    User updateProfile(UUID userId, String name, String email, String occupation, String bio, ExperienceLevel experienceLevel);
+    User updateProfile(UUID userId, String name, String email, String occupation, String bio,
+                       ExperienceLevel experienceLevel, List<String> hardSkills, List<String> softSkills);
 }

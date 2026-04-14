@@ -44,7 +44,9 @@ public class UserController {
                 request.getEmail(),
                 request.getOccupation(),
                 request.getBio(),
-                request.getExperienceLevel()
+                request.getExperienceLevel(),
+                request.getHardSkills(),
+                request.getSoftSkills()
         );
         return ResponseEntity.ok(userMapper.toResponseDto(updatedUser));
     }

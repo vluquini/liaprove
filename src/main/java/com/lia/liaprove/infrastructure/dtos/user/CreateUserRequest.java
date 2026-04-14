@@ -9,6 +9,8 @@ import jakarta.validation.constraints.Size;
 import com.lia.liaprove.infrastructure.validation.RecruiterFieldsRequired;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 @RecruiterFieldsRequired
 public class CreateUserRequest {
@@ -28,6 +30,10 @@ public class CreateUserRequest {
     private String bio;
 
     private ExperienceLevel experienceLevel;
+
+    private List<String> hardSkills;
+
+    private List<String> softSkills;
 
     @NotNull
     private UserRole role;

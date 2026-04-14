@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class UpdateUserRequest {
     @Size(min = 2, max = 100)
@@ -21,4 +23,8 @@ public class UpdateUserRequest {
     private String bio;
 
     private ExperienceLevel experienceLevel;
+
+    private List<String> hardSkills;
+
+    private List<String> softSkills;
 }

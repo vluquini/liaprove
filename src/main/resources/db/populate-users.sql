@@ -35,3 +35,23 @@ VALUES
 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15', 'RECRUITER', 'Ana Pereira', 'ana.p@techrecruit.com', '$2a$12$ZeCUK5Nch8u4ARcN45OA5uU/Oh/ywkcOP.oxePI3/8N7P7V851JvG', 'RECRUITER', NOW(), 'ACTIVE', 'TechRecruit', 'contact@techrecruit.com', 10, 4.8, 50, 7),
 ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a16', 'RECRUITER', 'Roberto Lima', 'roberto.l@hiredev.com', '$2a$12$f3kegv/uXWQdydlTtMzi6.X8H8Wy9xQSnM4UL.MV3v7wQ4GBkSPne', 'RECRUITER', NOW(), 'ACTIVE', 'HireDev Solutions', 'contact@hiredev.com', 5, 4.5, 25, 7)
     ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO user_professional_hard_skills (user_id, skill_order, skill)
+VALUES
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 0, 'Java'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 1, 'Spring Boot'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 0, 'Python'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 1, 'Machine Learning'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 0, 'React'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 1, 'TypeScript')
+ON CONFLICT DO NOTHING;
+
+INSERT INTO user_professional_soft_skills (user_id, skill_order, skill)
+VALUES
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 0, 'Leadership'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 1, 'Mentoring'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 0, 'Analytical Thinking'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 1, 'Communication'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 0, 'Collaboration'),
+('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 1, 'Adaptability')
+ON CONFLICT DO NOTHING;

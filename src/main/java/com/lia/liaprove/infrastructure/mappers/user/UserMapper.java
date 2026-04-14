@@ -14,9 +14,45 @@ import org.mapstruct.ReportingPolicy;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface UserMapper {
 
-    UserResponseDto toResponseDto(UserRecruiter user);
+    default UserResponseDto toResponseDto(UserRecruiter user) {
+        if (user == null) {
+            return null;
+        }
 
-    UserResponseDto toResponseDto(UserProfessional user);
+        return new UserResponseDto(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getOccupation(),
+                user.getBio(),
+                user.getExperienceLevel(),
+                null,
+                null,
+                user.getRole(),
+                user.getCompanyName(),
+                user.getCompanyEmail()
+        );
+    }
+
+    default UserResponseDto toResponseDto(UserProfessional user) {
+        if (user == null) {
+            return null;
+        }
+
+        return new UserResponseDto(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getOccupation(),
+                user.getBio(),
+                user.getExperienceLevel(),
+                user.getHardSkills(),
+                user.getSoftSkills(),
+                user.getRole(),
+                null,
+                null
+        );
+    }
 
     default UserResponseDto toResponseDto(User user) {
         return switch (user) {

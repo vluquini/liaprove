@@ -4,6 +4,7 @@ import com.lia.liaprove.core.domain.assessment.Certificate;
 import com.lia.liaprove.core.domain.assessment.Assessment;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +14,8 @@ import java.util.UUID;
  * submeter questões e interagir com a plataforma.
  */
 public class UserProfessional extends User{
+    private List<String> hardSkills = new ArrayList<>();
+    private List<String> softSkills = new ArrayList<>();
 
     public UserProfessional() {}
 
@@ -22,6 +25,22 @@ public class UserProfessional extends User{
                             LocalDateTime lastLogin, UserStatus status) {
         super(id, name, email, password, occupation, bio, experienceLevel, role, voteWeight, totalAssessmentsTaken,
                 certificates, averageScore, registrationDate, lastLogin, status);
+    }
+
+    public List<String> getHardSkills() {
+        return hardSkills;
+    }
+
+    public void setHardSkills(List<String> hardSkills) {
+        this.hardSkills = normalizeSkills(hardSkills);
+    }
+
+    public List<String> getSoftSkills() {
+        return softSkills;
+    }
+
+    public void setSoftSkills(List<String> softSkills) {
+        this.softSkills = normalizeSkills(softSkills);
     }
 
     // ---------- Métodos de domínio  ----------
@@ -61,6 +80,15 @@ public class UserProfessional extends User{
         }
     }
 
+    public void updateSkills(List<String> hardSkills, List<String> softSkills) {
+        if (hardSkills != null) {
+            this.hardSkills = normalizeSkills(hardSkills);
+        }
+        if (softSkills != null) {
+            this.softSkills = normalizeSkills(softSkills);
+        }
+    }
+
     /**
      * Verificação simples se o usuário é elegível a tentar uma avaliação.
      * NÃO substitui regras de negócio completas (por ex., limites de retake),
@@ -72,5 +100,16 @@ public class UserProfessional extends User{
         java.time.LocalDateTime reg = this.getRegistrationDate();
         if (reg == null) return true; // sem registro, devolve true (fallback)
         return reg.isBefore(java.time.LocalDateTime.now().minusMinutes(1));
+    }
+
+    private List<String> normalizeSkills(List<String> skills) {
+        if (skills == null) {
+            return new ArrayList<>();
+        }
+        return skills.stream()
+                .filter(skill -> skill != null && !skill.isBlank())
+                .map(String::trim)
+                .distinct()
+                .toList();
     }
 }
