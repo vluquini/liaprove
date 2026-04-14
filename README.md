@@ -1,19 +1,21 @@
 
-# Plataforma de Avaliação de Conhecimento Colaborativa com uso de Inteligência Artificial
+# Plataforma Colaborativa de Avaliação Técnica orientada ao Mercado de Trabalho com uso de Inteligência Artificial
 
 > **Nota:** Este é um projeto de TCC que ainda está em sua fase inicial de desenvolvimento.
 
 ## 1 - Descrição Geral
 
-Plataforma colaborativa onde usuários (profissionais de TI e recrutadores) podem submeter questões e mini projetos. Essas contribuições compõem as avaliações disponíveis na aplicação, que validam o conhecimento dos participantes em temas específicos. Ao finalizar uma avaliação de múltipla escolha e obter pelo menos 70% de acertos, o usuário recebe um certificado de comprovação de conhecimento.
+Plataforma colaborativa onde usuários profissionais de TI e recrutadores podem submeter questões e mini projetos para compor avaliações técnicas alinhadas a contextos reais do mercado de trabalho. As contribuições passam por curadoria da comunidade e apoiam tanto a autoavaliação dos participantes quanto a criação de avaliações personalizadas por recrutadores. Ao finalizar uma avaliação de múltipla escolha e obter pelo menos 70% de acertos, o usuário recebe um certificado de comprovação de conhecimento.
 
 ## 2 - Detalhamento da Proposta
 
 ### 2.1 - Descrição
 
-A plataforma permite que profissionais de TI e recrutadores criem e submetam questões e mini projetos para validar conhecimentos técnicos. As submissões passam por pré-avaliação feita por uma LLM (por exemplo, ChatGPT via API) e, depois, por votação da comunidade; cada usuário pode atribuir notas a cada questão.
+A plataforma permite que profissionais de TI e recrutadores criem e submetam questões e mini projetos para validar conhecimentos técnicos em áreas relevantes para o mercado de trabalho. As submissões passam por pré-avaliação feita por uma LLM (por exemplo, ChatGPT via API) e, depois, por votação da comunidade; cada usuário pode atribuir notas a cada questão.
 
-Após a submissão e a votação, uma **Rede Bayesiana** apura os votos e decide se a questão será incorporada às avaliações da plataforma. **Algoritmos Genéticos** monitoram e ajustam periodicamente o peso dos votos dos recrutadores, aumentando ou diminuindo conforme sinais de uso e qualidade. Hoje, o ajuste considera: uso recente (avaliações criadas/usadas no período), média das avaliações (rating médio das assessments), quantidade de questões aprovadas, razão de likes em comentários (likes/(likes+dislikes)) e o peso atual para estabilidade. A Rede Bayesiana também irá auxiliar os recrutadores ao sugerir questões frequentemente escolhidas por outros recrutadores no momento da criação de avaliações personalizadas.
+Após a submissão e a votação, uma **Rede Bayesiana** apura os votos e decide se a questão será incorporada às avaliações da plataforma. **Algoritmos Genéticos** monitoram e ajustam periodicamente o peso dos votos dos recrutadores, aumentando ou diminuindo conforme sinais de uso e qualidade. Hoje, o ajuste considera: uso recente (avaliações criadas/usadas no período), média das avaliações (rating médio das assessments), quantidade de questões aprovadas, razão de likes em comentários (likes/(likes+dislikes)) e o peso atual para estabilidade. A Rede Bayesiana também auxilia recrutadores ao sugerir questões frequentemente escolhidas por outros recrutadores no momento da criação de avaliações personalizadas.
+
+No contexto de recrutadores, a plataforma atua como ferramenta de apoio à avaliação técnica. Ela ajuda a estruturar critérios, selecionar questões e interpretar resultados, mas a decisão final de aprovar ou reprovar um candidato em um processo seletivo permanece humana e externa à regra automática da plataforma.
 
 ### 2.1.1 - Visão do Usuário Profissional
 
@@ -34,7 +36,7 @@ O recrutador possui as mesmas funcionalidades do profissional e, adicionalmente:
     
 - Tem votos com peso maior na avaliação das questões (peso ajustável por Algoritmos Genéticos).
     
-- Recebe sugestões inteligentes de questões (baseadas em padrões de escolha de outros recrutadores).
+- Recebe sugestões inteligentes de questões e critérios de avaliação com base no contexto da vaga e em padrões de escolha de outros recrutadores.
     
 
 ### 2.1.3 - Tipos de Avaliação

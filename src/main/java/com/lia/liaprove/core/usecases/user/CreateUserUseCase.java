@@ -4,6 +4,8 @@ import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRole;
 
+import java.util.List;
+
 /**
  * Caso de uso para registrar um novo usuário, seja ele Professional ou Recruiter.
  * <p>
@@ -13,5 +15,6 @@ import com.lia.liaprove.core.domain.user.UserRole;
  */
 public interface CreateUserUseCase {
     User create(String name, String email, String rawPassword, String occupation,
-                ExperienceLevel experienceLevel, UserRole role, String companyName, String companyEmail);
+                ExperienceLevel experienceLevel, UserRole role, List<String> hardSkills,
+                List<String> softSkills, String companyName, String companyEmail);
 }

@@ -12,6 +12,8 @@ public record UserCreateDto(
         String occupation,
         ExperienceLevel experienceLevel,
         UserRole role,
+        java.util.List<String> hardSkills,
+        java.util.List<String> softSkills,
         String companyName,
         String companyEmail
 ) {}

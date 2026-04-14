@@ -17,6 +17,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -69,6 +71,35 @@ public class AuthControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(authenticationRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.token").isNotEmpty());
+    }
+
+    @Test
+    @DisplayName("Should persist professional hard and soft skills on registration")
+    void shouldPersistProfessionalSkillsOnRegistration() throws Exception {
+        CreateUserRequest createUserRequest = new CreateUserRequest();
+        createUserRequest.setName("Skilled User");
+        createUserRequest.setEmail("skills@example.com");
+        createUserRequest.setPassword("password123");
+        createUserRequest.setOccupation("Backend Engineer");
+        createUserRequest.setExperienceLevel(ExperienceLevel.PLENO);
+        createUserRequest.setRole(UserRole.PROFESSIONAL);
+        createUserRequest.setHardSkills(List.of("Java", "Spring Boot", "Java"));
+        createUserRequest.setSoftSkills(List.of("Communication", "Leadership"));
+
+        mockMvc.perform(post("/api/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createUserRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.token").isNotEmpty());
+
+        UserEntity entity = userJpaRepository.findByEmail("skills@example.com").orElseThrow();
+        assertThat(entity).isInstanceOf(com.lia.liaprove.infrastructure.entities.user.UserProfessionalEntity.class);
+
+        com.lia.liaprove.infrastructure.entities.user.UserProfessionalEntity professional =
+                (com.lia.liaprove.infrastructure.entities.user.UserProfessionalEntity) entity;
+
+        assertThat(professional.getHardSkills()).containsExactly("Java", "Spring Boot");
+        assertThat(professional.getSoftSkills()).containsExactly("Communication", "Leadership");
     }
 
     @Test

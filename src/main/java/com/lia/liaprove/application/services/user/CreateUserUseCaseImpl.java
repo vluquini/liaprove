@@ -7,6 +7,8 @@ import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
 import com.lia.liaprove.core.usecases.user.CreateUserUseCase;
 import com.lia.liaprove.core.usecases.user.UserFactory;
 
+import java.util.List;
+
 /**
  * Implementação do caso de uso "CreateUser".
  *
@@ -30,6 +32,7 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
     @Override
     public User create(String name, String email, String rawPassword,
                        String occupation, ExperienceLevel experienceLevel, UserRole role,
+                       List<String> hardSkills, List<String> softSkills,
                        String companyName, String companyEmail) {
 
         validatePassword(rawPassword);
@@ -43,7 +46,18 @@ public class CreateUserUseCaseImpl implements CreateUserUseCase {
         String passwordHash = passwordHasher.hash(rawPassword);
 
         // Criar comando e delegar para a factory (application cria a factory impl)
-        UserCreateDto dto = new UserCreateDto(name, email, passwordHash, occupation, experienceLevel, role, companyName, companyEmail);
+        UserCreateDto dto = new UserCreateDto(
+                name,
+                email,
+                passwordHash,
+                occupation,
+                experienceLevel,
+                role,
+                hardSkills,
+                softSkills,
+                companyName,
+                companyEmail
+        );
         User user = userFactory.create(dto);
 
         // Persistir via gateway e retornar o usuário salvo

@@ -42,6 +42,8 @@ public class AuthController {
                 request.getOccupation(),
                 request.getExperienceLevel(),
                 request.getRole(),
+                request.getHardSkills(),
+                request.getSoftSkills(),
                 request.getCompanyName(),
                 request.getCompanyEmail()
         );

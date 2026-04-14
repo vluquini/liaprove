@@ -18,6 +18,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -57,6 +59,8 @@ public class UserControllerIntegrationTest {
         updateRequest.setEmail("carlos.new@example.com");
         updateRequest.setOccupation("Senior Developer");
         updateRequest.setExperienceLevel(ExperienceLevel.SENIOR);
+        updateRequest.setHardSkills(List.of("Java", "Spring Boot", "PostgreSQL"));
+        updateRequest.setSoftSkills(List.of("Leadership", "Communication"));
 
         mockMvc.perform(put("/api/v1/users/{id}", user.getId())
                         .header("X-Dev-User-Email", user.getEmail())
@@ -64,7 +68,9 @@ public class UserControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Carlos Updated"))
-                .andExpect(jsonPath("$.occupation").value("Senior Developer"));
+                .andExpect(jsonPath("$.occupation").value("Senior Developer"))
+                .andExpect(jsonPath("$.hardSkills[0]").value("Java"))
+                .andExpect(jsonPath("$.softSkills[0]").value("Leadership"));
     }
 
     @Test
@@ -103,5 +109,17 @@ public class UserControllerIntegrationTest {
 
         mockMvc.perform(get("/api/v1/users/{id}", user.getId()))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Should return professional skills when fetching user by id")
+    void shouldReturnProfessionalSkillsWhenFetchingUserById() throws Exception {
+        UserEntity user = getSeededUser("mariana.costa@example.com");
+
+        mockMvc.perform(get("/api/v1/users/{id}", user.getId())
+                        .header("X-Dev-User-Email", user.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.hardSkills[0]").value("Python"))
+                .andExpect(jsonPath("$.softSkills[0]").value("Analytical Thinking"));
     }
 }

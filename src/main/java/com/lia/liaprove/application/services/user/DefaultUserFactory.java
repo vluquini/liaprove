@@ -20,7 +20,12 @@ public class DefaultUserFactory implements UserFactory {
 
         User user;
         switch (dto.role()) {
-            case PROFESSIONAL -> user = new UserProfessional();
+            case PROFESSIONAL -> {
+                UserProfessional professional = new UserProfessional();
+                professional.setHardSkills(dto.hardSkills());
+                professional.setSoftSkills(dto.softSkills());
+                user = professional;
+            }
             case RECRUITER, ADMIN -> {
                 UserRecruiter recruiter = new UserRecruiter();
                 initRecruiterFields(recruiter, dto);

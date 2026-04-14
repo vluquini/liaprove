@@ -3,6 +3,7 @@ package com.lia.liaprove.infrastructure.dtos.user;
 import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.UserRole;
 
+import java.util.List;
 import java.util.UUID;
 
 public record UserResponseDto(
@@ -12,6 +13,8 @@ public record UserResponseDto(
         String occupation,
         String bio,
         ExperienceLevel experienceLevel,
+        List<String> hardSkills,
+        List<String> softSkills,
         UserRole role,
         String companyName,
         String companyEmail

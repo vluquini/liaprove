@@ -15,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,7 +50,9 @@ class CreateUserUseCaseImplTest {
         ExperienceLevel experience = ExperienceLevel.PLENO;
         UserRole role = UserRole.PROFESSIONAL;
 
-        UserCreateDto dto = new UserCreateDto(name, email, hashedPassword, occupation, experience, role, null, null);
+        List<String> hardSkills = List.of("Java", "Spring");
+        List<String> softSkills = List.of("Communication");
+        UserCreateDto dto = new UserCreateDto(name, email, hashedPassword, occupation, experience, role, hardSkills, softSkills, null, null);
         User userToCreate = mock(User.class);
         User savedUser = mock(User.class);
 
@@ -59,7 +62,7 @@ class CreateUserUseCaseImplTest {
         when(userGateway.save(userToCreate)).thenReturn(savedUser);
 
         // Act
-        User result = createUserUseCase.create(name, email, rawPassword, occupation, experience, role, null, null);
+        User result = createUserUseCase.create(name, email, rawPassword, occupation, experience, role, hardSkills, softSkills, null, null);
 
         // Assert
         assertThat(result).isEqualTo(savedUser);
@@ -82,7 +85,7 @@ class CreateUserUseCaseImplTest {
 
         // Act & Assert
         assertThatThrownBy(() -> createUserUseCase.create("John", email, "password123", "Dev",
-                                                          ExperienceLevel.JUNIOR, UserRole.PROFESSIONAL, null, null))
+                                                          ExperienceLevel.JUNIOR, UserRole.PROFESSIONAL, null, null, null, null))
                 .isInstanceOf(InvalidUserDataException.class)
                 .hasMessageContaining("Email already registered");
 
@@ -102,7 +105,7 @@ class CreateUserUseCaseImplTest {
 
         // Act & Assert
         assertThatThrownBy(() -> createUserUseCase.create("John", email, invalidPassword, "Dev",
-                                                          ExperienceLevel.JUNIOR, UserRole.PROFESSIONAL, null, null))
+                                                          ExperienceLevel.JUNIOR, UserRole.PROFESSIONAL, null, null, null, null))
                 .isInstanceOf(InvalidUserDataException.class)
                 .hasMessageContaining("Password must have at least");
 
