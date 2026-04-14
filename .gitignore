@@ -32,6 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 
+### Git Worktrees ###
+.worktrees/
+
 ### Postgres and H2 Data Files ###
 /data
 
