@@ -34,4 +34,9 @@ public class ProjectQuestion extends Question {
     public void assignProjectSubmission(String projectUrl) {
         this.projectUrl = projectUrl;
     }
+
+    @Override
+    public QuestionType getQuestionType() {
+        return QuestionType.PROJECT;
+    }
 }

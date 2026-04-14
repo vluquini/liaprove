@@ -1,0 +1,15 @@
+task: add-explicit-question-typing-core-model
+date: 2026-04-14T00:00:00Z
+prompt: "Task 1: Add explicit question typing in the core model."
+files_generated:
+  - src/main/java/com/lia/liaprove/core/domain/question/QuestionType.java
+  - src/main/java/com/lia/liaprove/core/domain/question/Question.java
+  - src/main/java/com/lia/liaprove/core/domain/question/ProjectQuestion.java
+  - src/main/java/com/lia/liaprove/core/domain/question/MultipleChoiceQuestion.java
+tests: []
+checks:
+  - architecture-compliance: PASS
+  - core-only-scope: PASS
+  - javac-syntax-check: PASS
+  - mvnw-compile: BLOCKED (wrapper could not download Maven in sandbox)
+notes: "Added explicit QuestionType enum and subtype accessors only; did not implement OpenQuestion. Hot spots still rely on instanceof in application/infrastructure and will be addressed separately."

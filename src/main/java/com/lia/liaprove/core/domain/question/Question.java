@@ -142,4 +142,6 @@ public abstract class Question {
         this.recruiterUsageCount = recruiterUsageCount;
     }
 
+    public abstract QuestionType getQuestionType();
+
 }
