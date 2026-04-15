@@ -4,6 +4,7 @@ import com.lia.liaprove.core.domain.question.Alternative;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.OpenQuestionVisibility;
+import com.lia.liaprove.core.domain.question.QuestionType;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ class QuestionValidatorTest {
                 DifficultyLevel.MEDIUM,
                 RelevanceLevel.HIGH,
                 null,
+                QuestionType.OPEN,
                 List.of(),
                 "Focus on clarity and correctness.",
                 OpenQuestionVisibility.PRIVATE
@@ -45,6 +47,7 @@ class QuestionValidatorTest {
                 DifficultyLevel.MEDIUM,
                 RelevanceLevel.HIGH,
                 null,
+                QuestionType.OPEN,
                 List.of(new Alternative(null, "Because it is correct.", true)),
                 "Focus on clarity and correctness.",
                 OpenQuestionVisibility.SHARED
@@ -54,7 +57,7 @@ class QuestionValidatorTest {
     }
 
     @Test
-    void shouldRejectOpenQuestionWithoutVisibility() {
+    void shouldRejectOpenQuestionWithoutVisibilityEvenWhenGuidelineIsOmitted() {
         QuestionCreateDto dto = new QuestionCreateDto(
                 UUID.randomUUID(),
                 "How would you explain the result?",
@@ -63,11 +66,46 @@ class QuestionValidatorTest {
                 DifficultyLevel.MEDIUM,
                 RelevanceLevel.HIGH,
                 null,
+                QuestionType.OPEN,
                 List.of(),
-                "Focus on clarity and correctness.",
+                null,
                 null
         );
 
         assertThrows(InvalidUserDataException.class, () -> QuestionValidator.validate(dto));
+    }
+
+    @Test
+    void shouldDefaultLegacyConstructorToMultipleChoiceWhenAlternativesExist() {
+        QuestionCreateDto dto = new QuestionCreateDto(
+                UUID.randomUUID(),
+                "How would you explain the result?",
+                "Describe your reasoning using the rubric provided in the prompt.",
+                Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT),
+                DifficultyLevel.MEDIUM,
+                RelevanceLevel.HIGH,
+                null,
+                List.of(new Alternative(null, "Because it is correct.", true))
+        );
+
+        assertDoesNotThrow(() -> QuestionValidator.validate(dto));
+        org.junit.jupiter.api.Assertions.assertEquals(QuestionType.MULTIPLE_CHOICE, dto.questionType());
+    }
+
+    @Test
+    void shouldDefaultLegacyConstructorToProjectWhenAlternativesAreAbsent() {
+        QuestionCreateDto dto = new QuestionCreateDto(
+                UUID.randomUUID(),
+                "How would you explain the result?",
+                "Describe your reasoning using the rubric provided in the prompt.",
+                Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT),
+                DifficultyLevel.MEDIUM,
+                RelevanceLevel.HIGH,
+                null,
+                List.of()
+        );
+
+        assertDoesNotThrow(() -> QuestionValidator.validate(dto));
+        org.junit.jupiter.api.Assertions.assertEquals(QuestionType.PROJECT, dto.questionType());
     }
 }

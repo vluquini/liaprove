@@ -1,6 +1,7 @@
 package com.lia.liaprove.application.services.question;
 
 import com.lia.liaprove.core.domain.question.QuestionContent;
+import com.lia.liaprove.core.domain.question.QuestionType;
 import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
 
 import java.util.Objects;
@@ -28,6 +29,11 @@ public class QuestionValidator {
 
     public static void validate(QuestionCreateDto content) {
         validateCommon(content);
+
+        if (content.questionType() == null) {
+            throw new InvalidUserDataException("Question type is required.");
+        }
+
         validateOpenQuestion(content);
     }
 
@@ -52,9 +58,7 @@ public class QuestionValidator {
     }
 
     private static void validateOpenQuestion(QuestionCreateDto content) {
-        boolean hasOpenMetadata = content.guideline() != null || content.visibility() != null;
-
-        if (!hasOpenMetadata) {
+        if (content.questionType() != QuestionType.OPEN) {
             return;
         }
 
