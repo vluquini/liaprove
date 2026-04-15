@@ -22,7 +22,8 @@ import java.util.UUID;
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "type")
 @JsonSubTypes({
         @JsonSubTypes.Type(value = MultipleChoiceQuestionResponse.class, name = "MULTIPLE_CHOICE"),
-        @JsonSubTypes.Type(value = ProjectQuestionResponse.class, name = "PROJECT")
+        @JsonSubTypes.Type(value = ProjectQuestionResponse.class, name = "PROJECT"),
+        @JsonSubTypes.Type(value = OpenQuestionResponse.class, name = "OPEN")
 })
 public abstract class QuestionResponse {
     private UUID id;

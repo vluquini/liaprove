@@ -12,6 +12,7 @@ import com.lia.liaprove.infrastructure.dtos.question.*;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import com.lia.liaprove.infrastructure.entities.question.AlternativeEntity;
+import com.lia.liaprove.infrastructure.entities.question.OpenQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.MultipleChoiceQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.ProjectQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
@@ -33,6 +34,7 @@ public interface QuestionMapper {
             case null -> null;
             case MultipleChoiceQuestion mc -> toEntity(mc);
             case ProjectQuestion pq -> toEntity(pq);
+            case OpenQuestion oq -> toEntity(oq);
             default -> throw new IllegalArgumentException("Unknown Question subtype: " + domain.getClass());
         };
     }
@@ -40,6 +42,8 @@ public interface QuestionMapper {
     MultipleChoiceQuestionEntity toEntity(MultipleChoiceQuestion domain);
 
     ProjectQuestionEntity toEntity(ProjectQuestion domain);
+
+    OpenQuestionEntity toEntity(OpenQuestion domain);
 
     List<AlternativeEntity> alternativeListToEntity(List<Alternative> domainList);
 
@@ -51,11 +55,15 @@ public interface QuestionMapper {
     @InheritInverseConfiguration(name = "toEntity")
     ProjectQuestion toDomain(ProjectQuestionEntity entity);
 
+    @InheritInverseConfiguration(name = "toEntity")
+    OpenQuestion toDomain(OpenQuestionEntity entity);
+
     default Question toDomain(QuestionEntity entity) {
         return switch (entity) {
             case null -> null;
             case MultipleChoiceQuestionEntity mc -> toDomain(mc);
             case ProjectQuestionEntity pq -> toDomain(pq);
+            case OpenQuestionEntity oq -> toDomain(oq);
             default -> throw new IllegalArgumentException("Unknown QuestionEntity subtype: " + entity.getClass());
         };
     }
@@ -78,6 +86,13 @@ public interface QuestionMapper {
     @Mapping(target = "votingEndDate", ignore = true)
     @Mapping(target = "recruiterUsageCount", ignore = true)
     void updateEntityFromDomain(ProjectQuestion domain, @MappingTarget ProjectQuestionEntity entity);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "submissionDate", ignore = true)
+    @Mapping(target = "votingEndDate", ignore = true)
+    @Mapping(target = "recruiterUsageCount", ignore = true)
+    void updateEntityFromDomain(OpenQuestion domain, @MappingTarget OpenQuestionEntity entity);
 
     default void updateEntityFromDomain(Question domain, @MappingTarget QuestionEntity entity) {
         if (domain == null || entity == null) return;
@@ -110,6 +125,13 @@ public interface QuestionMapper {
                     throw new IllegalArgumentException(s);
                 }
                 updateEntityFromDomain(pq, pqe);
+            }
+
+            case OpenQuestionEntity oqe -> {
+                if (!(domain instanceof OpenQuestion oq)) {
+                    throw new IllegalArgumentException(s);
+                }
+                updateEntityFromDomain(oq, oqe);
             }
 
             default -> throw new IllegalArgumentException("Unsupported QuestionEntity subtype: " + entity.getClass()
@@ -223,11 +245,17 @@ public interface QuestionMapper {
     // ######################################## REQUEST -> DTO ############################################
 
     @Mapping(target = "authorId", expression = "java(authorId)")
+    @Mapping(target = "questionType", expression = "java(com.lia.liaprove.core.domain.question.QuestionType.MULTIPLE_CHOICE)")
+    @Mapping(target = "guideline", ignore = true)
+    @Mapping(target = "visibility", ignore = true)
     @Mapping(target = "relevanceByLLM", ignore = true)
     QuestionCreateDto toQuestionCreateDto(SubmitMultipleChoiceQuestionRequest req, UUID authorId);
 
     @Mapping(target = "authorId", expression = "java(authorId)")
     @Mapping(target = "alternatives", ignore = true)
+    @Mapping(target = "questionType", expression = "java(com.lia.liaprove.core.domain.question.QuestionType.PROJECT)")
+    @Mapping(target = "guideline", ignore = true)
+    @Mapping(target = "visibility", ignore = true)
     @Mapping(target = "relevanceByLLM", ignore = true)
     QuestionCreateDto toQuestionCreateDto(SubmitProjectQuestionRequest req, UUID authorId);
 
@@ -269,11 +297,14 @@ public interface QuestionMapper {
 
     ProjectQuestionResponse toResponseDto(ProjectQuestion domain);
 
+    OpenQuestionResponse toResponseDto(OpenQuestion domain);
+
     default QuestionResponse toResponseDto(Question domain) {
         return switch (domain) {
             case null -> null;
             case MultipleChoiceQuestion mc -> toResponseDto(mc);
             case ProjectQuestion pq -> toResponseDto(pq);
+            case OpenQuestion oq -> toResponseDto(oq);
             default -> throw new IllegalArgumentException("Unknown Question subtype: " + domain.getClass().getName());
         };
     }
@@ -305,6 +336,8 @@ public interface QuestionMapper {
             return MultipleChoiceQuestionEntity.class;
         } else if (ProjectQuestion.class.equals(domainClass)) {
             return ProjectQuestionEntity.class;
+        } else if (OpenQuestion.class.equals(domainClass)) {
+            return OpenQuestionEntity.class;
         }
         return QuestionEntity.class;
     }
