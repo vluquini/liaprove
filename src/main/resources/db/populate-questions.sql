@@ -67,3 +67,35 @@ VALUES
 ('00000003-0000-0000-0000-000000000001', 'SOFTWARE_DEVELOPMENT'),
 ('00000003-0000-0000-0000-000000000001', 'DATABASE')
     ON CONFLICT DO NOTHING;
+-- =================================================================
+--  Question 101: Open Question by Ana Pereira
+-- =================================================================
+INSERT INTO questions (
+    id, question_type, author_id, title, description,
+    difficulty_by_community, relevance_by_community,
+    submission_date, voting_end_date, status,
+    relevance_byllm, recruiter_usage_count, guideline, visibility
+    )
+VALUES
+(
+    '00000101-0000-0000-0000-000000000001',
+    'OPEN',
+    'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15',
+    'Revision of Pull Request',
+    'Describe how you would evaluate a pull request before approving the merge.',
+    'MEDIUM',
+    'FOUR',
+    NOW(),
+    NOW() + INTERVAL '7 DAY',
+    'FINISHED',
+    'FOUR',
+    0,
+    'Consider quality, tests, security, and readability in the review.',
+    'SHARED'
+)
+    ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO question_knowledge_areas (question_id, knowledge_area)
+VALUES
+('00000101-0000-0000-0000-000000000001', 'SOFTWARE_DEVELOPMENT')
+    ON CONFLICT DO NOTHING;

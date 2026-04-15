@@ -3462,3 +3462,31 @@ MERGE INTO question_alternatives (id, question_id, text, correct, ord_index) KEY
     ('00000100-a002-0000-0000-000000000001', '00000100-0000-0000-0000-000000000001', 'Set permite chaves duplicadas.', FALSE,1),
     ('00000100-a003-0000-0000-000000000001', '00000100-0000-0000-0000-000000000001', 'Map não permite iteração.', FALSE,2),
     ('00000100-a004-0000-0000-000000000001', '00000100-0000-0000-0000-000000000001', 'Set armazena pares ordenados por índice.', FALSE,3);
+-- Open Question 101: Software Development by Ana Pereira
+MERGE INTO questions (
+    id, question_type, author_id, title, description,
+    difficulty_by_community, relevance_by_community,
+    submission_date, voting_end_date, status,
+    relevance_byllm, recruiter_usage_count, guideline, visibility
+    )
+    KEY (id)
+    VALUES (
+    '00000101-0000-0000-0000-000000000001',
+    'OPEN',
+    'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15',
+    'Revision of Pull Request',
+    'Describe how you would evaluate a pull request before approving the merge.',
+    'MEDIUM',
+    4,
+    CURRENT_TIMESTAMP,
+    DATEADD('DAY', 7, CURRENT_TIMESTAMP),
+    'FINISHED',
+    4,
+    0,
+    'Consider quality, tests, security, and readability in the review.',
+    'SHARED'
+    );
+
+MERGE INTO question_knowledge_areas (question_id, knowledge_area) KEY (question_id, knowledge_area)
+    VALUES
+    ('00000101-0000-0000-0000-000000000001', 'SOFTWARE_DEVELOPMENT');
