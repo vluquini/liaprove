@@ -26,7 +26,7 @@ class QuestionValidatorTest {
                 "Describe your reasoning using the rubric provided in the prompt.",
                 Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT),
                 DifficultyLevel.MEDIUM,
-                RelevanceLevel.HIGH,
+                RelevanceLevel.FIVE,
                 null,
                 QuestionType.OPEN,
                 List.of(),
@@ -45,7 +45,7 @@ class QuestionValidatorTest {
                 "Describe your reasoning using the rubric provided in the prompt.",
                 Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT),
                 DifficultyLevel.MEDIUM,
-                RelevanceLevel.HIGH,
+                RelevanceLevel.FIVE,
                 null,
                 QuestionType.OPEN,
                 List.of(new Alternative(null, "Because it is correct.", true)),
@@ -64,7 +64,7 @@ class QuestionValidatorTest {
                 "Describe your reasoning using the rubric provided in the prompt.",
                 Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT),
                 DifficultyLevel.MEDIUM,
-                RelevanceLevel.HIGH,
+                RelevanceLevel.FIVE,
                 null,
                 QuestionType.OPEN,
                 List.of(),
@@ -83,7 +83,7 @@ class QuestionValidatorTest {
                 "Describe your reasoning using the rubric provided in the prompt.",
                 Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT),
                 DifficultyLevel.MEDIUM,
-                RelevanceLevel.HIGH,
+                RelevanceLevel.FIVE,
                 null,
                 List.of(new Alternative(null, "Because it is correct.", true))
         );
@@ -100,7 +100,7 @@ class QuestionValidatorTest {
                 "Describe your reasoning using the rubric provided in the prompt.",
                 Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT),
                 DifficultyLevel.MEDIUM,
-                RelevanceLevel.HIGH,
+                RelevanceLevel.FIVE,
                 null,
                 List.of()
         );
