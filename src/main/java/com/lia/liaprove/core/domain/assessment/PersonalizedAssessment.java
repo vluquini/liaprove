@@ -21,11 +21,21 @@ public class PersonalizedAssessment extends Assessment {
     private String shareableToken;
     private PersonalizedAssessmentStatus status;
     private AssessmentCriteriaWeights criteriaWeights;
+    private JobDescriptionAnalysis jobDescriptionAnalysis;
 
     public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate,
                                   List<Question> questions, Duration evaluationTimer, UserRecruiter createdBy,
                                   LocalDateTime expirationDate, int totalAttempts, int maxAttempts, String shareableToken,
                                   PersonalizedAssessmentStatus status, AssessmentCriteriaWeights criteriaWeights) {
+        this(id, title, description, creationDate, questions, evaluationTimer, createdBy, expirationDate, totalAttempts,
+                maxAttempts, shareableToken, status, criteriaWeights, null);
+    }
+
+    public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate,
+                                  List<Question> questions, Duration evaluationTimer, UserRecruiter createdBy,
+                                  LocalDateTime expirationDate, int totalAttempts, int maxAttempts, String shareableToken,
+                                  PersonalizedAssessmentStatus status, AssessmentCriteriaWeights criteriaWeights,
+                                  JobDescriptionAnalysis jobDescriptionAnalysis) {
         super(id, title, description, creationDate, questions, evaluationTimer);
         this.createdBy = createdBy;
         this.expirationDate = expirationDate;
@@ -34,6 +44,7 @@ public class PersonalizedAssessment extends Assessment {
         this.shareableToken = shareableToken;
         this.status = status;
         this.criteriaWeights = criteriaWeights == null ? AssessmentCriteriaWeights.defaultWeights() : criteriaWeights;
+        this.jobDescriptionAnalysis = jobDescriptionAnalysis;
     }
 
     public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate,
@@ -98,5 +109,13 @@ public class PersonalizedAssessment extends Assessment {
 
     public void setCriteriaWeights(AssessmentCriteriaWeights criteriaWeights) {
         this.criteriaWeights = criteriaWeights == null ? AssessmentCriteriaWeights.defaultWeights() : criteriaWeights;
+    }
+
+    public JobDescriptionAnalysis getJobDescriptionAnalysis() {
+        return jobDescriptionAnalysis;
+    }
+
+    public void setJobDescriptionAnalysis(JobDescriptionAnalysis jobDescriptionAnalysis) {
+        this.jobDescriptionAnalysis = jobDescriptionAnalysis;
     }
 }

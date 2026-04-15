@@ -1,0 +1,15 @@
+task: task-1-job-description-analysis-domain-model
+date: 2026-04-15T20:37:53-03:00
+prompt: "Implement Task 1 only: add JobDescriptionAnalysis domain model, extend PersonalizedAssessment with optional snapshot, and add the targeted test."
+files_generated:
+  - src/main/java/com/lia/liaprove/core/domain/assessment/JobDescriptionAnalysis.java
+  - src/main/java/com/lia/liaprove/core/domain/assessment/PersonalizedAssessment.java
+  - src/test/java/com/lia/liaprove/application/services/assessment/CreatePersonalizedAssessmentUseCaseImplTest.java
+tests:
+  - CreatePersonalizedAssessmentUseCaseImplTest.shouldCreatePersonalizedAssessmentWithJobDescriptionAnalysis
+checks:
+  - import-policy: PASS
+  - architecture-compliance: PASS
+  - tests-created: PASS (1 test added)
+  - targeted-test-run: PASS
+notes: "Kept backward-compatible PersonalizedAssessment constructor and normalized null collections/default weights in the new core domain snapshot."
