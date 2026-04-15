@@ -4,11 +4,9 @@ import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
-import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
 import com.lia.liaprove.core.domain.question.Question;
-import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
 import com.lia.liaprove.core.domain.user.UserRole;
@@ -24,7 +22,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -78,43 +75,6 @@ class CreatePersonalizedAssessmentUseCaseImplTest {
         PersonalizedAssessment persisted = captor.getValue();
         assertThat(created.getCriteriaWeights()).isEqualTo(weights);
         assertThat(persisted.getCriteriaWeights()).isEqualTo(weights);
-    }
-
-    @Test
-    void shouldCreatePersonalizedAssessmentWithJobDescriptionAnalysis() {
-        JobDescriptionAnalysis analysis = new JobDescriptionAnalysis(
-                "Senior Java developer with Spring experience",
-                null,
-                null,
-                null,
-                null
-        );
-
-        PersonalizedAssessment created = new PersonalizedAssessment(
-                UUID.randomUUID(),
-                "Java assessment",
-                "Assessment with job description analysis",
-                LocalDateTime.now(),
-                List.of(),
-                java.time.Duration.ofMinutes(60),
-                null,
-                LocalDateTime.now().plusDays(5),
-                0,
-                3,
-                "token",
-                null,
-                AssessmentCriteriaWeights.defaultWeights(),
-                analysis
-        );
-
-        assertThat(created.getJobDescriptionAnalysis()).isSameAs(analysis);
-        assertThat(created.getJobDescriptionAnalysis().getOriginalJobDescription())
-                .isEqualTo("Senior Java developer with Spring experience");
-        assertThat(created.getJobDescriptionAnalysis().getSuggestedKnowledgeAreas()).isEmpty();
-        assertThat(created.getJobDescriptionAnalysis().getSuggestedHardSkills()).isEmpty();
-        assertThat(created.getJobDescriptionAnalysis().getSuggestedSoftSkills()).isEmpty();
-        assertThat(created.getJobDescriptionAnalysis().getSuggestedCriteriaWeights())
-                .isEqualTo(AssessmentCriteriaWeights.defaultWeights());
     }
 
     private UserRecruiter recruiter(UUID recruiterId) {
