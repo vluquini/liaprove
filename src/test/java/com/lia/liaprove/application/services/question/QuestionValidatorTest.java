@@ -57,7 +57,7 @@ class QuestionValidatorTest {
     }
 
     @Test
-    void shouldRejectOpenQuestionWithoutVisibilityEvenWhenGuidelineIsOmitted() {
+    void shouldAllowOpenQuestionWithoutVisibilityToUseDefaultBehavior() {
         QuestionCreateDto dto = new QuestionCreateDto(
                 UUID.randomUUID(),
                 "How would you explain the result?",
@@ -72,7 +72,7 @@ class QuestionValidatorTest {
                 null
         );
 
-        assertThrows(InvalidUserDataException.class, () -> QuestionValidator.validate(dto));
+        assertDoesNotThrow(() -> QuestionValidator.validate(dto));
     }
 
     @Test

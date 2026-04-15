@@ -105,6 +105,35 @@ class QuestionControllerOpenQuestionIntegrationTest {
     }
 
     @Test
+    @DisplayName("Should default open question visibility to PRIVATE when recruiter omits it")
+    void shouldDefaultOpenQuestionVisibilityToPrivateWhenRecruiterOmitsIt() throws Exception {
+        UserEntity recruiter = getSeededUserEntity(RECRUITER_EMAIL);
+
+        CreateOpenQuestionRequest request = openQuestionRequest(
+                "Explain the default visibility flow",
+                "Describe how recruiters create open questions without explicitly choosing a visibility.",
+                null
+        );
+
+        mockMvc.perform(post("/api/v1/questions/open")
+                        .header("X-Dev-User-Email", recruiter.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.type", is("OPEN")))
+                .andExpect(jsonPath("$.visibility", is(OpenQuestionVisibility.PRIVATE.name())));
+
+        QuestionEntity persistedQuestion = questionJpaRepository.findAll().stream()
+                .filter(question -> request.getTitle().equals(question.getTitle()))
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(persistedQuestion).isInstanceOf(OpenQuestionEntity.class);
+        OpenQuestionEntity openQuestionEntity = (OpenQuestionEntity) persistedQuestion;
+        assertThat(openQuestionEntity.getVisibility()).isEqualTo(OpenQuestionVisibility.PRIVATE);
+    }
+
+    @Test
     @DisplayName("Should return forbidden when a professional tries to create an open question")
     void shouldReturnForbiddenWhenProfessionalCreatesOpenQuestion() throws Exception {
         UserEntity professional = getSeededUserEntity(PROFESSIONAL_EMAIL);

@@ -62,10 +62,6 @@ public class QuestionValidator {
             return;
         }
 
-        if (content.visibility() == null) {
-            throw new InvalidUserDataException("Visibility is required for open questions.");
-        }
-
         if (content.alternatives() != null && !content.alternatives().isEmpty()) {
             throw new InvalidUserDataException("Open questions must not have alternatives.");
         }

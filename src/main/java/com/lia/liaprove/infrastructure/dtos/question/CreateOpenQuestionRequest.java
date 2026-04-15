@@ -37,6 +37,5 @@ public class CreateOpenQuestionRequest {
     @Size(min = 10, max = 2000)
     private String guideline;
 
-    @NotNull
     private OpenQuestionVisibility visibility;
 }

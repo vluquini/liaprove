@@ -7,12 +7,15 @@ public class OpenQuestion extends Question {
     private String guideline;
     private OpenQuestionVisibility visibility;
 
+    private static final OpenQuestionVisibility DEFAULT_VISIBILITY = OpenQuestionVisibility.PRIVATE;
+
     public OpenQuestion() {
+        this.visibility = DEFAULT_VISIBILITY;
     }
 
     public OpenQuestion(String guideline, OpenQuestionVisibility visibility) {
         this.guideline = guideline;
-        this.visibility = visibility;
+        this.visibility = defaultVisibility(visibility);
     }
 
     public String getGuideline() {
@@ -28,11 +31,15 @@ public class OpenQuestion extends Question {
     }
 
     public void setVisibility(OpenQuestionVisibility visibility) {
-        this.visibility = visibility;
+        this.visibility = defaultVisibility(visibility);
     }
 
     @Override
     public QuestionType getQuestionType() {
         return QuestionType.OPEN;
+    }
+
+    private static OpenQuestionVisibility defaultVisibility(OpenQuestionVisibility visibility) {
+        return visibility == null ? DEFAULT_VISIBILITY : visibility;
     }
 }

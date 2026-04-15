@@ -46,4 +46,26 @@ class DefaultQuestionFactoryTest {
         assertEquals(QuestionStatus.VOTING, openQuestion.getStatus());
         assertEquals(dto.title(), openQuestion.getTitle());
     }
+
+    @Test
+    void shouldDefaultOpenQuestionVisibilityToPrivateWhenDtoOmitsIt() {
+        QuestionCreateDto dto = new QuestionCreateDto(
+                UUID.randomUUID(),
+                "Explain generator trade-offs in Python",
+                "Describe how generators affect memory usage and iteration semantics in Python applications.",
+                Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT),
+                DifficultyLevel.MEDIUM,
+                RelevanceLevel.FIVE,
+                RelevanceLevel.FIVE,
+                QuestionType.OPEN,
+                List.of(),
+                "Mention lazy evaluation and yield semantics.",
+                null
+        );
+
+        Question question = factory.createOpenQuestion(dto);
+
+        OpenQuestion openQuestion = assertInstanceOf(OpenQuestion.class, question);
+        assertEquals(OpenQuestionVisibility.PRIVATE, openQuestion.getVisibility());
+    }
 }

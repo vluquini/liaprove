@@ -53,12 +53,12 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
             @Value("${ai.http.api-key:}") String apiKey,
             @Value("${ai.http.principal.model:}") String model,
             @Value("${ai.http.fallbacks.models:}") String modelsCsv,
-            @Value("${ai.http.connect-timeout-ms:}") int connectTimeoutMs,
-            @Value("${ai.http.read-timeout-ms:}") int readTimeoutMs,
+            @Value("${ai.http.connect-timeout-ms:5000}") int connectTimeoutMs,
+            @Value("${ai.http.read-timeout-ms:20000}") int readTimeoutMs,
             @Value("${ai.http.referer:}") String referer,
             @Value("${ai.http.title:}") String appTitle,
-            @Value("${ai.http.pre-analysis-system-prompt}") String preAnalysisSystemPrompt,
-            @Value("${ai.http.submission-preparation-system-prompt}") String submissionPreparationSystemPrompt) {
+            @Value("${ai.http.pre-analysis-system-prompt:}") String preAnalysisSystemPrompt,
+            @Value("${ai.http.submission-preparation-system-prompt:}") String submissionPreparationSystemPrompt) {
 
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;
@@ -308,9 +308,6 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
         }
 
         List<String> unique = resolved.stream().distinct().toList();
-        if (unique.isEmpty()) {
-            throw new QuestionPreAnalysisException("No AI models configured for HTTP LLM client.");
-        }
         return unique;
     }
 

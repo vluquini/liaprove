@@ -14,4 +14,11 @@ class OpenQuestionTest {
         assertEquals("Use the rubric below.", question.getGuideline());
         assertEquals(OpenQuestionVisibility.SHARED, question.getVisibility());
     }
+
+    @Test
+    void shouldDefaultVisibilityToPrivateWhenNotProvided() {
+        OpenQuestion question = new OpenQuestion("Use the rubric below.", null);
+
+        assertEquals(OpenQuestionVisibility.PRIVATE, question.getVisibility());
+    }
 }

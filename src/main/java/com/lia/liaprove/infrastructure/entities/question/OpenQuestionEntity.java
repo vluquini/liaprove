@@ -19,6 +19,6 @@ public class OpenQuestionEntity extends QuestionEntity {
     private String guideline;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "visibility", nullable = false)
+    @Column(name = "visibility")
     private OpenQuestionVisibility visibility;
 }
