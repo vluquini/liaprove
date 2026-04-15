@@ -34,12 +34,11 @@ public class SubmitQuestionUseCaseImpl implements SubmitQuestionUseCase {
             throw new InvalidUserDataException("Unable to process question submission with the provided details.");
         }
 
-        Question newQuestion;
-
-        if (dto.alternatives() != null && !dto.alternatives().isEmpty()) {
-            newQuestion = questionFactory.createMultipleChoice(dto);
-        }else
-            newQuestion = questionFactory.createProject(dto);
+        Question newQuestion = switch (dto.questionType()) {
+            case MULTIPLE_CHOICE -> questionFactory.createMultipleChoice(dto);
+            case PROJECT -> questionFactory.createProject(dto);
+            case OPEN -> questionFactory.createOpenQuestion(dto);
+        };
 
         return questionGateway.save(newQuestion);
     }

@@ -9,4 +9,5 @@ import com.lia.liaprove.core.domain.question.*;
 public interface QuestionFactory {
     Question createMultipleChoice(QuestionCreateDto dto);
     Question createProject(QuestionCreateDto dto);
+    Question createOpenQuestion(QuestionCreateDto dto);
 }
