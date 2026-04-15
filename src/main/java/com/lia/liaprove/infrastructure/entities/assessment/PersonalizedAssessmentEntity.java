@@ -39,5 +39,14 @@ public class PersonalizedAssessmentEntity extends AssessmentEntity {
     @Enumerated(EnumType.STRING)
     @Column(length = 32)
     private PersonalizedAssessmentStatus status;
+
+    @Column
+    private int hardSkillsWeight = 34;
+
+    @Column
+    private int softSkillsWeight = 33;
+
+    @Column
+    private int experienceWeight = 33;
 }
 

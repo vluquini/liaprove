@@ -28,5 +28,25 @@ public record CreatePersonalizedAssessmentRequest(
     int maxAttempts,
 
     @Min(value = 5, message = "Evaluation timer must be at least 5 minutes")
-    long evaluationTimerMinutes
-) {}
+    long evaluationTimerMinutes,
+
+    @Min(value = 0, message = "Hard skills weight must be non-negative")
+    Integer hardSkillsWeight,
+
+    @Min(value = 0, message = "Soft skills weight must be non-negative")
+    Integer softSkillsWeight,
+
+    @Min(value = 0, message = "Experience weight must be non-negative")
+    Integer experienceWeight
+) {
+    public CreatePersonalizedAssessmentRequest(
+            String title,
+            String description,
+            List<UUID> questionIds,
+            LocalDateTime expirationDate,
+            int maxAttempts,
+            long evaluationTimerMinutes
+    ) {
+        this(title, description, questionIds, expirationDate, maxAttempts, evaluationTimerMinutes, null, null, null);
+    }
+}

@@ -3,6 +3,7 @@ package com.lia.liaprove.application.services.assessment;
 import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.assessment.Assessment;
+import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
 import com.lia.liaprove.core.domain.user.User;
@@ -31,7 +32,8 @@ public class UpdatePersonalizedAssessmentUseCaseImpl implements UpdatePersonaliz
 
     @Override
     public Assessment execute(UUID assessmentId, UUID requesterId, Optional<LocalDateTime> expirationDate,
-                              Optional<Integer> maxAttempts, Optional<PersonalizedAssessmentStatus> status) {
+                              Optional<Integer> maxAttempts, Optional<PersonalizedAssessmentStatus> status,
+                              Optional<AssessmentCriteriaWeights> criteriaWeights) {
 
         // 1. Buscar a avaliação
         Assessment assessment = assessmentGateway.findById(assessmentId)
@@ -48,6 +50,7 @@ public class UpdatePersonalizedAssessmentUseCaseImpl implements UpdatePersonaliz
         expirationDate.ifPresent(personalizedAssessment::setExpirationDate);
         maxAttempts.ifPresent(personalizedAssessment::setMaxAttempts);
         status.ifPresent(personalizedAssessment::setStatus);
+        criteriaWeights.ifPresent(personalizedAssessment::setCriteriaWeights);
 
         // 4. Persistir e retornar
         return assessmentGateway.save(personalizedAssessment);

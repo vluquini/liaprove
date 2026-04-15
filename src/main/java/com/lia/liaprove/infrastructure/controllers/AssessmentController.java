@@ -5,6 +5,7 @@ import com.lia.liaprove.application.services.assessment.dto.SuggestionCriteriaDt
 import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
 import com.lia.liaprove.core.domain.assessment.Assessment;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
+import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
@@ -143,7 +144,12 @@ public class AssessmentController {
                 request.questionIds(),
                 request.expirationDate(),
                 request.maxAttempts(),
-                request.evaluationTimerMinutes()
+                request.evaluationTimerMinutes(),
+                resolveCriteriaWeights(
+                        request.hardSkillsWeight(),
+                        request.softSkillsWeight(),
+                        request.experienceWeight()
+                )
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(assessmentDtoMapper.toPersonalizedResponse(assessment));
@@ -260,11 +266,51 @@ public class AssessmentController {
                 requesterId,
                 java.util.Optional.ofNullable(request.expirationDate()),
                 java.util.Optional.ofNullable(request.maxAttempts()),
-                java.util.Optional.ofNullable(request.status())
+                java.util.Optional.ofNullable(request.status()),
+                resolveOptionalCriteriaWeights(
+                        request.hardSkillsWeight(),
+                        request.softSkillsWeight(),
+                        request.experienceWeight()
+                )
         );
 
         return ResponseEntity.ok(
                 assessmentDtoMapper.toUpdatePersonalizedResponse((PersonalizedAssessment) updated)
         );
+    }
+
+    private AssessmentCriteriaWeights resolveCriteriaWeights(
+            Integer hardSkillsWeight,
+            Integer softSkillsWeight,
+            Integer experienceWeight
+    ) {
+        if (hardSkillsWeight == null && softSkillsWeight == null && experienceWeight == null) {
+            return AssessmentCriteriaWeights.defaultWeights();
+        }
+
+        return new AssessmentCriteriaWeights(
+                requireWeight(hardSkillsWeight, "hardSkillsWeight"),
+                requireWeight(softSkillsWeight, "softSkillsWeight"),
+                requireWeight(experienceWeight, "experienceWeight")
+        );
+    }
+
+    private java.util.Optional<AssessmentCriteriaWeights> resolveOptionalCriteriaWeights(
+            Integer hardSkillsWeight,
+            Integer softSkillsWeight,
+            Integer experienceWeight
+    ) {
+        if (hardSkillsWeight == null && softSkillsWeight == null && experienceWeight == null) {
+            return java.util.Optional.empty();
+        }
+
+        return java.util.Optional.of(resolveCriteriaWeights(hardSkillsWeight, softSkillsWeight, experienceWeight));
+    }
+
+    private int requireWeight(Integer value, String fieldName) {
+        if (value == null) {
+            throw new IllegalArgumentException("All criteria weights must be provided together. Missing: " + fieldName);
+        }
+        return value;
     }
 }

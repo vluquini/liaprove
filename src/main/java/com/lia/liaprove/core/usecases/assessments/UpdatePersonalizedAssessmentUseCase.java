@@ -1,6 +1,7 @@
 package com.lia.liaprove.core.usecases.assessments;
 
 import com.lia.liaprove.core.domain.assessment.Assessment;
+import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
 import com.lia.liaprove.core.exceptions.assessment.AssessmentNotFoundException;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
@@ -13,6 +14,11 @@ import java.util.UUID;
  * Caso de uso para atualizar os dados de uma Avaliação Personalizada.
  */
 public interface UpdatePersonalizedAssessmentUseCase {
+
+    default Assessment execute(UUID assessmentId, UUID requesterId, Optional<LocalDateTime> expirationDate,
+                               Optional<Integer> maxAttempts, Optional<PersonalizedAssessmentStatus> status) {
+        return execute(assessmentId, requesterId, expirationDate, maxAttempts, status, Optional.empty());
+    }
 
     /**
      * Atualiza os campos permitidos de uma avaliação personalizada (ex: data de expiração, limite de tentativas, status).
@@ -28,5 +34,6 @@ public interface UpdatePersonalizedAssessmentUseCase {
      * @throws AuthorizationException      se o solicitante não for o dono ou um Admin.
      */
     Assessment execute(UUID assessmentId, UUID requesterId, Optional<LocalDateTime> expirationDate,
-                       Optional<Integer> maxAttempts, Optional<PersonalizedAssessmentStatus> status);
+                       Optional<Integer> maxAttempts, Optional<PersonalizedAssessmentStatus> status,
+                       Optional<AssessmentCriteriaWeights> criteriaWeights);
 }

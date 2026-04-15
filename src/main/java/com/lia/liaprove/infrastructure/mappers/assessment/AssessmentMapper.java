@@ -1,6 +1,7 @@
 package com.lia.liaprove.infrastructure.mappers.assessment;
 
 import com.lia.liaprove.core.domain.assessment.Assessment;
+import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.assessment.SystemAssessment;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentEntity;
@@ -9,8 +10,11 @@ import com.lia.liaprove.infrastructure.entities.assessment.SystemAssessmentEntit
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import org.hibernate.Hibernate;
+import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
+import org.mapstruct.ObjectFactory;
 import org.mapstruct.ReportingPolicy;
 
 import java.time.Duration;
@@ -58,12 +62,64 @@ public interface AssessmentMapper {
     @Mapping(source = "evaluationTimerSeconds", target = "evaluationTimer")
     PersonalizedAssessment toDomain(PersonalizedAssessmentEntity entity);
 
+    @ObjectFactory
+    default PersonalizedAssessment createPersonalizedAssessment(PersonalizedAssessmentEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return new PersonalizedAssessment(
+                entity.getId(),
+                entity.getTitle(),
+                entity.getDescription(),
+                entity.getCreationDate(),
+                null,
+                map(entity.getEvaluationTimerSeconds()),
+                null,
+                entity.getExpirationDate(),
+                entity.getTotalAttempts(),
+                entity.getMaxAttempts(),
+                entity.getShareableToken(),
+                entity.getStatus(),
+                mapCriteriaWeights(entity)
+        );
+    }
+
     default Long map(Duration duration) {
         return duration == null ? null : duration.getSeconds();
     }
 
     default Duration map(Long seconds) {
         return seconds == null ? null : Duration.ofSeconds(seconds);
+    }
+
+    default AssessmentCriteriaWeights mapCriteriaWeights(PersonalizedAssessmentEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return new AssessmentCriteriaWeights(
+                entity.getHardSkillsWeight(),
+                entity.getSoftSkillsWeight(),
+                entity.getExperienceWeight()
+        );
+    }
+
+    default void mapCriteriaWeights(AssessmentCriteriaWeights weights, PersonalizedAssessmentEntity entity) {
+        AssessmentCriteriaWeights source = weights == null ? AssessmentCriteriaWeights.defaultWeights() : weights;
+        entity.setHardSkillsWeight(source.getHardSkillsWeight());
+        entity.setSoftSkillsWeight(source.getSoftSkillsWeight());
+        entity.setExperienceWeight(source.getExperienceWeight());
+    }
+
+    @AfterMapping
+    default void afterToEntity(PersonalizedAssessment domain, @MappingTarget PersonalizedAssessmentEntity entity) {
+        mapCriteriaWeights(domain.getCriteriaWeights(), entity);
+    }
+
+    @AfterMapping
+    default void afterToDomain(PersonalizedAssessmentEntity entity, @MappingTarget PersonalizedAssessment domain) {
+        domain.setCriteriaWeights(mapCriteriaWeights(entity));
     }
 }
 

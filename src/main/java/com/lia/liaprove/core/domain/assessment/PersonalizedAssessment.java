@@ -20,11 +20,12 @@ public class PersonalizedAssessment extends Assessment {
     private int maxAttempts;
     private String shareableToken;
     private PersonalizedAssessmentStatus status;
+    private AssessmentCriteriaWeights criteriaWeights;
 
     public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate,
                                   List<Question> questions, Duration evaluationTimer, UserRecruiter createdBy,
                                   LocalDateTime expirationDate, int totalAttempts, int maxAttempts, String shareableToken,
-                                  PersonalizedAssessmentStatus status) {
+                                  PersonalizedAssessmentStatus status, AssessmentCriteriaWeights criteriaWeights) {
         super(id, title, description, creationDate, questions, evaluationTimer);
         this.createdBy = createdBy;
         this.expirationDate = expirationDate;
@@ -32,6 +33,15 @@ public class PersonalizedAssessment extends Assessment {
         this.maxAttempts = maxAttempts;
         this.shareableToken = shareableToken;
         this.status = status;
+        this.criteriaWeights = criteriaWeights == null ? AssessmentCriteriaWeights.defaultWeights() : criteriaWeights;
+    }
+
+    public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate,
+                                  List<Question> questions, Duration evaluationTimer, UserRecruiter createdBy,
+                                  LocalDateTime expirationDate, int totalAttempts, int maxAttempts, String shareableToken,
+                                  PersonalizedAssessmentStatus status) {
+        this(id, title, description, creationDate, questions, evaluationTimer, createdBy, expirationDate,
+                totalAttempts, maxAttempts, shareableToken, status, AssessmentCriteriaWeights.defaultWeights());
     }
 
     public UserRecruiter getCreatedBy() {
@@ -80,5 +90,13 @@ public class PersonalizedAssessment extends Assessment {
 
     public void setStatus(PersonalizedAssessmentStatus status) {
         this.status = status;
+    }
+
+    public AssessmentCriteriaWeights getCriteriaWeights() {
+        return criteriaWeights;
+    }
+
+    public void setCriteriaWeights(AssessmentCriteriaWeights criteriaWeights) {
+        this.criteriaWeights = criteriaWeights == null ? AssessmentCriteriaWeights.defaultWeights() : criteriaWeights;
     }
 }

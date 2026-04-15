@@ -1,6 +1,7 @@
 package com.lia.liaprove.infrastructure.mappers.assessment;
 
 import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
+import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
 import com.lia.liaprove.core.domain.assessment.Answer;
 import com.lia.liaprove.core.domain.assessment.Assessment;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
@@ -12,6 +13,7 @@ import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentAttemptDetailsR
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentAttemptResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentAttemptSummaryResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentResultResponse;
+import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentCriteriaWeightsResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.DeletePersonalizedAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.EvaluateAssessmentAttemptResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.PersonalizedAssessmentResponse;
@@ -45,6 +47,7 @@ public interface AssessmentDtoMapper {
 
     @Mapping(target = "shareableToken", source = "shareableToken")
     @Mapping(target = "status", expression = "java(assessment.getStatus().name())")
+    @Mapping(target = "criteriaWeights", expression = "java(toCriteriaWeightsResponse(assessment.getCriteriaWeights()))")
     PersonalizedAssessmentResponse toPersonalizedResponse(PersonalizedAssessment assessment);
 
     @Mapping(target = "status", source = "status")
@@ -116,7 +119,20 @@ public interface AssessmentDtoMapper {
                 assessment.getId(),
                 assessment.getExpirationDate(),
                 assessment.getMaxAttempts(),
-                assessment.getStatus()
+                assessment.getStatus(),
+                toCriteriaWeightsResponse(assessment.getCriteriaWeights())
+        );
+    }
+
+    default AssessmentCriteriaWeightsResponse toCriteriaWeightsResponse(AssessmentCriteriaWeights weights) {
+        if (weights == null) {
+            return null;
+        }
+
+        return new AssessmentCriteriaWeightsResponse(
+                weights.getHardSkillsWeight(),
+                weights.getSoftSkillsWeight(),
+                weights.getExperienceWeight()
         );
     }
 

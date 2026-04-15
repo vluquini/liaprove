@@ -3,6 +3,7 @@ package com.lia.liaprove.application.services.assessment;
 import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.application.gateways.user.UserGateway;
+import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
 import com.lia.liaprove.core.domain.question.Question;
@@ -38,7 +39,8 @@ public class CreatePersonalizedAssessmentUseCaseImpl implements CreatePersonaliz
 
     @Override
     public PersonalizedAssessment execute(UUID creatorId, String title, String description, List<UUID> questionIds,
-            LocalDateTime expirationDate, int maxAttempts, long evaluationTimerMinutes) {
+            LocalDateTime expirationDate, int maxAttempts, long evaluationTimerMinutes,
+            AssessmentCriteriaWeights criteriaWeights) {
 
         // 1. Validar o criador (deve ser RECRUITER ou ADMIN)
         User creator = userGateway.findById(creatorId)
@@ -77,7 +79,8 @@ public class CreatePersonalizedAssessmentUseCaseImpl implements CreatePersonaliz
                 0, // totalAttempts inicial
                 maxAttempts,
                 shareableToken,
-                PersonalizedAssessmentStatus.ACTIVE
+                PersonalizedAssessmentStatus.ACTIVE,
+                criteriaWeights
         );
 
         // 5. Persistir

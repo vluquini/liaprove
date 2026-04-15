@@ -6,5 +6,6 @@ public record PersonalizedAssessmentResponse(
     UUID id,
     String title,
     String shareableToken,
-    String status
+    String status,
+    AssessmentCriteriaWeightsResponse criteriaWeights
 ) {}
