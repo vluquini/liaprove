@@ -6,6 +6,7 @@ import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.*;
+import com.lia.liaprove.infrastructure.dtos.question.CreateOpenQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.PreAnalyzeQuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.question.QuestionDetailResponse;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitQuestionRequest;
@@ -38,6 +39,7 @@ public class QuestionController {
     private final SecurityContextService securityContextService;
     private final PreAnalyzeQuestionUseCase preAnalyzeQuestionUseCase;
     private final PrepareQuestionSubmissionUseCase prepareQuestionSubmissionUseCase;
+    private final CreateRecruiterOpenQuestionUseCase createRecruiterOpenQuestionUseCase;
 
     @PostMapping("/pre-analysis")
     public ResponseEntity<PreAnalyzeQuestionResponse> preAnalyzeQuestion(@Valid @RequestBody SubmitQuestionRequest request) {
@@ -72,6 +74,27 @@ public class QuestionController {
         );
         Question submitted = submitQuestionUseCase.submit(dto);
 
+        QuestionResponse responseDto = questionMapper.toResponseDto(submitted);
+        return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
+    }
+
+    @PostMapping("/open")
+    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
+    public ResponseEntity<QuestionResponse> createOpenQuestion(@Valid @RequestBody CreateOpenQuestionRequest request) {
+        UUID authorId = securityContextService.getCurrentUserId();
+
+        CreateRecruiterOpenQuestionUseCase.OpenQuestionCommand command =
+                new CreateRecruiterOpenQuestionUseCase.OpenQuestionCommand(
+                        request.getTitle(),
+                        request.getDescription(),
+                        request.getKnowledgeAreas(),
+                        request.getDifficultyByCommunity(),
+                        request.getRelevanceByCommunity(),
+                        request.getGuideline(),
+                        request.getVisibility()
+                );
+
+        Question submitted = createRecruiterOpenQuestionUseCase.create(authorId, command);
         QuestionResponse responseDto = questionMapper.toResponseDto(submitted);
         return ResponseEntity.status(HttpStatus.CREATED).body(responseDto);
     }

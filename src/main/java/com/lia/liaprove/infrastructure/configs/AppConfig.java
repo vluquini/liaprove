@@ -139,6 +139,12 @@ public class AppConfig {
     }
 
     @Bean
+    public CreateRecruiterOpenQuestionUseCase createRecruiterOpenQuestionUseCase(QuestionGateway questionGateway,
+                                                                                 QuestionFactory questionFactory) {
+        return new CreateRecruiterOpenQuestionUseCaseImpl(questionGateway, questionFactory);
+    }
+
+    @Bean
     public EvaluateVotingResultUseCase evaluateVotingResultUseCase(QuestionGateway questionGateway) {
         return new MockEvaluateVotingResultUseCaseImpl(questionGateway);
     }
