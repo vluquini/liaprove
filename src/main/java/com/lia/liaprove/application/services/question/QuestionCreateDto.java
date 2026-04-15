@@ -3,6 +3,7 @@ package com.lia.liaprove.application.services.question;
 import com.lia.liaprove.core.domain.question.Alternative;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
+import com.lia.liaprove.core.domain.question.OpenQuestionVisibility;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.core.domain.question.QuestionContent;
 
@@ -23,7 +24,26 @@ public record QuestionCreateDto(
         DifficultyLevel difficultyByCommunity,
         RelevanceLevel relevanceByCommunity,
         RelevanceLevel relevanceByLLM,
-        List<Alternative> alternatives
-) implements QuestionContent {}
+        List<Alternative> alternatives,
+        String guideline,
+        OpenQuestionVisibility visibility
+) implements QuestionContent {
+
+    public QuestionCreateDto(
+            UUID authorId,
+            String title,
+            String description,
+            Set<KnowledgeArea> knowledgeAreas,
+            DifficultyLevel difficultyByCommunity,
+            RelevanceLevel relevanceByCommunity,
+            RelevanceLevel relevanceByLLM,
+            List<Alternative> alternatives) {
+        this(authorId, title, description, knowledgeAreas, difficultyByCommunity, relevanceByCommunity,
+                relevanceByLLM, alternatives, null, null);
+    }
+}
+
+
+
 
 

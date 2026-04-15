@@ -23,6 +23,15 @@ public class QuestionValidator {
      * @throws NullPointerException caso o parâmetro content seja nulo
      */
     public static void validate(QuestionContent content) {
+        validateCommon(content);
+    }
+
+    public static void validate(QuestionCreateDto content) {
+        validateCommon(content);
+        validateOpenQuestion(content);
+    }
+
+    private static void validateCommon(QuestionContent content) {
         Objects.requireNonNull(content, "Question content must not be null");
 
         if (isBlank(content.title()) || content.title().length() < 10 || content.title().length() > 255) {
@@ -39,6 +48,22 @@ public class QuestionValidator {
         }
         if (content.relevanceByCommunity() == null) {
             throw new InvalidUserDataException("Relevance level is required.");
+        }
+    }
+
+    private static void validateOpenQuestion(QuestionCreateDto content) {
+        boolean hasOpenMetadata = content.guideline() != null || content.visibility() != null;
+
+        if (!hasOpenMetadata) {
+            return;
+        }
+
+        if (content.visibility() == null) {
+            throw new InvalidUserDataException("Visibility is required for open questions.");
+        }
+
+        if (content.alternatives() != null && !content.alternatives().isEmpty()) {
+            throw new InvalidUserDataException("Open questions must not have alternatives.");
         }
     }
 
