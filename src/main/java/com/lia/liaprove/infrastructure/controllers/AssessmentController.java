@@ -8,6 +8,7 @@ import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
+import com.lia.liaprove.core.domain.question.QuestionType;
 import com.lia.liaprove.core.usecases.assessments.CreatePersonalizedAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.DeletePersonalizedAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.EvaluateAssessmentAttemptUseCase;
@@ -152,6 +153,7 @@ public class AssessmentController {
     public ResponseEntity<SuggestedQuestionsResponse> getSuggestedQuestions(
             @RequestParam(required = false) Set<KnowledgeArea> knowledgeAreas,
             @RequestParam(required = false) Set<DifficultyLevel> difficultyLevels,
+            @RequestParam(required = false) Set<QuestionType> questionTypes,
             @RequestParam(required = false) List<UUID> excludeIds,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -161,6 +163,7 @@ public class AssessmentController {
         SuggestionCriteriaDto criteria = new SuggestionCriteriaDto(
                 knowledgeAreas,
                 difficultyLevels,
+                questionTypes,
                 page,
                 pageSize,
                 excludeIds

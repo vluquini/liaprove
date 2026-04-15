@@ -421,6 +421,7 @@ public class AssessmentControllerIntegrationTest {
                         .header("X-Dev-User-Email", recruiter.getEmail())
                         .param("knowledgeAreas", "SOFTWARE_DEVELOPMENT")
                         .param("difficultyLevels", "MEDIUM")
+                        .param("questionTypes", "OPEN")
                         .param("pageSize", "5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray());
