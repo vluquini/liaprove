@@ -117,7 +117,8 @@ public class AssessmentController {
                 .map(a -> new SubmitAssessmentAnswersDto.QuestionAnswerDto(
                         a.questionId(),
                         a.selectedAlternativeId(),
-                        a.projectUrl()
+                        a.projectUrl(),
+                        a.textResponse()
                 ))
                 .collect(Collectors.toList());
 

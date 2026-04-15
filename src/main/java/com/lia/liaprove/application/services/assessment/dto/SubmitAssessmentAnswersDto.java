@@ -13,11 +13,13 @@ public record SubmitAssessmentAnswersDto(
     /**
      * DTO interno para representar a resposta de uma questão específica.
      * Pode conter o ID da alternativa selecionada (para múltipla escolha)
-     * ou o link do projeto (para mini-projetos).
+     * o link do projeto (para mini-projetos) ou o texto respondido (para
+     * questões abertas).
      */
     public record QuestionAnswerDto(
             UUID questionId,
             UUID selectedAlternativeId,
-            String projectUrl
+            String projectUrl,
+            String textResponse
     ) {}
 }

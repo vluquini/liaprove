@@ -58,6 +58,7 @@ public class SubmitAssessmentUseCaseImpl implements SubmitAssessmentUseCase {
                         Answer answer = new Answer(dto.questionId());
                         answer.setSelectedAlternativeId(dto.selectedAlternativeId());
                         answer.setProjectUrl(dto.projectUrl());
+                        answer.setTextResponse(dto.textResponse());
                         return answer;
                     })
                     .collect(Collectors.toList());
