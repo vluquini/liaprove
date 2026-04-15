@@ -5,15 +5,9 @@ import java.util.Set;
 import java.util.UUID;
 
 /**
- * Representa uma questão de projeto (mini-projeto), estendendo a classe Question e incluindo um URL para o projeto.
+ * Representa uma questão de projeto (mini-projeto).
  */
 public class ProjectQuestion extends Question {
-    /**
-     * Link do projeto desenvolvido pelo Usuário.
-     * Só será preenchido quando o usuário responder, por isto não é preenchido no construtor.
-     */
-    private String projectUrl;
-
     public ProjectQuestion(){}
 
     public ProjectQuestion(UUID id, UUID authorId, String title, String description, Set<KnowledgeArea> knowledgeAreas,
@@ -25,14 +19,15 @@ public class ProjectQuestion extends Question {
     }
 
     public String getProjectUrl() {
-        return projectUrl;
+        return null;
     }
 
     /**
-     * Submissão de um link do projeto para a questão.
+     * Mantido apenas por compatibilidade com o factory existente.
+     * O payload de submissão agora pertence a Answer.
      */
     public void assignProjectSubmission(String projectUrl) {
-        this.projectUrl = projectUrl;
+        // no-op
     }
 
     @Override

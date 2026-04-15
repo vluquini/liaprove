@@ -20,6 +20,7 @@ public interface AnswerMapper {
         Answer answer = new Answer(entity.getQuestionId());
         answer.setSelectedAlternativeId(entity.getSelectedAlternativeId());
         answer.setProjectUrl(entity.getProjectUrl());
+        answer.setTextResponse(entity.getTextResponse());
         return answer;
     }
 }
