@@ -4,6 +4,7 @@ import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
+import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
 import com.lia.liaprove.core.domain.question.Question;
@@ -17,6 +18,7 @@ import com.lia.liaprove.core.usecases.assessments.CreatePersonalizedAssessmentUs
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -41,6 +43,23 @@ public class CreatePersonalizedAssessmentUseCaseImpl implements CreatePersonaliz
     public PersonalizedAssessment execute(UUID creatorId, String title, String description, List<UUID> questionIds,
             LocalDateTime expirationDate, int maxAttempts, long evaluationTimerMinutes,
             AssessmentCriteriaWeights criteriaWeights) {
+        return execute(
+                creatorId,
+                title,
+                description,
+                questionIds,
+                expirationDate,
+                maxAttempts,
+                evaluationTimerMinutes,
+                criteriaWeights,
+                Optional.empty()
+        );
+    }
+
+    @Override
+    public PersonalizedAssessment execute(UUID creatorId, String title, String description, List<UUID> questionIds,
+            LocalDateTime expirationDate, int maxAttempts, long evaluationTimerMinutes,
+            AssessmentCriteriaWeights criteriaWeights, Optional<JobDescriptionAnalysis> jobDescriptionAnalysis) {
 
         // 1. Validar o criador (deve ser RECRUITER ou ADMIN)
         User creator = userGateway.findById(creatorId)
@@ -80,7 +99,8 @@ public class CreatePersonalizedAssessmentUseCaseImpl implements CreatePersonaliz
                 maxAttempts,
                 shareableToken,
                 PersonalizedAssessmentStatus.ACTIVE,
-                criteriaWeights
+                criteriaWeights,
+                jobDescriptionAnalysis.orElse(null)
         );
 
         // 5. Persistir

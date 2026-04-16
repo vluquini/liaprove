@@ -4,6 +4,7 @@ import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
+import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
 import com.lia.liaprove.core.domain.question.Question;
@@ -75,6 +76,47 @@ class CreatePersonalizedAssessmentUseCaseImplTest {
         PersonalizedAssessment persisted = captor.getValue();
         assertThat(created.getCriteriaWeights()).isEqualTo(weights);
         assertThat(persisted.getCriteriaWeights()).isEqualTo(weights);
+    }
+
+    @Test
+    void shouldCreatePersonalizedAssessmentWithJobDescriptionAnalysis() {
+        UUID recruiterId = UUID.randomUUID();
+        UUID questionId = UUID.randomUUID();
+
+        UserRecruiter recruiter = recruiter(recruiterId);
+        Question question = new MultipleChoiceQuestion();
+        question.setId(questionId);
+
+        when(userGateway.findById(recruiterId)).thenReturn(Optional.of(recruiter));
+        when(questionGateway.findById(questionId)).thenReturn(Optional.of(question));
+        when(assessmentGateway.save(any(PersonalizedAssessment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        JobDescriptionAnalysis analysis = new JobDescriptionAnalysis(
+                "Java developer role",
+                null,
+                List.of("Java", "Spring Boot"),
+                List.of("Communication"),
+                AssessmentCriteriaWeights.defaultWeights()
+        );
+
+        PersonalizedAssessment created = useCase.execute(
+                recruiterId,
+                "Java assessment",
+                "Assessment with analysis snapshot",
+                List.of(questionId),
+                LocalDateTime.now().plusDays(5),
+                3,
+                60,
+                AssessmentCriteriaWeights.defaultWeights(),
+                Optional.of(analysis)
+        );
+
+        ArgumentCaptor<PersonalizedAssessment> captor = ArgumentCaptor.forClass(PersonalizedAssessment.class);
+        verify(assessmentGateway).save(captor.capture());
+
+        PersonalizedAssessment persisted = captor.getValue();
+        assertThat(created.getJobDescriptionAnalysis()).isSameAs(analysis);
+        assertThat(persisted.getJobDescriptionAnalysis()).isSameAs(analysis);
     }
 
     private UserRecruiter recruiter(UUID recruiterId) {
