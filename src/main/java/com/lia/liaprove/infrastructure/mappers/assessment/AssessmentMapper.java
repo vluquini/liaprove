@@ -2,6 +2,7 @@ package com.lia.liaprove.infrastructure.mappers.assessment;
 
 import com.lia.liaprove.core.domain.assessment.Assessment;
 import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
+import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.assessment.SystemAssessment;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentEntity;
@@ -18,6 +19,9 @@ import org.mapstruct.ObjectFactory;
 import org.mapstruct.ReportingPolicy;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
 
 @Mapper(
         componentModel = "spring",
@@ -81,7 +85,8 @@ public interface AssessmentMapper {
                 entity.getMaxAttempts(),
                 entity.getShareableToken(),
                 entity.getStatus(),
-                mapCriteriaWeights(entity)
+                mapCriteriaWeights(entity),
+                mapJobDescriptionAnalysis(entity)
         );
     }
 
@@ -112,14 +117,70 @@ public interface AssessmentMapper {
         entity.setExperienceWeight(source.getExperienceWeight());
     }
 
+    default JobDescriptionAnalysis mapJobDescriptionAnalysis(PersonalizedAssessmentEntity entity) {
+        if (entity == null || entity.getOriginalJobDescription() == null) {
+            return null;
+        }
+
+        AssessmentCriteriaWeights suggestedCriteriaWeights = null;
+        if (entity.getSuggestedHardSkillsWeight() != null
+                && entity.getSuggestedSoftSkillsWeight() != null
+                && entity.getSuggestedExperienceWeight() != null) {
+            suggestedCriteriaWeights = new AssessmentCriteriaWeights(
+                    entity.getSuggestedHardSkillsWeight(),
+                    entity.getSuggestedSoftSkillsWeight(),
+                    entity.getSuggestedExperienceWeight()
+            );
+        }
+
+        return new JobDescriptionAnalysis(
+                entity.getOriginalJobDescription(),
+                entity.getSuggestedKnowledgeAreas(),
+                entity.getSuggestedHardSkills(),
+                entity.getSuggestedSoftSkills(),
+                suggestedCriteriaWeights
+        );
+    }
+
+    default void mapJobDescriptionAnalysis(JobDescriptionAnalysis analysis, PersonalizedAssessmentEntity entity) {
+        if (analysis == null) {
+            entity.setOriginalJobDescription(null);
+            entity.setSuggestedKnowledgeAreas(null);
+            entity.setSuggestedHardSkills(null);
+            entity.setSuggestedSoftSkills(null);
+            entity.setSuggestedHardSkillsWeight(null);
+            entity.setSuggestedSoftSkillsWeight(null);
+            entity.setSuggestedExperienceWeight(null);
+            return;
+        }
+
+        entity.setOriginalJobDescription(analysis.getOriginalJobDescription());
+        entity.setSuggestedKnowledgeAreas(analysis.getSuggestedKnowledgeAreas() == null
+                ? null
+                : new LinkedHashSet<>(analysis.getSuggestedKnowledgeAreas()));
+        entity.setSuggestedHardSkills(analysis.getSuggestedHardSkills() == null
+                ? null
+                : new ArrayList<>(analysis.getSuggestedHardSkills()));
+        entity.setSuggestedSoftSkills(analysis.getSuggestedSoftSkills() == null
+                ? null
+                : new ArrayList<>(analysis.getSuggestedSoftSkills()));
+
+        AssessmentCriteriaWeights suggestedCriteriaWeights = analysis.getSuggestedCriteriaWeights();
+        entity.setSuggestedHardSkillsWeight(suggestedCriteriaWeights.getHardSkillsWeight());
+        entity.setSuggestedSoftSkillsWeight(suggestedCriteriaWeights.getSoftSkillsWeight());
+        entity.setSuggestedExperienceWeight(suggestedCriteriaWeights.getExperienceWeight());
+    }
+
     @AfterMapping
     default void afterToEntity(PersonalizedAssessment domain, @MappingTarget PersonalizedAssessmentEntity entity) {
         mapCriteriaWeights(domain.getCriteriaWeights(), entity);
+        mapJobDescriptionAnalysis(domain.getJobDescriptionAnalysis(), entity);
     }
 
     @AfterMapping
     default void afterToDomain(PersonalizedAssessmentEntity entity, @MappingTarget PersonalizedAssessment domain) {
         domain.setCriteriaWeights(mapCriteriaWeights(entity));
+        domain.setJobDescriptionAnalysis(mapJobDescriptionAnalysis(entity));
     }
 }
 
