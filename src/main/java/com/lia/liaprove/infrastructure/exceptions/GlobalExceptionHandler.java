@@ -99,10 +99,21 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage())
         );
+        ex.getBindingResult().getGlobalErrors().forEach(error ->
+                errors.put(error.getObjectName(), error.getDefaultMessage())
+        );
 
         log.warn("MethodArgumentNotValidException: {}", errors);
 
         Map<String, Object> body = createErrorBody(HttpStatus.BAD_REQUEST, errors, req.getRequestURI());
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, Object>> handleIllegalArgumentException(
+            IllegalArgumentException ex, HttpServletRequest req) {
+        log.warn("IllegalArgumentException: {}", ex.getMessage());
+        Map<String, Object> body = createErrorBody(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
         return ResponseEntity.badRequest().body(body);
     }
 

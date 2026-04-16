@@ -341,11 +341,15 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
             return AssessmentCriteriaWeights.defaultWeights();
         }
 
-        return new AssessmentCriteriaWeights(
-                output.suggestedHardSkillsWeight(),
-                output.suggestedSoftSkillsWeight(),
-                output.suggestedExperienceWeight()
-        );
+        try {
+            return new AssessmentCriteriaWeights(
+                    output.suggestedHardSkillsWeight(),
+                    output.suggestedSoftSkillsWeight(),
+                    output.suggestedExperienceWeight()
+            );
+        } catch (IllegalArgumentException ex) {
+            return AssessmentCriteriaWeights.defaultWeights();
+        }
     }
 
     /**
