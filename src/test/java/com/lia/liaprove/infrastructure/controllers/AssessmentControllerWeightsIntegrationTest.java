@@ -17,15 +17,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -51,6 +56,9 @@ class AssessmentControllerWeightsIntegrationTest {
 
     @Autowired
     private AssessmentJpaRepository assessmentJpaRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @AfterEach
     void tearDown() {
@@ -116,18 +124,35 @@ class AssessmentControllerWeightsIntegrationTest {
                 analysisSnapshot
         );
 
-        mockMvc.perform(post("/api/v1/assessments/personalized")
+        MvcResult result = mockMvc.perform(post("/api/v1/assessments/personalized")
                         .header("X-Dev-User-Email", recruiter.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.jobDescriptionAnalysis.originalJobDescription")
                         .value("Senior backend engineer focused on Java and distributed systems."))
+                .andExpect(jsonPath("$.jobDescriptionAnalysis.suggestedKnowledgeAreas.length()").value(2))
                 .andExpect(jsonPath("$.jobDescriptionAnalysis.suggestedHardSkills[0]").value("Java"))
                 .andExpect(jsonPath("$.jobDescriptionAnalysis.suggestedSoftSkills[0]").value("Communication"))
                 .andExpect(jsonPath("$.jobDescriptionAnalysis.suggestedCriteriaWeights.hardSkillsWeight").value(50))
                 .andExpect(jsonPath("$.jobDescriptionAnalysis.suggestedCriteriaWeights.softSkillsWeight").value(30))
-                .andExpect(jsonPath("$.jobDescriptionAnalysis.suggestedCriteriaWeights.experienceWeight").value(20));
+                .andExpect(jsonPath("$.jobDescriptionAnalysis.suggestedCriteriaWeights.experienceWeight").value(20))
+                .andReturn();
+
+        UUID createdAssessmentId = extractAssessmentId(result);
+        PersonalizedAssessmentEntity persistedAssessment = getAssessmentById(createdAssessmentId);
+
+        assertThat(persistedAssessment.getOriginalJobDescription())
+                .isEqualTo("Senior backend engineer focused on Java and distributed systems.");
+        assertThat(loadSuggestedKnowledgeAreas(createdAssessmentId))
+                .containsExactlyInAnyOrder("SOFTWARE_DEVELOPMENT", "DATABASE");
+        assertThat(loadSuggestedHardSkills(createdAssessmentId))
+                .containsExactly("Java", "Spring Boot");
+        assertThat(loadSuggestedSoftSkills(createdAssessmentId))
+                .containsExactly("Communication", "Ownership");
+        assertThat(persistedAssessment.getSuggestedHardSkillsWeight()).isEqualTo(50);
+        assertThat(persistedAssessment.getSuggestedSoftSkillsWeight()).isEqualTo(30);
+        assertThat(persistedAssessment.getSuggestedExperienceWeight()).isEqualTo(20);
     }
 
     @Test
@@ -181,6 +206,21 @@ class AssessmentControllerWeightsIntegrationTest {
                         .value("Senior backend engineer focused on Java and distributed systems."))
                 .andExpect(jsonPath("$.jobDescriptionAnalysis.suggestedHardSkills[0]").value("Java"))
                 .andExpect(jsonPath("$.jobDescriptionAnalysis.suggestedCriteriaWeights.hardSkillsWeight").value(50));
+
+        PersonalizedAssessmentEntity updatedAssessment = getAssessmentById(assessment.getId());
+
+        assertThat(updatedAssessment.getStatus()).isEqualTo(PersonalizedAssessmentStatus.DEACTIVATED);
+        assertThat(updatedAssessment.getOriginalJobDescription())
+                .isEqualTo("Senior backend engineer focused on Java and distributed systems.");
+        assertThat(loadSuggestedKnowledgeAreas(assessment.getId()))
+                .containsExactlyInAnyOrder("SOFTWARE_DEVELOPMENT", "DATABASE");
+        assertThat(loadSuggestedHardSkills(assessment.getId()))
+                .containsExactly("Java", "Spring Boot");
+        assertThat(loadSuggestedSoftSkills(assessment.getId()))
+                .containsExactly("Communication", "Ownership");
+        assertThat(updatedAssessment.getSuggestedHardSkillsWeight()).isEqualTo(50);
+        assertThat(updatedAssessment.getSuggestedSoftSkillsWeight()).isEqualTo(30);
+        assertThat(updatedAssessment.getSuggestedExperienceWeight()).isEqualTo(20);
     }
 
     private UserEntity getSeededUserEntity(String email) {
@@ -204,12 +244,45 @@ class AssessmentControllerWeightsIntegrationTest {
     private PersonalizedAssessmentEntity createTestAssessmentWithAnalysis(UserEntity recruiter) {
         PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter);
         assessment.setOriginalJobDescription("Senior backend engineer focused on Java and distributed systems.");
-        assessment.setSuggestedKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT, KnowledgeArea.DATABASE));
-        assessment.setSuggestedHardSkills(List.of("Java", "Spring Boot"));
-        assessment.setSuggestedSoftSkills(List.of("Communication", "Ownership"));
+        assessment.setSuggestedKnowledgeAreas(new HashSet<>(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT, KnowledgeArea.DATABASE)));
+        assessment.setSuggestedHardSkills(new ArrayList<>(List.of("Java", "Spring Boot")));
+        assessment.setSuggestedSoftSkills(new ArrayList<>(List.of("Communication", "Ownership")));
         assessment.setSuggestedHardSkillsWeight(50);
         assessment.setSuggestedSoftSkillsWeight(30);
         assessment.setSuggestedExperienceWeight(20);
         return assessmentJpaRepository.save(assessment);
+    }
+
+    private UUID extractAssessmentId(MvcResult result) throws Exception {
+        return UUID.fromString(objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText());
+    }
+
+    private PersonalizedAssessmentEntity getAssessmentById(UUID assessmentId) {
+        return (PersonalizedAssessmentEntity) assessmentJpaRepository.findById(assessmentId)
+                .orElseThrow(() -> new RuntimeException("Assessment not found: " + assessmentId));
+    }
+
+    private List<String> loadSuggestedKnowledgeAreas(UUID assessmentId) {
+        return jdbcTemplate.queryForList(
+                "SELECT knowledge_area FROM personalized_assessment_job_description_knowledge_areas WHERE personalized_assessment_id = ?",
+                String.class,
+                assessmentId
+        );
+    }
+
+    private List<String> loadSuggestedHardSkills(UUID assessmentId) {
+        return jdbcTemplate.queryForList(
+                "SELECT skill FROM personalized_assessment_job_description_hard_skills WHERE personalized_assessment_id = ? ORDER BY skill_order",
+                String.class,
+                assessmentId
+        );
+    }
+
+    private List<String> loadSuggestedSoftSkills(UUID assessmentId) {
+        return jdbcTemplate.queryForList(
+                "SELECT skill FROM personalized_assessment_job_description_soft_skills WHERE personalized_assessment_id = ? ORDER BY skill_order",
+                String.class,
+                assessmentId
+        );
     }
 }
