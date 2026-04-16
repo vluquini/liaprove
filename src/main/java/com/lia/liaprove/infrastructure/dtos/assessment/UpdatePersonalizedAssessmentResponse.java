@@ -10,5 +10,6 @@ public record UpdatePersonalizedAssessmentResponse(
         LocalDateTime expirationDate,
         Integer maxAttempts,
         PersonalizedAssessmentStatus status,
-        AssessmentCriteriaWeightsResponse criteriaWeights
+        AssessmentCriteriaWeightsResponse criteriaWeights,
+        JobDescriptionAnalysisResponse jobDescriptionAnalysis
 ) {}

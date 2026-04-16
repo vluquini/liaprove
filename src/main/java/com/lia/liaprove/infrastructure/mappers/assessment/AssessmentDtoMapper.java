@@ -5,6 +5,7 @@ import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
 import com.lia.liaprove.core.domain.assessment.Answer;
 import com.lia.liaprove.core.domain.assessment.Assessment;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
+import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
 import com.lia.liaprove.core.domain.question.Question;
@@ -16,6 +17,7 @@ import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentResultResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentCriteriaWeightsResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.DeletePersonalizedAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.EvaluateAssessmentAttemptResponse;
+import com.lia.liaprove.infrastructure.dtos.assessment.JobDescriptionAnalysisResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.PersonalizedAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.ScoredQuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.UpdatePersonalizedAssessmentResponse;
@@ -48,6 +50,7 @@ public interface AssessmentDtoMapper {
     @Mapping(target = "shareableToken", source = "shareableToken")
     @Mapping(target = "status", expression = "java(assessment.getStatus().name())")
     @Mapping(target = "criteriaWeights", expression = "java(toCriteriaWeightsResponse(assessment.getCriteriaWeights()))")
+    @Mapping(target = "jobDescriptionAnalysis", expression = "java(toJobDescriptionAnalysisResponse(assessment.getJobDescriptionAnalysis()))")
     PersonalizedAssessmentResponse toPersonalizedResponse(PersonalizedAssessment assessment);
 
     @Mapping(target = "status", source = "status")
@@ -120,7 +123,24 @@ public interface AssessmentDtoMapper {
                 assessment.getExpirationDate(),
                 assessment.getMaxAttempts(),
                 assessment.getStatus(),
-                toCriteriaWeightsResponse(assessment.getCriteriaWeights())
+                toCriteriaWeightsResponse(assessment.getCriteriaWeights()),
+                toJobDescriptionAnalysisResponse(assessment.getJobDescriptionAnalysis())
+        );
+    }
+
+    default JobDescriptionAnalysisResponse toJobDescriptionAnalysisResponse(JobDescriptionAnalysis analysis) {
+        if (analysis == null) {
+            return null;
+        }
+
+        return new JobDescriptionAnalysisResponse(
+                analysis.getOriginalJobDescription(),
+                analysis.getSuggestedKnowledgeAreas().stream()
+                        .map(Enum::name)
+                        .collect(Collectors.toSet()),
+                analysis.getSuggestedHardSkills(),
+                analysis.getSuggestedSoftSkills(),
+                toCriteriaWeightsResponse(analysis.getSuggestedCriteriaWeights())
         );
     }
 

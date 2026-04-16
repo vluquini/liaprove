@@ -7,5 +7,6 @@ public record PersonalizedAssessmentResponse(
     String title,
     String shareableToken,
     String status,
-    AssessmentCriteriaWeightsResponse criteriaWeights
+    AssessmentCriteriaWeightsResponse criteriaWeights,
+    JobDescriptionAnalysisResponse jobDescriptionAnalysis
 ) {}

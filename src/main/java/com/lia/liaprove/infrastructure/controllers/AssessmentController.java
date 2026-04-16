@@ -6,6 +6,7 @@ import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
 import com.lia.liaprove.core.domain.assessment.Assessment;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
+import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
@@ -15,6 +16,7 @@ import com.lia.liaprove.core.usecases.assessments.DeletePersonalizedAssessmentUs
 import com.lia.liaprove.core.usecases.assessments.EvaluateAssessmentAttemptUseCase;
 import com.lia.liaprove.core.usecases.assessments.GetAssessmentAttemptDetailsUseCase;
 import com.lia.liaprove.core.usecases.assessments.ListAttemptsForMyAssessmentUseCase;
+import com.lia.liaprove.core.usecases.assessments.AnalyzeJobDescriptionUseCase;
 import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SubmitAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SuggestQuestionsForAssessmentUseCase;
@@ -46,6 +48,7 @@ public class AssessmentController {
     private final GetAssessmentAttemptDetailsUseCase getAssessmentAttemptDetailsUseCase;
     private final ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase;
     private final UpdatePersonalizedAssessmentUseCase updatePersonalizedAssessmentUseCase;
+    private final AnalyzeJobDescriptionUseCase analyzeJobDescriptionUseCase;
     private final SecurityContextService securityContextService;
     private final AssessmentDtoMapper assessmentDtoMapper;
 
@@ -58,6 +61,7 @@ public class AssessmentController {
                                 GetAssessmentAttemptDetailsUseCase getAssessmentAttemptDetailsUseCase,
                                 ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase,
                                 UpdatePersonalizedAssessmentUseCase updatePersonalizedAssessmentUseCase,
+                                AnalyzeJobDescriptionUseCase analyzeJobDescriptionUseCase,
                                 SecurityContextService securityContextService,
                                 AssessmentDtoMapper assessmentDtoMapper) {
         this.startNewAssessmentUseCase = startNewAssessmentUseCase;
@@ -69,6 +73,7 @@ public class AssessmentController {
         this.getAssessmentAttemptDetailsUseCase = getAssessmentAttemptDetailsUseCase;
         this.listAttemptsForMyAssessmentUseCase = listAttemptsForMyAssessmentUseCase;
         this.updatePersonalizedAssessmentUseCase = updatePersonalizedAssessmentUseCase;
+        this.analyzeJobDescriptionUseCase = analyzeJobDescriptionUseCase;
         this.securityContextService = securityContextService;
         this.assessmentDtoMapper = assessmentDtoMapper;
     }
@@ -130,6 +135,15 @@ public class AssessmentController {
         return ResponseEntity.ok(assessmentDtoMapper.toResultResponse(finalAttempt));
     }
 
+    @PostMapping("/personalized/job-description-analysis")
+    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
+    public ResponseEntity<JobDescriptionAnalysisResponse> analyzeJobDescription(
+            @RequestBody @Valid AnalyzeJobDescriptionRequest request) {
+
+        JobDescriptionAnalysis analysis = analyzeJobDescriptionUseCase.execute(request.jobDescription());
+        return ResponseEntity.ok(assessmentDtoMapper.toJobDescriptionAnalysisResponse(analysis));
+    }
+
     @PostMapping("/personalized")
     @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
     public ResponseEntity<PersonalizedAssessmentResponse> createPersonalizedAssessment(
@@ -149,7 +163,8 @@ public class AssessmentController {
                         request.hardSkillsWeight(),
                         request.softSkillsWeight(),
                         request.experienceWeight()
-                )
+                ),
+                mapOptionalJobDescriptionAnalysis(request.jobDescriptionAnalysis())
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(assessmentDtoMapper.toPersonalizedResponse(assessment));
@@ -312,5 +327,37 @@ public class AssessmentController {
             throw new IllegalArgumentException("All criteria weights must be provided together. Missing: " + fieldName);
         }
         return value;
+    }
+
+    private java.util.Optional<JobDescriptionAnalysis> mapOptionalJobDescriptionAnalysis(
+            CreatePersonalizedAssessmentRequest.JobDescriptionAnalysisSnapshotRequest snapshot
+    ) {
+        if (snapshot == null) {
+            return java.util.Optional.empty();
+        }
+
+        return java.util.Optional.of(new JobDescriptionAnalysis(
+                snapshot.originalJobDescription(),
+                snapshot.suggestedKnowledgeAreas(),
+                snapshot.suggestedHardSkills(),
+                snapshot.suggestedSoftSkills(),
+                resolveSuggestedCriteriaWeights(snapshot)
+        ));
+    }
+
+    private AssessmentCriteriaWeights resolveSuggestedCriteriaWeights(
+            CreatePersonalizedAssessmentRequest.JobDescriptionAnalysisSnapshotRequest snapshot
+    ) {
+        if (snapshot.suggestedHardSkillsWeight() == null
+                && snapshot.suggestedSoftSkillsWeight() == null
+                && snapshot.suggestedExperienceWeight() == null) {
+            return AssessmentCriteriaWeights.defaultWeights();
+        }
+
+        return new AssessmentCriteriaWeights(
+                requireWeight(snapshot.suggestedHardSkillsWeight(), "suggestedHardSkillsWeight"),
+                requireWeight(snapshot.suggestedSoftSkillsWeight(), "suggestedSoftSkillsWeight"),
+                requireWeight(snapshot.suggestedExperienceWeight(), "suggestedExperienceWeight")
+        );
     }
 }

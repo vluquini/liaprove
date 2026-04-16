@@ -3,12 +3,18 @@ package com.lia.liaprove.infrastructure.services.ai;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lia.liaprove.application.gateways.ai.QuestionPreAnalysisGateway;
+import com.lia.liaprove.application.gateways.ai.JobDescriptionAnalysisGateway;
+import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
+import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
+import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.core.exceptions.question.QuestionPreAnalysisException;
 import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.PrepareQuestionSubmissionUseCase;
 import com.lia.liaprove.infrastructure.dtos.ai.AcceptedSuggestionsInput;
+import com.lia.liaprove.infrastructure.dtos.ai.JobDescriptionAnalysisInput;
 import com.lia.liaprove.infrastructure.dtos.ai.LlmAlternative;
+import com.lia.liaprove.infrastructure.dtos.ai.LlmJobDescriptionAnalysisOutput;
 import com.lia.liaprove.infrastructure.dtos.ai.LlmPreAnalysisOutput;
 import com.lia.liaprove.infrastructure.dtos.ai.LlmSubmissionOutput;
 import com.lia.liaprove.infrastructure.dtos.ai.PromptInput;
@@ -25,7 +31,10 @@ import org.springframework.web.client.RestClientResponseException;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.stream.Stream;
 
 /**
@@ -34,7 +43,7 @@ import java.util.stream.Stream;
  * structured suggestions or a prepared question, with fallback across configured models.
  */
 @Service
-public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGateway {
+public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGateway, JobDescriptionAnalysisGateway {
 
     private final ObjectMapper objectMapper;
     private final RestClient restClient;
@@ -45,6 +54,15 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
     private final String appTitle;
     private final String preAnalysisSystemPrompt;
     private final String submissionPreparationSystemPrompt;
+    private static final String JOB_DESCRIPTION_ANALYSIS_SYSTEM_PROMPT = """
+            You analyze IT job descriptions and return only valid JSON.
+            Extract:
+            - originalJobDescription
+            - suggestedKnowledgeAreas using only enum names from this set: SOFTWARE_DEVELOPMENT, DATABASE, CYBERSECURITY, NETWORKS, AI
+            - suggestedHardSkills as a short list
+            - suggestedSoftSkills as a short list
+            - suggestedHardSkillsWeight, suggestedSoftSkillsWeight, suggestedExperienceWeight as integers that should sum to 100 when possible
+            """;
 
     public HttpQuestionPreAnalysisGatewayImpl(
             ObjectMapper objectMapper,
@@ -147,6 +165,40 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
                         output.description(),
                         alternatives,
                         parseRelevance(output.relevanceByLLM())
+                );
+            });
+        } catch (JsonProcessingException ex) {
+            throw new QuestionPreAnalysisException("Failed to parse AI provider response.", ex);
+        }
+    }
+
+    @Override
+    public JobDescriptionAnalysis analyze(String jobDescription) {
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new QuestionPreAnalysisException("AI API key is not configured.");
+        }
+
+        try {
+            String userPrompt = objectMapper.writeValueAsString(new JobDescriptionAnalysisInput(jobDescription));
+            List<ProviderChatRequest.Message> messages = List.of(
+                    new ProviderChatRequest.Message("system", JOB_DESCRIPTION_ANALYSIS_SYSTEM_PROMPT),
+                    new ProviderChatRequest.Message("user", userPrompt)
+            );
+
+            return executeWithFallback(model -> {
+                ProviderChatRequest body = new ProviderChatRequest(model, 0.2, messages);
+                ProviderChatResponse response = callProvider(body);
+                String content = extractContent(response);
+                LlmJobDescriptionAnalysisOutput output = objectMapper.readValue(content, LlmJobDescriptionAnalysisOutput.class);
+
+                return new JobDescriptionAnalysis(
+                        output.originalJobDescription() == null || output.originalJobDescription().isBlank()
+                                ? jobDescription
+                                : output.originalJobDescription(),
+                        parseKnowledgeAreas(output.suggestedKnowledgeAreas()),
+                        nullSafe(output.suggestedHardSkills()),
+                        nullSafe(output.suggestedSoftSkills()),
+                        resolveSuggestedWeights(output)
                 );
             });
         } catch (JsonProcessingException ex) {
@@ -261,6 +313,39 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
                 .filter(alt -> alt != null && alt.text() != null && !alt.text().isBlank())
                 .map(alt -> new PrepareQuestionSubmissionUseCase.AlternativeInput(alt.text(), alt.correct()))
                 .toList();
+    }
+
+    private static Set<KnowledgeArea> parseKnowledgeAreas(List<String> rawValues) {
+        if (rawValues == null || rawValues.isEmpty()) {
+            return Set.of();
+        }
+
+        EnumSet<KnowledgeArea> areas = EnumSet.noneOf(KnowledgeArea.class);
+        for (String rawValue : rawValues) {
+            if (rawValue == null || rawValue.isBlank()) {
+                continue;
+            }
+            try {
+                areas.add(KnowledgeArea.valueOf(rawValue.trim().toUpperCase(Locale.ROOT)));
+            } catch (IllegalArgumentException ignored) {
+                // Ignore unknown values returned by the provider and keep only supported areas.
+            }
+        }
+        return areas;
+    }
+
+    private static AssessmentCriteriaWeights resolveSuggestedWeights(LlmJobDescriptionAnalysisOutput output) {
+        if (output.suggestedHardSkillsWeight() == null
+                || output.suggestedSoftSkillsWeight() == null
+                || output.suggestedExperienceWeight() == null) {
+            return AssessmentCriteriaWeights.defaultWeights();
+        }
+
+        return new AssessmentCriteriaWeights(
+                output.suggestedHardSkillsWeight(),
+                output.suggestedSoftSkillsWeight(),
+                output.suggestedExperienceWeight()
+        );
     }
 
     /**

@@ -1,13 +1,16 @@
 package com.lia.liaprove.infrastructure.dtos.assessment;
 
+import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public record CreatePersonalizedAssessmentRequest(
@@ -37,8 +40,36 @@ public record CreatePersonalizedAssessmentRequest(
     Integer softSkillsWeight,
 
     @Min(value = 0, message = "Experience weight must be non-negative")
-    Integer experienceWeight
+    Integer experienceWeight,
+
+    @Valid
+    JobDescriptionAnalysisSnapshotRequest jobDescriptionAnalysis
 ) {
+    public CreatePersonalizedAssessmentRequest(
+            String title,
+            String description,
+            List<UUID> questionIds,
+            LocalDateTime expirationDate,
+            int maxAttempts,
+            long evaluationTimerMinutes,
+            Integer hardSkillsWeight,
+            Integer softSkillsWeight,
+            Integer experienceWeight
+    ) {
+        this(
+                title,
+                description,
+                questionIds,
+                expirationDate,
+                maxAttempts,
+                evaluationTimerMinutes,
+                hardSkillsWeight,
+                softSkillsWeight,
+                experienceWeight,
+                null
+        );
+    }
+
     public CreatePersonalizedAssessmentRequest(
             String title,
             String description,
@@ -47,6 +78,16 @@ public record CreatePersonalizedAssessmentRequest(
             int maxAttempts,
             long evaluationTimerMinutes
     ) {
-        this(title, description, questionIds, expirationDate, maxAttempts, evaluationTimerMinutes, null, null, null);
+        this(title, description, questionIds, expirationDate, maxAttempts, evaluationTimerMinutes, null, null, null, null);
     }
+
+    public record JobDescriptionAnalysisSnapshotRequest(
+            String originalJobDescription,
+            Set<KnowledgeArea> suggestedKnowledgeAreas,
+            List<String> suggestedHardSkills,
+            List<String> suggestedSoftSkills,
+            Integer suggestedHardSkillsWeight,
+            Integer suggestedSoftSkillsWeight,
+            Integer suggestedExperienceWeight
+    ) {}
 }
