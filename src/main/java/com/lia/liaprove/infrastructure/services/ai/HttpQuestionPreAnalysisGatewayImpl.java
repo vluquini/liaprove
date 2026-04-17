@@ -2,9 +2,12 @@ package com.lia.liaprove.infrastructure.services.ai;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lia.liaprove.application.gateways.ai.AttemptPreAnalysisContext;
+import com.lia.liaprove.application.gateways.ai.AttemptPreAnalysisGateway;
 import com.lia.liaprove.application.gateways.ai.QuestionPreAnalysisGateway;
 import com.lia.liaprove.application.gateways.ai.JobDescriptionAnalysisGateway;
 import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
+import com.lia.liaprove.core.domain.assessment.AttemptPreAnalysis;
 import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
@@ -14,6 +17,7 @@ import com.lia.liaprove.core.usecases.question.PrepareQuestionSubmissionUseCase;
 import com.lia.liaprove.infrastructure.dtos.ai.AcceptedSuggestionsInput;
 import com.lia.liaprove.infrastructure.dtos.ai.JobDescriptionAnalysisInput;
 import com.lia.liaprove.infrastructure.dtos.ai.LlmAlternative;
+import com.lia.liaprove.infrastructure.dtos.ai.LlmAttemptPreAnalysisOutput;
 import com.lia.liaprove.infrastructure.dtos.ai.LlmJobDescriptionAnalysisOutput;
 import com.lia.liaprove.infrastructure.dtos.ai.LlmPreAnalysisOutput;
 import com.lia.liaprove.infrastructure.dtos.ai.LlmSubmissionOutput;
@@ -43,7 +47,8 @@ import java.util.stream.Stream;
  * structured suggestions or a prepared question, with fallback across configured models.
  */
 @Service
-public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGateway, JobDescriptionAnalysisGateway {
+public class HttpQuestionPreAnalysisGatewayImpl
+        implements QuestionPreAnalysisGateway, JobDescriptionAnalysisGateway, AttemptPreAnalysisGateway {
 
     private final ObjectMapper objectMapper;
     private final RestClient restClient;
@@ -54,6 +59,19 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
     private final String appTitle;
     private final String preAnalysisSystemPrompt;
     private final String submissionPreparationSystemPrompt;
+    private static final String ATTEMPT_PRE_ANALYSIS_SYSTEM_PROMPT = """
+            Você está auxiliando uma pré-análise de uma tentativa.
+            Esta pré-análise é auxiliar e não decide contratação ou reprovação.
+            Não deve recomendar contratação ou reprovação.
+            Ignore mini-projeto completamente.
+            Considere apenas questões de múltipla escolha e abertas fornecidas no JSON.
+            Retorne apenas JSON válido, sem markdown, sem blocos de código e sem texto extra.
+            O JSON deve conter:
+            - summary: string
+            - strengths: array de strings
+            - attentionPoints: array de strings
+            - finalExplanation: string
+            """;
     private static final String JOB_DESCRIPTION_ANALYSIS_SYSTEM_PROMPT = """
             You analyze IT job descriptions and return only valid JSON.
             Extract:
@@ -95,6 +113,31 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
                 .baseUrl(baseUrl)
                 .requestFactory(requestFactory)
                 .build();
+    }
+
+    @Override
+    public AttemptPreAnalysis.Analysis generate(AttemptPreAnalysisContext context) {
+        if (apiKey == null || apiKey.isBlank()) {
+            throw new QuestionPreAnalysisException("AI API key is not configured.");
+        }
+
+        try {
+            String userPrompt = buildAttemptPreAnalysisUserPrompt(context);
+            List<ProviderChatRequest.Message> messages = List.of(
+                    new ProviderChatRequest.Message("system", ATTEMPT_PRE_ANALYSIS_SYSTEM_PROMPT),
+                    new ProviderChatRequest.Message("user", userPrompt)
+            );
+
+            return executeWithFallback(model -> {
+                ProviderChatRequest body = new ProviderChatRequest(model, 0.2, messages);
+                ProviderChatResponse response = callProvider(body);
+                String content = sanitizeJsonContent(extractContent(response));
+                LlmAttemptPreAnalysisOutput output = objectMapper.readValue(content, LlmAttemptPreAnalysisOutput.class);
+                return toAttemptAnalysis(output);
+            });
+        } catch (JsonProcessingException ex) {
+            throw new QuestionPreAnalysisException("Failed to parse AI provider response.", ex);
+        }
     }
 
     /**
@@ -247,6 +290,13 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
     }
 
     /**
+     * Builds the JSON user prompt for attempt pre-analysis.
+     */
+    private String buildAttemptPreAnalysisUserPrompt(AttemptPreAnalysisContext context) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(context);
+    }
+
+    /**
      * Executes the HTTP call to the LLM provider.
      */
     private ProviderChatResponse callProvider(ProviderChatRequest body) {
@@ -349,6 +399,51 @@ public class HttpQuestionPreAnalysisGatewayImpl implements QuestionPreAnalysisGa
             );
         } catch (IllegalArgumentException ex) {
             return AssessmentCriteriaWeights.defaultWeights();
+        }
+    }
+
+    private static String sanitizeJsonContent(String content) {
+        if (content == null) {
+            throw new QuestionPreAnalysisException("AI provider response does not contain content.");
+        }
+
+        String sanitized = content.trim();
+        sanitized = sanitized.replaceAll("(?s)^```(?:json)?\\s*", "");
+        sanitized = sanitized.replaceAll("(?s)\\s*```\\s*$", "");
+
+        int firstBrace = sanitized.indexOf('{');
+        int lastBrace = sanitized.lastIndexOf('}');
+        if (firstBrace >= 0 && lastBrace > firstBrace) {
+            sanitized = sanitized.substring(firstBrace, lastBrace + 1).trim();
+        }
+
+        if (sanitized.isBlank()) {
+            throw new QuestionPreAnalysisException("AI provider response does not contain parsable JSON.");
+        }
+
+        return sanitized;
+    }
+
+    private static AttemptPreAnalysis.Analysis toAttemptAnalysis(LlmAttemptPreAnalysisOutput output) {
+        if (output == null) {
+            throw new QuestionPreAnalysisException("AI provider response does not contain attempt analysis.");
+        }
+        if (output.summary() == null || output.summary().isBlank()) {
+            throw new QuestionPreAnalysisException("AI provider response is missing attempt summary.");
+        }
+        if (output.finalExplanation() == null || output.finalExplanation().isBlank()) {
+            throw new QuestionPreAnalysisException("AI provider response is missing attempt final explanation.");
+        }
+
+        try {
+            return new AttemptPreAnalysis.Analysis(
+                    output.summary(),
+                    nullSafe(output.strengths()),
+                    nullSafe(output.attentionPoints()),
+                    output.finalExplanation()
+            );
+        } catch (IllegalArgumentException ex) {
+            throw new QuestionPreAnalysisException("AI provider response is invalid.", ex);
         }
     }
 

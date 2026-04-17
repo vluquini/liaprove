@@ -6,6 +6,7 @@ import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
 import com.lia.liaprove.core.domain.assessment.Assessment;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
+import com.lia.liaprove.core.domain.assessment.AttemptPreAnalysis;
 import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
@@ -15,6 +16,7 @@ import com.lia.liaprove.core.usecases.assessments.CreatePersonalizedAssessmentUs
 import com.lia.liaprove.core.usecases.assessments.DeletePersonalizedAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.EvaluateAssessmentAttemptUseCase;
 import com.lia.liaprove.core.usecases.assessments.GetAssessmentAttemptDetailsUseCase;
+import com.lia.liaprove.core.usecases.assessments.GenerateAttemptPreAnalysisUseCase;
 import com.lia.liaprove.core.usecases.assessments.ListAttemptsForMyAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.AnalyzeJobDescriptionUseCase;
 import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
@@ -46,6 +48,7 @@ public class AssessmentController {
     private final EvaluateAssessmentAttemptUseCase evaluateAssessmentAttemptUseCase;
     private final DeletePersonalizedAssessmentUseCase deletePersonalizedAssessmentUseCase;
     private final GetAssessmentAttemptDetailsUseCase getAssessmentAttemptDetailsUseCase;
+    private final GenerateAttemptPreAnalysisUseCase generateAttemptPreAnalysisUseCase;
     private final ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase;
     private final UpdatePersonalizedAssessmentUseCase updatePersonalizedAssessmentUseCase;
     private final AnalyzeJobDescriptionUseCase analyzeJobDescriptionUseCase;
@@ -59,6 +62,7 @@ public class AssessmentController {
                                 EvaluateAssessmentAttemptUseCase evaluateAssessmentAttemptUseCase,
                                 DeletePersonalizedAssessmentUseCase deletePersonalizedAssessmentUseCase,
                                 GetAssessmentAttemptDetailsUseCase getAssessmentAttemptDetailsUseCase,
+                                GenerateAttemptPreAnalysisUseCase generateAttemptPreAnalysisUseCase,
                                 ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase,
                                 UpdatePersonalizedAssessmentUseCase updatePersonalizedAssessmentUseCase,
                                 AnalyzeJobDescriptionUseCase analyzeJobDescriptionUseCase,
@@ -71,6 +75,7 @@ public class AssessmentController {
         this.evaluateAssessmentAttemptUseCase = evaluateAssessmentAttemptUseCase;
         this.deletePersonalizedAssessmentUseCase = deletePersonalizedAssessmentUseCase;
         this.getAssessmentAttemptDetailsUseCase = getAssessmentAttemptDetailsUseCase;
+        this.generateAttemptPreAnalysisUseCase = generateAttemptPreAnalysisUseCase;
         this.listAttemptsForMyAssessmentUseCase = listAttemptsForMyAssessmentUseCase;
         this.updatePersonalizedAssessmentUseCase = updatePersonalizedAssessmentUseCase;
         this.analyzeJobDescriptionUseCase = analyzeJobDescriptionUseCase;
@@ -253,6 +258,17 @@ public class AssessmentController {
         return ResponseEntity.ok(assessmentDtoMapper.toAttemptDetailsResponse(attempt));
     }
 
+    @PostMapping("/attempts/{attemptId}/pre-analysis")
+    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
+    public ResponseEntity<AttemptPreAnalysisResponse> generateAttemptPreAnalysis(
+            @PathVariable UUID attemptId) {
+
+        UUID requesterId = securityContextService.getCurrentUserId();
+        AttemptPreAnalysis attemptPreAnalysis = generateAttemptPreAnalysisUseCase.execute(attemptId, requesterId);
+
+        return ResponseEntity.ok(toAttemptPreAnalysisResponse(attemptPreAnalysis));
+    }
+
     @GetMapping("/personalized/{assessmentId}/attempts")
     @PreAuthorize("hasRole('RECRUITER')")
     public ResponseEntity<List<AssessmentAttemptSummaryResponse>> listAttemptsForMyAssessment(
@@ -358,6 +374,27 @@ public class AssessmentController {
                 requireWeight(snapshot.suggestedHardSkillsWeight(), "suggestedHardSkillsWeight"),
                 requireWeight(snapshot.suggestedSoftSkillsWeight(), "suggestedSoftSkillsWeight"),
                 requireWeight(snapshot.suggestedExperienceWeight(), "suggestedExperienceWeight")
+        );
+    }
+
+    private AttemptPreAnalysisResponse toAttemptPreAnalysisResponse(AttemptPreAnalysis attemptPreAnalysis) {
+        AttemptPreAnalysis.Metadata metadata = attemptPreAnalysis.getMetadata();
+        AttemptPreAnalysis.Analysis analysis = attemptPreAnalysis.getAnalysis();
+
+        return new AttemptPreAnalysisResponse(
+                new AttemptPreAnalysisResponse.Metadata(
+                        metadata.getAttemptId(),
+                        metadata.getGeneratedAt(),
+                        metadata.getIgnoredQuestionTypes().stream()
+                                .map(Enum::name)
+                                .toList()
+                ),
+                new AttemptPreAnalysisResponse.Analysis(
+                        analysis.getSummary(),
+                        analysis.getStrengths(),
+                        analysis.getAttentionPoints(),
+                        analysis.getFinalExplanation()
+                )
         );
     }
 }

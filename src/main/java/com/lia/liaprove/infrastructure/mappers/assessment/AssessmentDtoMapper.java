@@ -8,11 +8,15 @@ import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
+import com.lia.liaprove.core.domain.question.OpenQuestion;
 import com.lia.liaprove.core.domain.question.Question;
+import com.lia.liaprove.core.domain.question.QuestionType;
 import com.lia.liaprove.core.domain.user.User;
+import com.lia.liaprove.core.domain.user.UserProfessional;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentAttemptDetailsResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentAttemptResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentAttemptSummaryResponse;
+import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentExplainabilityResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentResultResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentCriteriaWeightsResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.DeletePersonalizedAssessmentResponse;
@@ -53,10 +57,37 @@ public interface AssessmentDtoMapper {
     @Mapping(target = "jobDescriptionAnalysis", expression = "java(toJobDescriptionAnalysisResponse(assessment.getJobDescriptionAnalysis()))")
     PersonalizedAssessmentResponse toPersonalizedResponse(PersonalizedAssessment assessment);
 
-    @Mapping(target = "status", source = "status")
-    @Mapping(target = "accuracyRate", source = "accuracyRate")
-    @Mapping(target = "message", constant = "Assessment evaluated successfully.")
-    EvaluateAssessmentAttemptResponse toEvaluateAttemptResponse(AssessmentAttempt attempt);
+    default EvaluateAssessmentAttemptResponse toEvaluateAttemptResponse(AssessmentAttempt attempt) {
+        if (attempt == null) {
+            return null;
+        }
+
+        Assessment assessment = attempt.getAssessment();
+        PersonalizedAssessment personalizedAssessment =
+                assessment instanceof PersonalizedAssessment pa ? pa : null;
+        AssessmentAttemptSummaryResponse.AssessmentSummary assessmentSummary =
+                new AssessmentAttemptSummaryResponse.AssessmentSummary(
+                        assessment != null ? assessment.getId() : null,
+                        assessment != null ? assessment.getTitle() : null,
+                        assessment instanceof PersonalizedAssessment,
+                        personalizedAssessment != null
+                                ? toCriteriaWeightsResponse(personalizedAssessment.getCriteriaWeights())
+                                : null,
+                        personalizedAssessment != null
+                                ? toJobDescriptionAnalysisResponse(personalizedAssessment.getJobDescriptionAnalysis())
+                                : null
+                );
+
+        return new EvaluateAssessmentAttemptResponse(
+                attempt.getId(),
+                attempt.getStatus(),
+                attempt.getAccuracyRate(),
+                assessmentSummary,
+                toUserResponseDto(attempt.getUser()),
+                toExplainabilityResponse(attempt),
+                "Assessment evaluated successfully."
+        );
+    }
 
     default AssessmentAttemptDetailsResponse toAttemptDetailsResponse(AssessmentAttempt attempt) {
         if (attempt == null) {
@@ -64,6 +95,8 @@ public interface AssessmentDtoMapper {
         }
 
         Assessment assessment = attempt.getAssessment();
+        PersonalizedAssessment personalizedAssessment =
+                assessment instanceof PersonalizedAssessment pa ? pa : null;
         AssessmentAttemptDetailsResponse.AssessmentSummary assessmentSummary =
                 new AssessmentAttemptDetailsResponse.AssessmentSummary(
                         assessment != null ? assessment.getId() : null,
@@ -71,6 +104,12 @@ public interface AssessmentDtoMapper {
                         assessment != null ? assessment.getDescription() : null,
                         assessment != null && assessment.getEvaluationTimer() != null
                                 ? assessment.getEvaluationTimer().toMinutes()
+                                : null,
+                        personalizedAssessment != null
+                                ? toCriteriaWeightsResponse(personalizedAssessment.getCriteriaWeights())
+                                : null,
+                        personalizedAssessment != null
+                                ? toJobDescriptionAnalysisResponse(personalizedAssessment.getJobDescriptionAnalysis())
                                 : null
                 );
 
@@ -86,6 +125,7 @@ public interface AssessmentDtoMapper {
                 attempt.getFinishedAt(),
                 assessmentSummary,
                 candidate,
+                toExplainabilityResponse(attempt),
                 questions
         );
     }
@@ -96,11 +136,19 @@ public interface AssessmentDtoMapper {
         }
 
         Assessment assessment = attempt.getAssessment();
+        PersonalizedAssessment personalizedAssessment =
+                assessment instanceof PersonalizedAssessment pa ? pa : null;
         AssessmentAttemptSummaryResponse.AssessmentSummary assessmentSummary =
                 new AssessmentAttemptSummaryResponse.AssessmentSummary(
                         assessment != null ? assessment.getId() : null,
                         assessment != null ? assessment.getTitle() : null,
-                        assessment instanceof PersonalizedAssessment
+                        assessment instanceof PersonalizedAssessment,
+                        personalizedAssessment != null
+                                ? toCriteriaWeightsResponse(personalizedAssessment.getCriteriaWeights())
+                                : null,
+                        personalizedAssessment != null
+                                ? toJobDescriptionAnalysisResponse(personalizedAssessment.getJobDescriptionAnalysis())
+                                : null
                 );
 
         return new AssessmentAttemptSummaryResponse(
@@ -223,10 +271,13 @@ public interface AssessmentDtoMapper {
         }
 
         List<AssessmentAttemptDetailsResponse.AlternativeResponse> alternatives = null;
+        String guideline = null;
         if (question instanceof MultipleChoiceQuestion mcq) {
             alternatives = mcq.getAlternatives().stream()
                     .map(alt -> new AssessmentAttemptDetailsResponse.AlternativeResponse(alt.id(), alt.text()))
                     .collect(Collectors.toList());
+        } else if (question instanceof OpenQuestion openQuestion) {
+            guideline = openQuestion.getGuideline();
         }
 
         AssessmentAttemptDetailsResponse.AnswerResponse answerResponse = null;
@@ -234,7 +285,8 @@ public interface AssessmentDtoMapper {
             answerResponse = new AssessmentAttemptDetailsResponse.AnswerResponse(
                     answer.getQuestionId(),
                     answer.getSelectedAlternativeId(),
-                    answer.getProjectUrl()
+                    answer.getProjectUrl(),
+                    answer.getTextResponse()
             );
         }
 
@@ -242,8 +294,86 @@ public interface AssessmentDtoMapper {
                 question.getId(),
                 question.getTitle(),
                 question.getDescription(),
+                guideline,
                 alternatives,
                 answerResponse
         );
+    }
+
+    default AssessmentExplainabilityResponse toExplainabilityResponse(AssessmentAttempt attempt) {
+        if (attempt == null) {
+            return null;
+        }
+
+        List<Question> questions = attempt.getQuestions();
+        List<Answer> answers = attempt.getAnswers();
+        User user = attempt.getUser();
+        UserProfessional professional = user instanceof UserProfessional up ? up : null;
+
+        int totalQuestions = questions == null ? 0 : questions.size();
+        int answeredQuestions = countAnsweredQuestions(answers);
+        int multipleChoiceQuestions = countQuestionsByType(questions, QuestionType.MULTIPLE_CHOICE);
+        int openQuestions = countQuestionsByType(questions, QuestionType.OPEN);
+        int projectQuestions = countQuestionsByType(questions, QuestionType.PROJECT);
+
+        String candidateExperienceLevel = professional != null && professional.getExperienceLevel() != null
+                ? professional.getExperienceLevel().name()
+                : null;
+
+        List<String> candidateHardSkills = professional != null ? professional.getHardSkills() : null;
+        List<String> candidateSoftSkills = professional != null ? professional.getSoftSkills() : null;
+        AssessmentCriteriaWeightsResponse criteriaWeights = null;
+        if (attempt.getAssessment() instanceof PersonalizedAssessment personalizedAssessment) {
+            criteriaWeights = toCriteriaWeightsResponse(personalizedAssessment.getCriteriaWeights());
+        }
+
+        return new AssessmentExplainabilityResponse(
+                totalQuestions,
+                answeredQuestions,
+                multipleChoiceQuestions,
+                openQuestions,
+                projectQuestions,
+                candidateExperienceLevel,
+                candidateHardSkills,
+                candidateSoftSkills,
+                criteriaWeights
+        );
+    }
+
+    default int countQuestionsByType(List<Question> questions, QuestionType questionType) {
+        if (questions == null || questionType == null) {
+            return 0;
+        }
+
+        return (int) questions.stream()
+                .filter(question -> question != null && question.getQuestionType() == questionType)
+                .count();
+    }
+
+    default int countAnsweredQuestions(List<Answer> answers) {
+        if (answers == null) {
+            return 0;
+        }
+
+        return (int) answers.stream()
+                .filter(this::hasProvidedAnswer)
+                .map(Answer::getQuestionId)
+                .filter(questionId -> questionId != null)
+                .distinct()
+                .count();
+    }
+
+    default boolean hasProvidedAnswer(Answer answer) {
+        if (answer == null) {
+            return false;
+        }
+
+        return answer.getSelectedAlternativeId() != null
+                || hasText(answer.getProjectUrl())
+                || hasText(answer.getTextResponse());
+    }
+
+    default boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

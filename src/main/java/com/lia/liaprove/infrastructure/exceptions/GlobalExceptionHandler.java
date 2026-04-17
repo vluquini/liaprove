@@ -1,6 +1,8 @@
 package com.lia.liaprove.infrastructure.exceptions;
 
 import com.lia.liaprove.core.exceptions.assessment.AssessmentNotFoundException;
+import com.lia.liaprove.core.exceptions.assessment.AttemptPreAnalysisInProgressException;
+import com.lia.liaprove.core.exceptions.assessment.AttemptPreAnalysisNotAvailableException;
 import com.lia.liaprove.core.exceptions.metrics.FeedbackNotFoundException;
 import com.lia.liaprove.core.exceptions.question.QuestionNotFoundException;
 import com.lia.liaprove.core.exceptions.question.QuestionPreAnalysisException;
@@ -131,6 +133,22 @@ public class GlobalExceptionHandler {
         log.warn("AssessmentNotFoundException: {}", ex.getMessage());
         Map<String, Object> body = createErrorBody(HttpStatus.NOT_FOUND, "Not Found: " + ex.getMessage(), req.getRequestURI());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
+    }
+
+    @ExceptionHandler(AttemptPreAnalysisNotAvailableException.class)
+    public ResponseEntity<Map<String, Object>> handleAttemptPreAnalysisNotAvailableException(
+            AttemptPreAnalysisNotAvailableException ex, HttpServletRequest req) {
+        log.warn("AttemptPreAnalysisNotAvailableException: {}", ex.getMessage());
+        Map<String, Object> body = createErrorBody(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+        return ResponseEntity.badRequest().body(body);
+    }
+
+    @ExceptionHandler(AttemptPreAnalysisInProgressException.class)
+    public ResponseEntity<Map<String, Object>> handleAttemptPreAnalysisInProgressException(
+            AttemptPreAnalysisInProgressException ex, HttpServletRequest req) {
+        log.warn("AttemptPreAnalysisInProgressException: {}", ex.getMessage());
+        Map<String, Object> body = createErrorBody(HttpStatus.CONFLICT, ex.getMessage(), req.getRequestURI());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
     }
 }
 

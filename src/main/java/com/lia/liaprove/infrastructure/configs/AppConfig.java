@@ -6,6 +6,7 @@ import com.lia.liaprove.application.gateways.algorithms.genetic.VoteMultiplierGa
 import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
 import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.application.gateways.assessment.CertificateGateway;
+import com.lia.liaprove.application.gateways.ai.AttemptPreAnalysisGateway;
 import com.lia.liaprove.application.gateways.ai.JobDescriptionAnalysisGateway;
 import com.lia.liaprove.application.gateways.metrics.AssessmentAttemptVoteGateway;
 import com.lia.liaprove.application.gateways.metrics.FeedbackGateway;
@@ -142,6 +143,18 @@ public class AppConfig {
     @Bean
     public AnalyzeJobDescriptionUseCase analyzeJobDescriptionUseCase(JobDescriptionAnalysisGateway jobDescriptionAnalysisGateway) {
         return new AnalyzeJobDescriptionUseCaseImpl(jobDescriptionAnalysisGateway);
+    }
+
+    @Bean
+    public GenerateAttemptPreAnalysisUseCase generateAttemptPreAnalysisUseCase(
+            AssessmentAttemptGateway assessmentAttemptGateway,
+            UserGateway userGateway,
+            AttemptPreAnalysisGateway attemptPreAnalysisGateway) {
+        return new GenerateAttemptPreAnalysisUseCaseImpl(
+                assessmentAttemptGateway,
+                userGateway,
+                attemptPreAnalysisGateway
+        );
     }
 
     @Bean
