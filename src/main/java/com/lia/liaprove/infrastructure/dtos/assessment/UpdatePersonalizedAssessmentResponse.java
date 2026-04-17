@@ -9,5 +9,7 @@ public record UpdatePersonalizedAssessmentResponse(
         UUID assessmentId,
         LocalDateTime expirationDate,
         Integer maxAttempts,
-        PersonalizedAssessmentStatus status
+        PersonalizedAssessmentStatus status,
+        AssessmentCriteriaWeightsResponse criteriaWeights,
+        JobDescriptionAnalysisResponse jobDescriptionAnalysis
 ) {}

@@ -1,6 +1,7 @@
 package com.lia.liaprove.application.services.question;
 
 import com.lia.liaprove.core.domain.question.QuestionContent;
+import com.lia.liaprove.core.domain.question.QuestionType;
 import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
 
 import java.util.Objects;
@@ -23,6 +24,20 @@ public class QuestionValidator {
      * @throws NullPointerException caso o parâmetro content seja nulo
      */
     public static void validate(QuestionContent content) {
+        validateCommon(content);
+    }
+
+    public static void validate(QuestionCreateDto content) {
+        validateCommon(content);
+
+        if (content.questionType() == null) {
+            throw new InvalidUserDataException("Question type is required.");
+        }
+
+        validateOpenQuestion(content);
+    }
+
+    private static void validateCommon(QuestionContent content) {
         Objects.requireNonNull(content, "Question content must not be null");
 
         if (isBlank(content.title()) || content.title().length() < 10 || content.title().length() > 255) {
@@ -39,6 +54,16 @@ public class QuestionValidator {
         }
         if (content.relevanceByCommunity() == null) {
             throw new InvalidUserDataException("Relevance level is required.");
+        }
+    }
+
+    private static void validateOpenQuestion(QuestionCreateDto content) {
+        if (content.questionType() != QuestionType.OPEN) {
+            return;
+        }
+
+        if (content.alternatives() != null && !content.alternatives().isEmpty()) {
+            throw new InvalidUserDataException("Open questions must not have alternatives.");
         }
     }
 

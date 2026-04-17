@@ -9,6 +9,11 @@ public record SubmitAssessmentRequest(
     public record QuestionAnswerRequest(
         UUID questionId,
         UUID selectedAlternativeId,
-        String projectUrl
-    ) {}
+        String projectUrl,
+        String textResponse
+    ) {
+        public QuestionAnswerRequest(UUID questionId, UUID selectedAlternativeId, String projectUrl) {
+            this(questionId, selectedAlternativeId, projectUrl, null);
+        }
+    }
 }

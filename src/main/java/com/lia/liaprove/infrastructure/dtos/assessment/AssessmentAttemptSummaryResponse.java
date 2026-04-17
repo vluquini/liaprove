@@ -18,6 +18,8 @@ public record AssessmentAttemptSummaryResponse(
     public record AssessmentSummary(
             UUID id,
             String title,
-            boolean personalized
+            boolean personalized,
+            AssessmentCriteriaWeightsResponse criteriaWeights,
+            JobDescriptionAnalysisResponse jobDescriptionAnalysis
     ) {}
 }

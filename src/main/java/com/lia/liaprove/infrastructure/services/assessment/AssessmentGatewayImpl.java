@@ -66,6 +66,7 @@ public class AssessmentGatewayImpl implements AssessmentGateway {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<PersonalizedAssessment> findActiveAssessmentsWithPastExpirationDate() {
         return assessmentJpaRepository.findActiveAssessmentsWithPastExpirationDate(
                         PersonalizedAssessmentStatus.ACTIVE,

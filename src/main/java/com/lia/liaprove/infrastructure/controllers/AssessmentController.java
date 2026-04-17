@@ -5,14 +5,20 @@ import com.lia.liaprove.application.services.assessment.dto.SuggestionCriteriaDt
 import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
 import com.lia.liaprove.core.domain.assessment.Assessment;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
+import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
+import com.lia.liaprove.core.domain.assessment.AttemptPreAnalysis;
+import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
+import com.lia.liaprove.core.domain.question.QuestionType;
 import com.lia.liaprove.core.usecases.assessments.CreatePersonalizedAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.DeletePersonalizedAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.EvaluateAssessmentAttemptUseCase;
 import com.lia.liaprove.core.usecases.assessments.GetAssessmentAttemptDetailsUseCase;
+import com.lia.liaprove.core.usecases.assessments.GenerateAttemptPreAnalysisUseCase;
 import com.lia.liaprove.core.usecases.assessments.ListAttemptsForMyAssessmentUseCase;
+import com.lia.liaprove.core.usecases.assessments.AnalyzeJobDescriptionUseCase;
 import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SubmitAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SuggestQuestionsForAssessmentUseCase;
@@ -42,8 +48,10 @@ public class AssessmentController {
     private final EvaluateAssessmentAttemptUseCase evaluateAssessmentAttemptUseCase;
     private final DeletePersonalizedAssessmentUseCase deletePersonalizedAssessmentUseCase;
     private final GetAssessmentAttemptDetailsUseCase getAssessmentAttemptDetailsUseCase;
+    private final GenerateAttemptPreAnalysisUseCase generateAttemptPreAnalysisUseCase;
     private final ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase;
     private final UpdatePersonalizedAssessmentUseCase updatePersonalizedAssessmentUseCase;
+    private final AnalyzeJobDescriptionUseCase analyzeJobDescriptionUseCase;
     private final SecurityContextService securityContextService;
     private final AssessmentDtoMapper assessmentDtoMapper;
 
@@ -54,8 +62,10 @@ public class AssessmentController {
                                 EvaluateAssessmentAttemptUseCase evaluateAssessmentAttemptUseCase,
                                 DeletePersonalizedAssessmentUseCase deletePersonalizedAssessmentUseCase,
                                 GetAssessmentAttemptDetailsUseCase getAssessmentAttemptDetailsUseCase,
+                                GenerateAttemptPreAnalysisUseCase generateAttemptPreAnalysisUseCase,
                                 ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase,
                                 UpdatePersonalizedAssessmentUseCase updatePersonalizedAssessmentUseCase,
+                                AnalyzeJobDescriptionUseCase analyzeJobDescriptionUseCase,
                                 SecurityContextService securityContextService,
                                 AssessmentDtoMapper assessmentDtoMapper) {
         this.startNewAssessmentUseCase = startNewAssessmentUseCase;
@@ -65,8 +75,10 @@ public class AssessmentController {
         this.evaluateAssessmentAttemptUseCase = evaluateAssessmentAttemptUseCase;
         this.deletePersonalizedAssessmentUseCase = deletePersonalizedAssessmentUseCase;
         this.getAssessmentAttemptDetailsUseCase = getAssessmentAttemptDetailsUseCase;
+        this.generateAttemptPreAnalysisUseCase = generateAttemptPreAnalysisUseCase;
         this.listAttemptsForMyAssessmentUseCase = listAttemptsForMyAssessmentUseCase;
         this.updatePersonalizedAssessmentUseCase = updatePersonalizedAssessmentUseCase;
+        this.analyzeJobDescriptionUseCase = analyzeJobDescriptionUseCase;
         this.securityContextService = securityContextService;
         this.assessmentDtoMapper = assessmentDtoMapper;
     }
@@ -116,7 +128,8 @@ public class AssessmentController {
                 .map(a -> new SubmitAssessmentAnswersDto.QuestionAnswerDto(
                         a.questionId(),
                         a.selectedAlternativeId(),
-                        a.projectUrl()
+                        a.projectUrl(),
+                        a.textResponse()
                 ))
                 .collect(Collectors.toList());
 
@@ -125,6 +138,15 @@ public class AssessmentController {
         AssessmentAttempt finalAttempt = submitAssessmentUseCase.execute(submitDto, userId);
 
         return ResponseEntity.ok(assessmentDtoMapper.toResultResponse(finalAttempt));
+    }
+
+    @PostMapping("/personalized/job-description-analysis")
+    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
+    public ResponseEntity<JobDescriptionAnalysisResponse> analyzeJobDescription(
+            @RequestBody @Valid AnalyzeJobDescriptionRequest request) {
+
+        JobDescriptionAnalysis analysis = analyzeJobDescriptionUseCase.execute(request.jobDescription());
+        return ResponseEntity.ok(assessmentDtoMapper.toJobDescriptionAnalysisResponse(analysis));
     }
 
     @PostMapping("/personalized")
@@ -141,7 +163,13 @@ public class AssessmentController {
                 request.questionIds(),
                 request.expirationDate(),
                 request.maxAttempts(),
-                request.evaluationTimerMinutes()
+                request.evaluationTimerMinutes(),
+                resolveCriteriaWeights(
+                        request.hardSkillsWeight(),
+                        request.softSkillsWeight(),
+                        request.experienceWeight()
+                ),
+                mapOptionalJobDescriptionAnalysis(request.jobDescriptionAnalysis())
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(assessmentDtoMapper.toPersonalizedResponse(assessment));
@@ -152,6 +180,7 @@ public class AssessmentController {
     public ResponseEntity<SuggestedQuestionsResponse> getSuggestedQuestions(
             @RequestParam(required = false) Set<KnowledgeArea> knowledgeAreas,
             @RequestParam(required = false) Set<DifficultyLevel> difficultyLevels,
+            @RequestParam(required = false) Set<QuestionType> questionTypes,
             @RequestParam(required = false) List<UUID> excludeIds,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int pageSize) {
@@ -161,6 +190,7 @@ public class AssessmentController {
         SuggestionCriteriaDto criteria = new SuggestionCriteriaDto(
                 knowledgeAreas,
                 difficultyLevels,
+                questionTypes,
                 page,
                 pageSize,
                 excludeIds
@@ -228,6 +258,17 @@ public class AssessmentController {
         return ResponseEntity.ok(assessmentDtoMapper.toAttemptDetailsResponse(attempt));
     }
 
+    @PostMapping("/attempts/{attemptId}/pre-analysis")
+    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
+    public ResponseEntity<AttemptPreAnalysisResponse> generateAttemptPreAnalysis(
+            @PathVariable UUID attemptId) {
+
+        UUID requesterId = securityContextService.getCurrentUserId();
+        AttemptPreAnalysis attemptPreAnalysis = generateAttemptPreAnalysisUseCase.execute(attemptId, requesterId);
+
+        return ResponseEntity.ok(toAttemptPreAnalysisResponse(attemptPreAnalysis));
+    }
+
     @GetMapping("/personalized/{assessmentId}/attempts")
     @PreAuthorize("hasRole('RECRUITER')")
     public ResponseEntity<List<AssessmentAttemptSummaryResponse>> listAttemptsForMyAssessment(
@@ -256,11 +297,104 @@ public class AssessmentController {
                 requesterId,
                 java.util.Optional.ofNullable(request.expirationDate()),
                 java.util.Optional.ofNullable(request.maxAttempts()),
-                java.util.Optional.ofNullable(request.status())
+                java.util.Optional.ofNullable(request.status()),
+                resolveOptionalCriteriaWeights(
+                        request.hardSkillsWeight(),
+                        request.softSkillsWeight(),
+                        request.experienceWeight()
+                )
         );
 
         return ResponseEntity.ok(
                 assessmentDtoMapper.toUpdatePersonalizedResponse((PersonalizedAssessment) updated)
+        );
+    }
+
+    private AssessmentCriteriaWeights resolveCriteriaWeights(
+            Integer hardSkillsWeight,
+            Integer softSkillsWeight,
+            Integer experienceWeight
+    ) {
+        if (hardSkillsWeight == null && softSkillsWeight == null && experienceWeight == null) {
+            return AssessmentCriteriaWeights.defaultWeights();
+        }
+
+        return new AssessmentCriteriaWeights(
+                requireWeight(hardSkillsWeight, "hardSkillsWeight"),
+                requireWeight(softSkillsWeight, "softSkillsWeight"),
+                requireWeight(experienceWeight, "experienceWeight")
+        );
+    }
+
+    private java.util.Optional<AssessmentCriteriaWeights> resolveOptionalCriteriaWeights(
+            Integer hardSkillsWeight,
+            Integer softSkillsWeight,
+            Integer experienceWeight
+    ) {
+        if (hardSkillsWeight == null && softSkillsWeight == null && experienceWeight == null) {
+            return java.util.Optional.empty();
+        }
+
+        return java.util.Optional.of(resolveCriteriaWeights(hardSkillsWeight, softSkillsWeight, experienceWeight));
+    }
+
+    private int requireWeight(Integer value, String fieldName) {
+        if (value == null) {
+            throw new IllegalArgumentException("All criteria weights must be provided together. Missing: " + fieldName);
+        }
+        return value;
+    }
+
+    private java.util.Optional<JobDescriptionAnalysis> mapOptionalJobDescriptionAnalysis(
+            CreatePersonalizedAssessmentRequest.JobDescriptionAnalysisSnapshotRequest snapshot
+    ) {
+        if (snapshot == null) {
+            return java.util.Optional.empty();
+        }
+
+        return java.util.Optional.of(new JobDescriptionAnalysis(
+                snapshot.originalJobDescription(),
+                snapshot.suggestedKnowledgeAreas(),
+                snapshot.suggestedHardSkills(),
+                snapshot.suggestedSoftSkills(),
+                resolveSuggestedCriteriaWeights(snapshot)
+        ));
+    }
+
+    private AssessmentCriteriaWeights resolveSuggestedCriteriaWeights(
+            CreatePersonalizedAssessmentRequest.JobDescriptionAnalysisSnapshotRequest snapshot
+    ) {
+        if (snapshot.suggestedHardSkillsWeight() == null
+                && snapshot.suggestedSoftSkillsWeight() == null
+                && snapshot.suggestedExperienceWeight() == null) {
+            return AssessmentCriteriaWeights.defaultWeights();
+        }
+
+        return new AssessmentCriteriaWeights(
+                requireWeight(snapshot.suggestedHardSkillsWeight(), "suggestedHardSkillsWeight"),
+                requireWeight(snapshot.suggestedSoftSkillsWeight(), "suggestedSoftSkillsWeight"),
+                requireWeight(snapshot.suggestedExperienceWeight(), "suggestedExperienceWeight")
+        );
+    }
+
+    private AttemptPreAnalysisResponse toAttemptPreAnalysisResponse(AttemptPreAnalysis attemptPreAnalysis) {
+        AttemptPreAnalysis.Metadata metadata = attemptPreAnalysis.getMetadata();
+        AttemptPreAnalysis.Analysis analysis = attemptPreAnalysis.getAnalysis();
+
+        return new AttemptPreAnalysisResponse(
+                new AttemptPreAnalysisResponse.Metadata(
+                        metadata.getAttemptId(),
+                        metadata.getGeneratedAt(),
+                        metadata.getIgnoredQuestionTypes().stream()
+                                .map(Enum::name)
+                                .toList()
+                ),
+                new AttemptPreAnalysisResponse.Analysis(
+                        analysis.getSummary(),
+                        analysis.getStrengths(),
+                        analysis.getAttentionPoints(),
+                        analysis.getFinalExplanation()
+                )
         );
     }
 }

@@ -63,7 +63,7 @@ public class AssessmentAttempt {
     }
 
     private void calculateSystemAssessmentResult(List<Answer> submittedAnswers) {
-        if (hasProjectSubmission(submittedAnswers)) {
+        if (hasManualSubmission(submittedAnswers)) {
             calculatePartialScore();
             this.status = AssessmentAttemptStatus.COMPLETED;
             return;
@@ -86,9 +86,9 @@ public class AssessmentAttempt {
         }
     }
 
-    private boolean hasProjectSubmission(List<Answer> submittedAnswers) {
+    private boolean hasManualSubmission(List<Answer> submittedAnswers) {
         return submittedAnswers != null && submittedAnswers.stream()
-                .anyMatch(answer -> answer.getProjectUrl() != null && !answer.getProjectUrl().isBlank());
+                .anyMatch(answer -> hasManualPayload(answer));
     }
 
     private void calculatePartialScore() {
@@ -105,7 +105,7 @@ public class AssessmentAttempt {
     }
 
     private int countCorrectAnswers() {
-        if (questions == null || questions.isEmpty()) {
+        if (questions == null || questions.isEmpty() || answers == null || answers.isEmpty()) {
             return 0;
         }
 
@@ -127,6 +127,18 @@ public class AssessmentAttempt {
         }
 
         return correctCount;
+    }
+
+    private boolean hasManualPayload(Answer answer) {
+        if (answer == null) {
+            return false;
+        }
+
+        return hasText(answer.getProjectUrl()) || hasText(answer.getTextResponse());
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 
     private boolean isAnswerCorrect(MultipleChoiceQuestion question, Answer answer) {

@@ -15,6 +15,7 @@ public record AssessmentAttemptDetailsResponse(
         LocalDateTime finishedAt,
         AssessmentSummary assessment,
         UserResponseDto candidate,
+        AssessmentExplainabilityResponse explainability,
         List<AttemptQuestionDetailsResponse> questions
 ) {
 
@@ -22,13 +23,16 @@ public record AssessmentAttemptDetailsResponse(
             UUID id,
             String title,
             String description,
-            Long evaluationTimerMinutes
+            Long evaluationTimerMinutes,
+            AssessmentCriteriaWeightsResponse criteriaWeights,
+            JobDescriptionAnalysisResponse jobDescriptionAnalysis
     ) {}
 
     public record AttemptQuestionDetailsResponse(
             UUID id,
             String title,
             String description,
+            String guideline,
             List<AlternativeResponse> alternatives,
             AnswerResponse answer
     ) {}
@@ -41,6 +45,7 @@ public record AssessmentAttemptDetailsResponse(
     public record AnswerResponse(
             UUID questionId,
             UUID selectedAlternativeId,
-            String projectUrl
+            String projectUrl,
+            String textResponse
     ) {}
 }

@@ -35,5 +35,8 @@ public class AnswerEntity {
 
     @Column(length = 500)
     private String projectUrl;
+
+    @Column(length = 4000)
+    private String textResponse;
 }
 

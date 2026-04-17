@@ -52,4 +52,9 @@ public class MultipleChoiceQuestion extends Question {
         this.alternatives = List.copyOf(alternatives);
     }
 
+    @Override
+    public QuestionType getQuestionType() {
+        return QuestionType.MULTIPLE_CHOICE;
+    }
+
 }

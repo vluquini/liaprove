@@ -5,7 +5,10 @@ import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
 import com.lia.liaprove.application.services.assessment.dto.SuggestionCriteriaDto;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
+import com.lia.liaprove.core.domain.question.OpenQuestion;
+import com.lia.liaprove.core.domain.question.OpenQuestionVisibility;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
+import com.lia.liaprove.core.domain.question.QuestionType;
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
@@ -57,6 +60,11 @@ public class SuggestQuestionsForAssessmentUseCaseImpl implements SuggestQuestion
         // 3. Aplicar filtros
         Stream<ScoredQuestion> filteredStream = allSuggestions.stream();
 
+        if (criteria.getQuestionTypes().isPresent()) {
+            Set<QuestionType> questionTypes = criteria.getQuestionTypes().get();
+            filteredStream = filteredStream.filter(sq -> questionTypes.contains(sq.getQuestion().getQuestionType()));
+        }
+
         // Filtrar por Área de Conhecimento
         if (criteria.getKnowledgeAreas().isPresent()) {
             Set<KnowledgeArea> knowledgeAreas = criteria.getKnowledgeAreas().get();
@@ -73,6 +81,9 @@ public class SuggestQuestionsForAssessmentUseCaseImpl implements SuggestQuestion
 
         // Filtrar apenas questões FINALIZADAS (aprovadas e prontas para uso)
         filteredStream = filteredStream.filter(sq -> sq.getQuestion().getStatus() == QuestionStatus.FINISHED);
+
+        // Open questions ficam visíveis apenas para o próprio autor ou quando marcadas como SHARED.
+        filteredStream = filteredStream.filter(sq -> isVisibleForRecruiter(sq.getQuestion(), recruiterId));
 
         // Filtrar IDs excluídos
         if (criteria.getExcludeIds() != null && !criteria.getExcludeIds().isEmpty()) {
@@ -92,5 +103,17 @@ public class SuggestQuestionsForAssessmentUseCaseImpl implements SuggestQuestion
                 .skip(skip)
                 .limit(criteria.getPageSize())
                 .collect(Collectors.toList());
+    }
+
+    private boolean isVisibleForRecruiter(com.lia.liaprove.core.domain.question.Question question, UUID recruiterId) {
+        if (!(question instanceof OpenQuestion openQuestion)) {
+            return true;
+        }
+
+        if (Objects.equals(question.getAuthorId(), recruiterId)) {
+            return true;
+        }
+
+        return openQuestion.getVisibility() == OpenQuestionVisibility.SHARED;
     }
 }

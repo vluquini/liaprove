@@ -50,6 +50,17 @@ public class DefaultQuestionFactory implements QuestionFactory {
         return question;
     }
 
+    @Override
+    public Question createOpenQuestion(QuestionCreateDto dto) {
+        QuestionValidator.validate(dto);
+
+        OpenQuestion question = new OpenQuestion(dto.guideline(), dto.visibility());
+
+        initCommonFields(question, dto);
+
+        return question;
+    }
+
     /**
      * <p>Valida as alternativas de uma questão de múltipla escolha.</p>
      *

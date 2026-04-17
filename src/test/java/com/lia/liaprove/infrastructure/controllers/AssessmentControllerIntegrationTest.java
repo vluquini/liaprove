@@ -7,9 +7,13 @@ import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
+import com.lia.liaprove.core.domain.question.OpenQuestionVisibility;
+import com.lia.liaprove.core.domain.question.QuestionStatus;
+import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.infrastructure.dtos.assessment.*;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
+import com.lia.liaprove.infrastructure.entities.question.OpenQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserRecruiterEntity;
@@ -28,11 +32,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -223,6 +230,74 @@ public class AssessmentControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Should propagate text response when submitting personalized assessment with open question")
+    @Transactional
+    void shouldPropagateTextResponseWhenSubmittingPersonalizedAssessmentWithOpenQuestion() throws Exception {
+        UserEntity user = getSeededUserEntity("carlos.silva@example.com");
+        UserRecruiterEntity recruiter = (UserRecruiterEntity) userJpaRepository.findById(RECRUITER_ID).orElseThrow();
+
+        OpenQuestionEntity openQuestion = new OpenQuestionEntity();
+        openQuestion.setAuthorId(recruiter.getId());
+        openQuestion.setTitle("Explain the trade-offs of event-driven architecture");
+        openQuestion.setDescription("Describe when to use event-driven architecture in backend systems.");
+        openQuestion.setKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
+        openQuestion.setDifficultyByCommunity(DifficultyLevel.MEDIUM);
+        openQuestion.setRelevanceByCommunity(RelevanceLevel.THREE);
+        openQuestion.setRelevanceByLLM(RelevanceLevel.THREE);
+        openQuestion.setSubmissionDate(LocalDateTime.now());
+        openQuestion.setVotingEndDate(LocalDateTime.now().plusDays(7));
+        openQuestion.setStatus(QuestionStatus.FINISHED);
+        openQuestion.setRecruiterUsageCount(0);
+        openQuestion.setGuideline("Mention decoupling, asynchronous communication and operational trade-offs.");
+        openQuestion.setVisibility(OpenQuestionVisibility.SHARED);
+        openQuestion = (OpenQuestionEntity) questionJpaRepository.save(openQuestion);
+
+        PersonalizedAssessmentEntity assessment = new PersonalizedAssessmentEntity();
+        assessment.setTitle("Open Question Assessment");
+        assessment.setDescription("Assessment that includes an open question.");
+        assessment.setCreationDate(LocalDateTime.now());
+        assessment.setCreatedBy(recruiter);
+        assessment.setShareableToken("token-open-question-" + UUID.randomUUID());
+        assessment.setStatus(PersonalizedAssessmentStatus.ACTIVE);
+        assessment.setMaxAttempts(2);
+        assessment.setEvaluationTimerSeconds(1800L);
+        assessment.setQuestions(List.of(openQuestion));
+        assessment = assessmentJpaRepository.save(assessment);
+
+        MvcResult startResult = mockMvc.perform(post("/api/v1/assessments/start-personalized/" + assessment.getShareableToken())
+                        .header("X-Dev-User-Email", user.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String attemptId = JsonPath.read(startResult.getResponse().getContentAsString(), "$.attemptId");
+
+        SubmitAssessmentRequest submitRequest = new SubmitAssessmentRequest(
+                List.of(new SubmitAssessmentRequest.QuestionAnswerRequest(
+                        openQuestion.getId(),
+                        null,
+                        null,
+                        "The main trade-offs are more operational complexity and weaker synchronous request flows."
+                ))
+        );
+
+        mockMvc.perform(post("/api/v1/assessments/" + attemptId + "/submit")
+                        .header("X-Dev-User-Email", user.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(submitRequest)))
+                .andExpect(status().isOk());
+
+        AssessmentAttemptEntity savedAttempt = assessmentAttemptJpaRepository.findById(UUID.fromString(attemptId))
+                .orElseThrow();
+
+        assertThat(savedAttempt.getAnswers()).hasSize(1);
+        assertThat(savedAttempt.getAnswers().get(0).getSelectedAlternativeId()).isNull();
+        assertThat(savedAttempt.getAnswers().get(0).getProjectUrl()).isNull();
+        assertThat(savedAttempt.getAnswers().get(0).getTextResponse())
+                .isEqualTo("The main trade-offs are more operational complexity and weaker synchronous request flows.");
+    }
+
+    @Test
     @DisplayName("Should submit system project assessment and keep status as COMPLETED")
     void shouldKeepCompletedStatusWhenSubmittingSystemProjectAssessment() throws Exception {
         UserEntity user = getSeededUserEntity("carlos.silva@example.com");
@@ -407,6 +482,71 @@ public class AssessmentControllerIntegrationTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    @DisplayName("Should count answered questions once per unique question in attempt details")
+    void shouldCountAnsweredQuestionsOncePerUniqueQuestionInAttemptDetails() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+        UserEntity candidate = getSeededUserEntity("carlos.silva@example.com");
+        String questionSuffix = UUID.randomUUID().toString();
+
+        OpenQuestionEntity openQuestion = new OpenQuestionEntity();
+        openQuestion.setAuthorId(recruiter.getId());
+        openQuestion.setTitle("Explain your architectural choice " + questionSuffix);
+        openQuestion.setDescription("Describe the tradeoffs considered in your solution. " + questionSuffix);
+        openQuestion.setKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
+        openQuestion.setDifficultyByCommunity(DifficultyLevel.MEDIUM);
+        openQuestion.setRelevanceByCommunity(RelevanceLevel.THREE);
+        openQuestion.setRelevanceByLLM(RelevanceLevel.THREE);
+        openQuestion.setSubmissionDate(LocalDateTime.now());
+        openQuestion.setVotingEndDate(LocalDateTime.now().plusDays(7));
+        openQuestion.setStatus(QuestionStatus.FINISHED);
+        openQuestion.setRecruiterUsageCount(0);
+        openQuestion.setGuideline("Describe the technical decision and the tradeoffs involved.");
+        openQuestion.setVisibility(OpenQuestionVisibility.SHARED);
+        openQuestion = (OpenQuestionEntity) questionJpaRepository.save(openQuestion);
+
+        PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter);
+        assessment.setQuestions(List.of(openQuestion));
+        assessment.setHardSkillsWeight(50);
+        assessment.setSoftSkillsWeight(30);
+        assessment.setExperienceWeight(20);
+        assessment.setOriginalJobDescription("Senior backend engineer with strong Java and communication skills.");
+        assessment.setSuggestedKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT, KnowledgeArea.AI));
+        assessment.setSuggestedHardSkills(List.of("Java", "Spring Boot"));
+        assessment.setSuggestedSoftSkills(List.of("Communication", "Teamwork"));
+        assessment.setSuggestedHardSkillsWeight(45);
+        assessment.setSuggestedSoftSkillsWeight(35);
+        assessment.setSuggestedExperienceWeight(20);
+        assessment = assessmentJpaRepository.save(assessment);
+
+        AssessmentAttemptEntity attempt = new AssessmentAttemptEntity();
+        attempt.setAssessment(assessment);
+        attempt.setUser(candidate);
+        attempt.setStartedAt(LocalDateTime.now());
+        attempt.setFinishedAt(LocalDateTime.now());
+        attempt.setStatus(AssessmentAttemptStatus.COMPLETED);
+        attempt.setQuestions(List.of(openQuestion));
+
+        com.lia.liaprove.infrastructure.entities.assessment.AnswerEntity firstAnswer =
+                new com.lia.liaprove.infrastructure.entities.assessment.AnswerEntity();
+        firstAnswer.setQuestionId(openQuestion.getId());
+        firstAnswer.setTextResponse("First answer");
+        attempt.addAnswer(firstAnswer);
+
+        com.lia.liaprove.infrastructure.entities.assessment.AnswerEntity duplicateAnswer =
+                new com.lia.liaprove.infrastructure.entities.assessment.AnswerEntity();
+        duplicateAnswer.setQuestionId(openQuestion.getId());
+        duplicateAnswer.setTextResponse("Duplicate answer");
+        attempt.addAnswer(duplicateAnswer);
+
+        attempt = assessmentAttemptJpaRepository.save(attempt);
+
+        mockMvc.perform(get("/api/v1/assessments/attempts/" + attempt.getId())
+                        .header("X-Dev-User-Email", recruiter.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.explainability.answeredQuestions").value(1));
+    }
+
 
     // ==========================
     // GET /api/v1/assessments/personalized/suggestions
@@ -421,6 +561,7 @@ public class AssessmentControllerIntegrationTest {
                         .header("X-Dev-User-Email", recruiter.getEmail())
                         .param("knowledgeAreas", "SOFTWARE_DEVELOPMENT")
                         .param("difficultyLevels", "MEDIUM")
+                        .param("questionTypes", "OPEN")
                         .param("pageSize", "5"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content").isArray());
@@ -522,6 +663,17 @@ public class AssessmentControllerIntegrationTest {
         UserEntity candidate = getSeededUserEntity("carlos.silva@example.com");
 
         PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter);
+        assessment.setHardSkillsWeight(55);
+        assessment.setSoftSkillsWeight(25);
+        assessment.setExperienceWeight(20);
+        assessment.setOriginalJobDescription("Backend engineer focused on Java, architecture and communication.");
+        assessment.setSuggestedKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
+        assessment.setSuggestedHardSkills(List.of("Java", "Spring Boot"));
+        assessment.setSuggestedSoftSkills(List.of("Communication"));
+        assessment.setSuggestedHardSkillsWeight(50);
+        assessment.setSuggestedSoftSkillsWeight(30);
+        assessment.setSuggestedExperienceWeight(20);
+        assessment = assessmentJpaRepository.save(assessment);
 
         AssessmentAttemptEntity attempt = new AssessmentAttemptEntity();
         attempt.setAssessment(assessment);
@@ -533,7 +685,15 @@ public class AssessmentControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/assessments/personalized/" + assessment.getId() + "/attempts")
                         .header("X-Dev-User-Email", recruiter.getEmail()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$").isArray());
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$[0].assessment.criteriaWeights.hardSkillsWeight").value(55))
+                .andExpect(jsonPath("$[0].assessment.criteriaWeights.softSkillsWeight").value(25))
+                .andExpect(jsonPath("$[0].assessment.criteriaWeights.experienceWeight").value(20))
+                .andExpect(jsonPath("$[0].assessment.jobDescriptionAnalysis.originalJobDescription")
+                        .value("Backend engineer focused on Java, architecture and communication."))
+                .andExpect(jsonPath("$[0].assessment.jobDescriptionAnalysis.suggestedHardSkills[0]").value("Java"))
+                .andExpect(jsonPath("$[0].assessment.jobDescriptionAnalysis.suggestedCriteriaWeights.hardSkillsWeight")
+                        .value(50));
     }
 
 
@@ -561,6 +721,82 @@ public class AssessmentControllerIntegrationTest {
                         .header("X-Dev-User-Email", recruiter.getEmail()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.attemptId").value(attempt.getId().toString()));
+    }
+
+    @Test
+    @DisplayName("Should return text response in attempt details when personalized assessment contains open question")
+    void shouldReturnTextResponseInAttemptDetailsWhenPersonalizedAssessmentContainsOpenQuestion() throws Exception {
+        UserEntity recruiter = getSeededUserEntity("ana.p@techrecruit.com");
+        UserEntity candidate = getSeededUserEntity("carlos.silva@example.com");
+
+        OpenQuestionEntity openQuestion = new OpenQuestionEntity();
+        openQuestion.setAuthorId(recruiter.getId());
+        openQuestion.setTitle("Explain your architectural choice");
+        openQuestion.setDescription("Describe the tradeoffs considered in your solution.");
+        openQuestion.setKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT));
+        openQuestion.setDifficultyByCommunity(DifficultyLevel.MEDIUM);
+        openQuestion.setRelevanceByCommunity(RelevanceLevel.THREE);
+        openQuestion.setRelevanceByLLM(RelevanceLevel.THREE);
+        openQuestion.setSubmissionDate(LocalDateTime.now());
+        openQuestion.setVotingEndDate(LocalDateTime.now().plusDays(7));
+        openQuestion.setStatus(QuestionStatus.FINISHED);
+        openQuestion.setRecruiterUsageCount(0);
+        openQuestion.setGuideline("Describe the technical decision and the tradeoffs involved.");
+        openQuestion.setVisibility(OpenQuestionVisibility.SHARED);
+        openQuestion = (OpenQuestionEntity) questionJpaRepository.save(openQuestion);
+
+        PersonalizedAssessmentEntity assessment = createTestAssessment(recruiter);
+        assessment.setQuestions(List.of(openQuestion));
+        assessment.setHardSkillsWeight(50);
+        assessment.setSoftSkillsWeight(30);
+        assessment.setExperienceWeight(20);
+        assessment.setOriginalJobDescription("Senior backend engineer with strong Java and communication skills.");
+        assessment.setSuggestedKnowledgeAreas(Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT, KnowledgeArea.AI));
+        assessment.setSuggestedHardSkills(List.of("Java", "Spring Boot"));
+        assessment.setSuggestedSoftSkills(List.of("Communication", "Teamwork"));
+        assessment.setSuggestedHardSkillsWeight(45);
+        assessment.setSuggestedSoftSkillsWeight(35);
+        assessment.setSuggestedExperienceWeight(20);
+        assessment = assessmentJpaRepository.save(assessment);
+
+        AssessmentAttemptEntity attempt = new AssessmentAttemptEntity();
+        attempt.setAssessment(assessment);
+        attempt.setUser(candidate);
+        attempt.setStartedAt(LocalDateTime.now());
+        attempt.setFinishedAt(LocalDateTime.now());
+        attempt.setStatus(AssessmentAttemptStatus.COMPLETED);
+        attempt.setQuestions(List.of(openQuestion));
+        com.lia.liaprove.infrastructure.entities.assessment.AnswerEntity answer =
+                new com.lia.liaprove.infrastructure.entities.assessment.AnswerEntity();
+        answer.setQuestionId(openQuestion.getId());
+        answer.setTextResponse("I prioritized maintainability over premature optimization.");
+        attempt.addAnswer(answer);
+
+        attempt = assessmentAttemptJpaRepository.save(attempt);
+
+        mockMvc.perform(get("/api/v1/assessments/attempts/" + attempt.getId())
+                        .header("X-Dev-User-Email", recruiter.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.assessment.criteriaWeights.hardSkillsWeight").value(50))
+                .andExpect(jsonPath("$.assessment.criteriaWeights.softSkillsWeight").value(30))
+                .andExpect(jsonPath("$.assessment.criteriaWeights.experienceWeight").value(20))
+                .andExpect(jsonPath("$.assessment.jobDescriptionAnalysis.originalJobDescription")
+                        .value("Senior backend engineer with strong Java and communication skills."))
+                .andExpect(jsonPath("$.assessment.jobDescriptionAnalysis.suggestedHardSkills[0]").value("Java"))
+                .andExpect(jsonPath("$.assessment.jobDescriptionAnalysis.suggestedCriteriaWeights.hardSkillsWeight").value(45))
+                .andExpect(jsonPath("$.explainability.totalQuestions").value(1))
+                .andExpect(jsonPath("$.explainability.answeredQuestions").value(1))
+                .andExpect(jsonPath("$.explainability.openQuestions").value(1))
+                .andExpect(jsonPath("$.explainability.multipleChoiceQuestions").value(0))
+                .andExpect(jsonPath("$.explainability.projectQuestions").value(0))
+                .andExpect(jsonPath("$.explainability.candidateExperienceLevel").value("SENIOR"))
+                .andExpect(jsonPath("$.explainability.candidateHardSkills").isArray())
+                .andExpect(jsonPath("$.explainability.criteriaWeights.hardSkillsWeight").value(50))
+                .andExpect(jsonPath("$.questions[0].guideline")
+                        .value("Describe the technical decision and the tradeoffs involved."))
+                .andExpect(jsonPath("$.questions[0].answer.questionId").value(openQuestion.getId().toString()))
+                .andExpect(jsonPath("$.questions[0].answer.textResponse")
+                        .value("I prioritized maintainability over premature optimization."));
     }
 
 
@@ -592,7 +828,14 @@ public class AssessmentControllerIntegrationTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value("APPROVED"));
+                .andExpect(jsonPath("$.attemptId").value(attempt.getId().toString()))
+                .andExpect(jsonPath("$.status").value("APPROVED"))
+                .andExpect(jsonPath("$.assessment.id").value(assessment.getId().toString()))
+                .andExpect(jsonPath("$.assessment.personalized").value(true))
+                .andExpect(jsonPath("$.candidate.id").value(candidate.getId().toString()))
+                .andExpect(jsonPath("$.explainability.totalQuestions").value(0))
+                .andExpect(jsonPath("$.explainability.answeredQuestions").value(0))
+                .andExpect(jsonPath("$.explainability.candidateExperienceLevel").value("SENIOR"));
     }
 
 

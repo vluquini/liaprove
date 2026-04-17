@@ -9,6 +9,7 @@ public class Answer {
     private final UUID questionId;
     private UUID selectedAlternativeId; // Para questões de múltipla escolha
     private String projectUrl;          // Para mini-projetos
+    private String textResponse;        // Para questões abertas
 
     public Answer(UUID questionId) {
         this.questionId = questionId;
@@ -26,11 +27,19 @@ public class Answer {
         return projectUrl;
     }
 
+    public String getTextResponse() {
+        return textResponse;
+    }
+
     public void setSelectedAlternativeId(UUID selectedAlternativeId) {
         this.selectedAlternativeId = selectedAlternativeId;
     }
 
     public void setProjectUrl(String projectUrl) {
         this.projectUrl = projectUrl;
+    }
+
+    public void setTextResponse(String textResponse) {
+        this.textResponse = textResponse;
     }
 }
