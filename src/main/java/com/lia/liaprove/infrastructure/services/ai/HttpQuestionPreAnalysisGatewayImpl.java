@@ -59,28 +59,8 @@ public class HttpQuestionPreAnalysisGatewayImpl
     private final String appTitle;
     private final String preAnalysisSystemPrompt;
     private final String submissionPreparationSystemPrompt;
-    private static final String ATTEMPT_PRE_ANALYSIS_SYSTEM_PROMPT = """
-            Você está auxiliando uma pré-análise de uma tentativa.
-            Esta pré-análise é auxiliar e não decide contratação ou reprovação.
-            Não deve recomendar contratação ou reprovação.
-            Ignore mini-projeto completamente.
-            Considere apenas questões de múltipla escolha e abertas fornecidas no JSON.
-            Retorne apenas JSON válido, sem markdown, sem blocos de código e sem texto extra.
-            O JSON deve conter:
-            - summary: string
-            - strengths: array de strings
-            - attentionPoints: array de strings
-            - finalExplanation: string
-            """;
-    private static final String JOB_DESCRIPTION_ANALYSIS_SYSTEM_PROMPT = """
-            You analyze IT job descriptions and return only valid JSON.
-            Extract:
-            - originalJobDescription
-            - suggestedKnowledgeAreas using only enum names from this set: SOFTWARE_DEVELOPMENT, DATABASE, CYBERSECURITY, NETWORKS, AI
-            - suggestedHardSkills as a short list
-            - suggestedSoftSkills as a short list
-            - suggestedHardSkillsWeight, suggestedSoftSkillsWeight, suggestedExperienceWeight as integers that should sum to 100 when possible
-            """;
+    private final String attemptPreAnalysisSystemPrompt;
+    private final String jobDescriptionAnalysisSystemPrompt;
 
     public HttpQuestionPreAnalysisGatewayImpl(
             ObjectMapper objectMapper,
@@ -94,7 +74,9 @@ public class HttpQuestionPreAnalysisGatewayImpl
             @Value("${ai.http.referer:}") String referer,
             @Value("${ai.http.title:}") String appTitle,
             @Value("${ai.http.pre-analysis-system-prompt:}") String preAnalysisSystemPrompt,
-            @Value("${ai.http.submission-preparation-system-prompt:}") String submissionPreparationSystemPrompt) {
+            @Value("${ai.http.submission-preparation-system-prompt:}") String submissionPreparationSystemPrompt,
+            @Value("${ai.http.attempt-pre-analysis-system-prompt:}") String attemptPreAnalysisSystemPrompt,
+            @Value("${ai.http.job-description-analysis-system-prompt:}") String jobDescriptionAnalysisSystemPrompt) {
 
         this.objectMapper = objectMapper;
         this.apiKey = apiKey;
@@ -104,6 +86,8 @@ public class HttpQuestionPreAnalysisGatewayImpl
         this.appTitle = appTitle;
         this.preAnalysisSystemPrompt = preAnalysisSystemPrompt;
         this.submissionPreparationSystemPrompt = submissionPreparationSystemPrompt;
+        this.attemptPreAnalysisSystemPrompt = attemptPreAnalysisSystemPrompt;
+        this.jobDescriptionAnalysisSystemPrompt = jobDescriptionAnalysisSystemPrompt;
 
         SimpleClientHttpRequestFactory requestFactory = new SimpleClientHttpRequestFactory();
         requestFactory.setConnectTimeout(connectTimeoutMs);
@@ -124,7 +108,7 @@ public class HttpQuestionPreAnalysisGatewayImpl
         try {
             String userPrompt = buildAttemptPreAnalysisUserPrompt(context);
             List<ProviderChatRequest.Message> messages = List.of(
-                    new ProviderChatRequest.Message("system", ATTEMPT_PRE_ANALYSIS_SYSTEM_PROMPT),
+                    new ProviderChatRequest.Message("system", attemptPreAnalysisSystemPrompt),
                     new ProviderChatRequest.Message("user", userPrompt)
             );
 
@@ -224,7 +208,7 @@ public class HttpQuestionPreAnalysisGatewayImpl
         try {
             String userPrompt = objectMapper.writeValueAsString(new JobDescriptionAnalysisInput(jobDescription));
             List<ProviderChatRequest.Message> messages = List.of(
-                    new ProviderChatRequest.Message("system", JOB_DESCRIPTION_ANALYSIS_SYSTEM_PROMPT),
+                    new ProviderChatRequest.Message("system", jobDescriptionAnalysisSystemPrompt),
                     new ProviderChatRequest.Message("user", userPrompt)
             );
 
