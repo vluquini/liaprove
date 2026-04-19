@@ -7,6 +7,7 @@ import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.OpenQuestion;
 import com.lia.liaprove.core.domain.question.OpenQuestionVisibility;
+import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.question.QuestionType;
 import com.lia.liaprove.core.domain.user.User;
@@ -105,7 +106,7 @@ public class SuggestQuestionsForAssessmentUseCaseImpl implements SuggestQuestion
                 .collect(Collectors.toList());
     }
 
-    private boolean isVisibleForRecruiter(com.lia.liaprove.core.domain.question.Question question, UUID recruiterId) {
+    private boolean isVisibleForRecruiter(Question question, UUID recruiterId) {
         if (!(question instanceof OpenQuestion openQuestion)) {
             return true;
         }

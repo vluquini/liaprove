@@ -97,9 +97,9 @@ public class UserProfessional extends User{
     public boolean isEligibleForAssessment(Assessment assessment) {
         if (assessment == null) return false;
         // exemplo simples: se o usuário está registrado há pelo menos 1 minuto (evita bots)
-        java.time.LocalDateTime reg = this.getRegistrationDate();
+        LocalDateTime reg = this.getRegistrationDate();
         if (reg == null) return true; // sem registro, devolve true (fallback)
-        return reg.isBefore(java.time.LocalDateTime.now().minusMinutes(1));
+        return reg.isBefore(LocalDateTime.now().minusMinutes(1));
     }
 
     private List<String> normalizeSkills(List<String> skills) {

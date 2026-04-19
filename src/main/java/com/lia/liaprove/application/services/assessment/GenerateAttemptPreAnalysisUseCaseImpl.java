@@ -35,13 +35,14 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class GenerateAttemptPreAnalysisUseCaseImpl implements GenerateAttemptPreAnalysisUseCase {
 
     private final AssessmentAttemptGateway attemptGateway;
     private final UserGateway userGateway;
     private final AttemptPreAnalysisGateway attemptPreAnalysisGateway;
-    private final Set<UUID> inProgressAttemptIds = java.util.concurrent.ConcurrentHashMap.newKeySet();
+    private final Set<UUID> inProgressAttemptIds = ConcurrentHashMap.newKeySet();
 
     public GenerateAttemptPreAnalysisUseCaseImpl(
             AssessmentAttemptGateway attemptGateway,

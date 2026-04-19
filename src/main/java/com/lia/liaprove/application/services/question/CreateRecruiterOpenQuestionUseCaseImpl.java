@@ -9,6 +9,7 @@ import com.lia.liaprove.core.usecases.question.QuestionFactory;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Cria perguntas abertas para recrutadores usando o pipeline de persistência já existente.
@@ -24,7 +25,7 @@ public class CreateRecruiterOpenQuestionUseCaseImpl implements CreateRecruiterOp
     }
 
     @Override
-    public Question create(java.util.UUID authorId, OpenQuestionCommand command) {
+    public Question create(UUID authorId, OpenQuestionCommand command) {
         Objects.requireNonNull(authorId, "authorId must not be null");
         Objects.requireNonNull(command, "command must not be null");
 

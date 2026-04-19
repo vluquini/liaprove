@@ -33,6 +33,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -295,9 +296,9 @@ public class AssessmentController {
         Assessment updated = updatePersonalizedAssessmentUseCase.execute(
                 assessmentId,
                 requesterId,
-                java.util.Optional.ofNullable(request.expirationDate()),
-                java.util.Optional.ofNullable(request.maxAttempts()),
-                java.util.Optional.ofNullable(request.status()),
+                Optional.ofNullable(request.expirationDate()),
+                Optional.ofNullable(request.maxAttempts()),
+                Optional.ofNullable(request.status()),
                 resolveOptionalCriteriaWeights(
                         request.hardSkillsWeight(),
                         request.softSkillsWeight(),
@@ -326,16 +327,16 @@ public class AssessmentController {
         );
     }
 
-    private java.util.Optional<AssessmentCriteriaWeights> resolveOptionalCriteriaWeights(
+    private Optional<AssessmentCriteriaWeights> resolveOptionalCriteriaWeights(
             Integer hardSkillsWeight,
             Integer softSkillsWeight,
             Integer experienceWeight
     ) {
         if (hardSkillsWeight == null && softSkillsWeight == null && experienceWeight == null) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
 
-        return java.util.Optional.of(resolveCriteriaWeights(hardSkillsWeight, softSkillsWeight, experienceWeight));
+        return Optional.of(resolveCriteriaWeights(hardSkillsWeight, softSkillsWeight, experienceWeight));
     }
 
     private int requireWeight(Integer value, String fieldName) {
@@ -345,14 +346,14 @@ public class AssessmentController {
         return value;
     }
 
-    private java.util.Optional<JobDescriptionAnalysis> mapOptionalJobDescriptionAnalysis(
+    private Optional<JobDescriptionAnalysis> mapOptionalJobDescriptionAnalysis(
             CreatePersonalizedAssessmentRequest.JobDescriptionAnalysisSnapshotRequest snapshot
     ) {
         if (snapshot == null) {
-            return java.util.Optional.empty();
+            return Optional.empty();
         }
 
-        return java.util.Optional.of(new JobDescriptionAnalysis(
+        return Optional.of(new JobDescriptionAnalysis(
                 snapshot.originalJobDescription(),
                 snapshot.suggestedKnowledgeAreas(),
                 snapshot.suggestedHardSkills(),
