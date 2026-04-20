@@ -187,7 +187,9 @@ class HttpQuestionPreAnalysisGatewayImplTest {
                     "",
                     "",
                     "Question pre-analysis prompt",
-                    "Submission preparation prompt"
+                    "Submission preparation prompt",
+                    "Attempt pre-analysis prompt",
+                    "Job description analysis prompt"
             );
 
             AttemptPreAnalysis.Analysis analysis = gateway.generate(context);

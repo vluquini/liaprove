@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.controllers;
+package com.lia.liaprove.infrastructure.controllers.assessment;
 
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.application.services.assessment.dto.SuggestionCriteriaDto;
@@ -13,6 +13,7 @@ import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SubmitAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SuggestQuestionsForAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.UpdatePersonalizedAssessmentUseCase;
+import com.lia.liaprove.infrastructure.controllers.AssessmentController;
 import com.lia.liaprove.infrastructure.mappers.assessment.AssessmentDtoMapper;
 import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import com.lia.liaprove.infrastructure.security.JwtService;
