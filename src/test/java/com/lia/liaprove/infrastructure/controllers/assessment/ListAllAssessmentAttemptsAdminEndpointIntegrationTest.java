@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
         "classpath:db/h2-populate-users.sql",
         "classpath:db/h2-populate-questions.sql"
 }, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
-public class AdminAssessmentControllerIntegrationTest {
+class ListAllAssessmentAttemptsAdminEndpointIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;

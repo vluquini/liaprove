@@ -4,9 +4,11 @@ import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.application.services.assessment.dto.SuggestionCriteriaDto;
 import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
 import com.lia.liaprove.core.domain.question.QuestionType;
+import com.lia.liaprove.core.usecases.assessments.AnalyzeJobDescriptionUseCase;
 import com.lia.liaprove.core.usecases.assessments.CreatePersonalizedAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.DeletePersonalizedAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.EvaluateAssessmentAttemptUseCase;
+import com.lia.liaprove.core.usecases.assessments.GenerateAttemptPreAnalysisUseCase;
 import com.lia.liaprove.core.usecases.assessments.GetAssessmentAttemptDetailsUseCase;
 import com.lia.liaprove.core.usecases.assessments.ListAttemptsForMyAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
@@ -15,6 +17,8 @@ import com.lia.liaprove.core.usecases.assessments.SuggestQuestionsForAssessmentU
 import com.lia.liaprove.core.usecases.assessments.UpdatePersonalizedAssessmentUseCase;
 import com.lia.liaprove.infrastructure.controllers.AssessmentController;
 import com.lia.liaprove.infrastructure.mappers.assessment.AssessmentDtoMapper;
+import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
+import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
 import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import com.lia.liaprove.infrastructure.security.JwtService;
 import org.junit.jupiter.api.Test;
@@ -66,16 +70,28 @@ class AssessmentControllerSuggestionWebMvcTest {
     private GetAssessmentAttemptDetailsUseCase getAssessmentAttemptDetailsUseCase;
 
     @MockitoBean
+    private GenerateAttemptPreAnalysisUseCase generateAttemptPreAnalysisUseCase;
+
+    @MockitoBean
     private ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase;
 
     @MockitoBean
     private UpdatePersonalizedAssessmentUseCase updatePersonalizedAssessmentUseCase;
 
     @MockitoBean
+    private AnalyzeJobDescriptionUseCase analyzeJobDescriptionUseCase;
+
+    @MockitoBean
     private SecurityContextService securityContextService;
 
     @MockitoBean
     private JwtService jwtService;
+
+    @MockitoBean
+    private UserJpaRepository userJpaRepository;
+
+    @MockitoBean
+    private UserMapper userMapper;
 
     @MockitoBean
     private AssessmentDtoMapper assessmentDtoMapper;
