@@ -7,16 +7,21 @@ import com.lia.liaprove.core.domain.assessment.AssessmentCriteriaWeights;
 import com.lia.liaprove.core.domain.assessment.AttemptPreAnalysis;
 import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.question.Alternative;
+import com.lia.liaprove.core.domain.question.DifficultyLevel;
+import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
 import com.lia.liaprove.core.domain.question.OpenQuestion;
 import com.lia.liaprove.core.domain.question.QuestionType;
+import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.UserProfessional;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.domain.user.UserStatus;
+import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
 import com.lia.liaprove.infrastructure.dtos.ai.LlmAttemptPreAnalysisOutput;
 import com.lia.liaprove.infrastructure.dtos.ai.LlmJobDescriptionAnalysisOutput;
+import com.lia.liaprove.infrastructure.dtos.ai.LlmPreAnalysisOutput;
 import com.lia.liaprove.infrastructure.dtos.ai.ProviderChatRequest;
 import com.lia.liaprove.infrastructure.dtos.ai.ProviderChatResponse;
 import org.junit.jupiter.api.Test;
@@ -31,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -38,6 +44,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class HttpQuestionPreAnalysisGatewayImplTest {
+
+    private static final String TEST_MODEL = "gpt-test";
+    private static final String QUESTION_PRE_ANALYSIS_SYSTEM_PROMPT = "Question pre-analysis prompt";
+    private static final String ATTEMPT_PRE_ANALYSIS_SYSTEM_PROMPT = "Attempt pre-analysis prompt";
 
     @Test
     void shouldFallbackToDefaultWeightsWhenProviderReturnsInvalidTotal() throws Exception {
@@ -164,6 +174,34 @@ class HttpQuestionPreAnalysisGatewayImplTest {
                 .hasMessageContaining("missing attempt summary");
     }
 
+    @Test
+    void shouldSanitizeFencedJsonResponseBeforeParsingQuestionPreAnalysis() throws Exception {
+        PreAnalyzeQuestionUseCase.PreAnalysisCommand command = new PreAnalyzeQuestionUseCase.PreAnalysisCommand(
+                "Controle de Versao",
+                "Qual alternativa descreve controle de versao?",
+                Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT),
+                DifficultyLevel.HARD,
+                RelevanceLevel.FIVE,
+                List.of("Sistema que registra alteracoes", "Compilador", "Garantia contra bugs")
+        );
+        String llmJson = new ObjectMapper().writeValueAsString(new LlmPreAnalysisOutput(
+                List.of("Ajustar acentuacao do titulo."),
+                List.of("Evitar alternativa absoluta."),
+                List.of("Adicionar distrator sobre historico de releases."),
+                "MEDIUM",
+                List.of("Tema coerente com desenvolvimento de software.")
+        ));
+        String llmContent = "```json\n" + llmJson + "\n```";
+
+        PreAnalyzeQuestionUseCase.PreAnalysisResult result = executeQuestionPreAnalysisGateway(command, llmContent);
+
+        assertThat(result.languageSuggestions()).containsExactly("Ajustar acentuacao do titulo.");
+        assertThat(result.biasOrAmbiguityWarnings()).containsExactly("Evitar alternativa absoluta.");
+        assertThat(result.distractorSuggestions()).containsExactly("Adicionar distrator sobre historico de releases.");
+        assertThat(result.difficultyLevelByLLM()).isEqualTo("MEDIUM");
+        assertThat(result.topicConsistencyNotes()).containsExactly("Tema coerente com desenvolvimento de software.");
+    }
+
     private AttemptPreAnalysis.Analysis executeGateway(
             AttemptPreAnalysisContext context,
             String llmContent,
@@ -180,15 +218,15 @@ class HttpQuestionPreAnalysisGatewayImplTest {
                     "http://localhost:" + server.getAddress().getPort(),
                     "/chat/completions",
                     "test-api-key",
-                    "gpt-test",
+                    TEST_MODEL,
                     "",
                     1000,
                     1000,
                     "",
                     "",
-                    "Question pre-analysis prompt",
+                    QUESTION_PRE_ANALYSIS_SYSTEM_PROMPT,
                     "Submission preparation prompt",
-                    "Attempt pre-analysis prompt",
+                    ATTEMPT_PRE_ANALYSIS_SYSTEM_PROMPT,
                     "Job description analysis prompt"
             );
 
@@ -197,14 +235,57 @@ class HttpQuestionPreAnalysisGatewayImplTest {
             String requestBody = capturedRequestBody.get();
             assertThat(requestBody).isNotBlank();
             ProviderChatRequest request = objectMapper.readValue(requestBody, ProviderChatRequest.class);
-            assertThat(request.model()).isEqualTo("gpt-test");
+            assertThat(request.model()).isEqualTo(TEST_MODEL);
             assertThat(request.messages()).hasSize(2);
-            assertThat(request.messages().get(0).content()).contains("auxiliar");
+            assertThat(request.messages().get(0).content()).isEqualTo(ATTEMPT_PRE_ANALYSIS_SYSTEM_PROMPT);
             assertThat(request.messages().get(1).content()).contains("attemptId");
 
             JsonNode payload = objectMapper.readTree(request.messages().get(1).content());
             requestAssertions.accept(payload);
             return analysis;
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    private PreAnalyzeQuestionUseCase.PreAnalysisResult executeQuestionPreAnalysisGateway(
+            PreAnalyzeQuestionUseCase.PreAnalysisCommand command,
+            String llmContent) throws Exception {
+        AtomicReference<String> capturedRequestBody = new AtomicReference<>();
+        ObjectMapper objectMapper = new ObjectMapper();
+        HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+        server.createContext("/chat/completions", exchange -> handleAttemptPreAnalysisRequest(exchange, capturedRequestBody, objectMapper, llmContent));
+        server.start();
+
+        try {
+            HttpQuestionPreAnalysisGatewayImpl gateway = new HttpQuestionPreAnalysisGatewayImpl(
+                    objectMapper,
+                    "http://localhost:" + server.getAddress().getPort(),
+                    "/chat/completions",
+                    "test-api-key",
+                    TEST_MODEL,
+                    "",
+                    1000,
+                    1000,
+                    "",
+                    "",
+                    QUESTION_PRE_ANALYSIS_SYSTEM_PROMPT,
+                    "Submission preparation prompt",
+                    ATTEMPT_PRE_ANALYSIS_SYSTEM_PROMPT,
+                    "Job description analysis prompt"
+            );
+
+            PreAnalyzeQuestionUseCase.PreAnalysisResult result = gateway.analyze(command);
+
+            String requestBody = capturedRequestBody.get();
+            assertThat(requestBody).isNotBlank();
+            ProviderChatRequest request = objectMapper.readValue(requestBody, ProviderChatRequest.class);
+            assertThat(request.model()).isEqualTo(TEST_MODEL);
+            assertThat(request.messages()).hasSize(2);
+            assertThat(request.messages().get(0).content()).isEqualTo(QUESTION_PRE_ANALYSIS_SYSTEM_PROMPT);
+            assertThat(request.messages().get(1).content()).contains("Controle de Versao");
+
+            return result;
         } finally {
             server.stop(0);
         }

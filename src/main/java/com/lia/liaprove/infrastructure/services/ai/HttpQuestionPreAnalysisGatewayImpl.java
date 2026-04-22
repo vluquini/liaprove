@@ -26,6 +26,8 @@ import com.lia.liaprove.infrastructure.dtos.ai.ProviderChatRequest;
 import com.lia.liaprove.infrastructure.dtos.ai.ProviderChatResponse;
 import com.lia.liaprove.infrastructure.dtos.ai.SubmissionPreparationInput;
 import com.lia.liaprove.infrastructure.dtos.ai.SubmissionQuestionDraftInput;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
@@ -49,6 +51,8 @@ import java.util.stream.Stream;
 @Service
 public class HttpQuestionPreAnalysisGatewayImpl
         implements QuestionPreAnalysisGateway, JobDescriptionAnalysisGateway, AttemptPreAnalysisGateway {
+
+    private static final Logger log = LoggerFactory.getLogger(HttpQuestionPreAnalysisGatewayImpl.class);
 
     private final ObjectMapper objectMapper;
     private final RestClient restClient;
@@ -143,7 +147,7 @@ public class HttpQuestionPreAnalysisGatewayImpl
             return executeWithFallback(model -> {
                 ProviderChatRequest body = new ProviderChatRequest(model, 0.2, messages);
                 ProviderChatResponse response = callProvider(body);
-                String content = extractContent(response);
+                String content = sanitizeJsonContent(extractContent(response));
                 LlmPreAnalysisOutput output = objectMapper.readValue(content, LlmPreAnalysisOutput.class);
 
                 return new PreAnalyzeQuestionUseCase.PreAnalysisResult(
@@ -439,13 +443,19 @@ public class HttpQuestionPreAnalysisGatewayImpl
 
         for (String candidate : models) {
             try {
-                return call.execute(candidate);
+                log.info("Trying AI provider model: {}", candidate);
+                T result = call.execute(candidate);
+                log.info("AI provider model succeeded: {}", candidate);
+                return result;
             } catch (QuestionPreAnalysisException ex) {
+                log.warn("AI provider model failed: {} - {}", candidate, ex.getMessage());
                 lastException = ex;
             } catch (RestClientResponseException ex) {
+                log.warn("AI provider model failed: {} - {} - {}", candidate, ex.getStatusCode(), ex.getResponseBodyAsString());
                 lastException = new QuestionPreAnalysisException(
                         "AI provider error: " + ex.getStatusCode() + " - " + ex.getResponseBodyAsString(), ex);
             } catch (JsonProcessingException ex) {
+                log.warn("AI provider model failed: {} - failed to parse provider response: {}", candidate, ex.getOriginalMessage());
                 lastException = new QuestionPreAnalysisException("Failed to parse AI provider response.", ex);
             }
         }
