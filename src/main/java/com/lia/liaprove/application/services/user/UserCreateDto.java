@@ -1,4 +1,9 @@
-package com.lia.liaprove.core.domain.user;
+package com.lia.liaprove.application.services.user;
+
+import com.lia.liaprove.core.domain.user.ExperienceLevel;
+import com.lia.liaprove.core.domain.user.UserRole;
+
+import java.util.List;
 
 /**
  * Record que possui os parâmetros obrigatórios para criação de um User.
@@ -12,8 +17,8 @@ public record UserCreateDto(
         String occupation,
         ExperienceLevel experienceLevel,
         UserRole role,
-        java.util.List<String> hardSkills,
-        java.util.List<String> softSkills,
+        List<String> hardSkills,
+        List<String> softSkills,
         String companyName,
         String companyEmail
 ) {}

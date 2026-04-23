@@ -6,7 +6,6 @@ import com.lia.liaprove.core.domain.user.*;
 import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
 import com.lia.liaprove.core.usecases.user.CreateUserUseCase;
 import com.lia.liaprove.core.usecases.user.UserFactory;
-
 import java.util.List;
 
 /**

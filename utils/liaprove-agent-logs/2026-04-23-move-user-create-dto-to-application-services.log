@@ -1,0 +1,14 @@
+task: move-user-create-dto-to-application-services
+date: 2026-04-23T23:20:00Z
+prompt: "Move UserCreateDto from core/domain/user to application/services/user and commit the change."
+files_generated:
+  - src/main/java/com/lia/liaprove/application/services/user/UserCreateDto.java
+  - src/main/java/com/lia/liaprove/core/usecases/user/UserFactory.java
+  - src/test/java/com/lia/liaprove/application/services/user/CreateUserUseCaseImplTest.java
+tests:
+  - CreateUserUseCaseImplTest
+checks:
+  - import-policy: REVIEWED
+  - architecture-compliance: USER-DIRECTED EXCEPTION
+  - tests-created: SKIPPED (user did not request new tests)
+notes: "Moved UserCreateDto into application.services.user as requested and updated consumers to reference the new package."
