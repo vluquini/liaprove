@@ -62,7 +62,7 @@ public class AdminMetricsControllerIntegrationTest {
         UserEntity admin = getSeededUserEntity("admin@liaprove.com");
         QuestionEntity question = questionJpaRepository.findAll().getFirst(); // Assuming at least one question exists
 
-        mockMvc.perform(get("/api/v1/admin/metrics/questions/{questionId}/votes", question.getId())
+        mockMvc.perform(get("/api/v1/admin/questions/{questionId}/votes", question.getId())
                         .header("X-Dev-User-Email", admin.getEmail()))
                 .andExpect(status().isOk());
     }
@@ -73,7 +73,7 @@ public class AdminMetricsControllerIntegrationTest {
         UserEntity admin = getSeededUserEntity("admin@liaprove.com");
         QuestionEntity question = questionJpaRepository.findAll().getFirst(); // Assuming at least one question exists
 
-        mockMvc.perform(get("/api/v1/admin/metrics/questions/{questionId}/feedbacks", question.getId())
+        mockMvc.perform(get("/api/v1/admin/questions/{questionId}/feedbacks", question.getId())
                         .header("X-Dev-User-Email", admin.getEmail()))
                 .andExpect(status().isOk());
     }
@@ -83,11 +83,11 @@ public class AdminMetricsControllerIntegrationTest {
     void shouldReturnForbiddenForNonAdmin() throws Exception {
         UserEntity user = getSeededUserEntity("carlos.silva@example.com");
 
-        mockMvc.perform(get("/api/v1/admin/metrics/questions/{questionId}/votes", UUID.randomUUID())
+        mockMvc.perform(get("/api/v1/admin/questions/{questionId}/votes", UUID.randomUUID())
                         .header("X-Dev-User-Email", user.getEmail()))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(get("/api/v1/admin/metrics/questions/{questionId}/feedbacks", UUID.randomUUID())
+        mockMvc.perform(get("/api/v1/admin/questions/{questionId}/feedbacks", UUID.randomUUID())
                         .header("X-Dev-User-Email", user.getEmail()))
                 .andExpect(status().isForbidden());
     }
@@ -96,7 +96,7 @@ public class AdminMetricsControllerIntegrationTest {
     @DisplayName("Should return not found if question does not exist for votes")
     void shouldReturnNotFoundForNonExistentQuestionVotes() throws Exception {
         UserEntity admin = getSeededUserEntity("admin@liaprove.com");
-        mockMvc.perform(get("/api/v1/admin/metrics/questions/{questionId}/votes", UUID.randomUUID())
+        mockMvc.perform(get("/api/v1/admin/questions/{questionId}/votes", UUID.randomUUID())
                         .header("X-Dev-User-Email", admin.getEmail()))
                 .andExpect(status().isNotFound());
     }
@@ -105,7 +105,7 @@ public class AdminMetricsControllerIntegrationTest {
     @DisplayName("Should return not found if question does not exist for feedbacks")
     void shouldReturnNotFoundForNonExistentQuestionFeedbacks() throws Exception {
         UserEntity admin = getSeededUserEntity("admin@liaprove.com");
-        mockMvc.perform(get("/api/v1/admin/metrics/questions/{questionId}/feedbacks", UUID.randomUUID())
+        mockMvc.perform(get("/api/v1/admin/questions/{questionId}/feedbacks", UUID.randomUUID())
                         .header("X-Dev-User-Email", admin.getEmail()))
                 .andExpect(status().isNotFound());
     }

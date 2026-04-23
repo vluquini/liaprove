@@ -1,0 +1,12 @@
+task: fix-admin-metrics-route-tests
+date: 2026-04-23T23:00:00Z
+prompt: "Verify whether changing AdminMetricsController routes broke tests and fix any affected tests."
+files_generated:
+  - src/test/java/com/lia/liaprove/infrastructure/controllers/metrics/AdminMetricsControllerIntegrationTest.java
+tests:
+  - AdminMetricsControllerIntegrationTest
+checks:
+  - route-regression: PASS
+  - architecture-compliance: PASS
+  - tests-created: PASS (existing integration test updated)
+notes: "Updated the integration test to call the new /api/v1/admin/questions/{questionId}/votes and /feedbacks routes after the administrative endpoint remapping."
