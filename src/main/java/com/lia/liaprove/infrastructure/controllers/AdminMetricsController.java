@@ -18,7 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/v1/admin/metrics")
+@RequestMapping("/api/v1/admin/questions")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminMetricsController {
@@ -30,7 +30,7 @@ public class AdminMetricsController {
 
     // Metrics Domain - Votes
 
-    @GetMapping("/questions/{questionId}/votes")
+    @GetMapping("/{questionId}/votes")
     public ResponseEntity<List<VoteResponseDto>> listVotesForQuestion(@PathVariable UUID questionId) {
         // The use case already handles validation for question existence
         List<Vote> votes = listVotesForQuestionUseCase.listVotesForQuestion(questionId);
@@ -42,7 +42,7 @@ public class AdminMetricsController {
 
     // Metrics Domain - Feedbacks
 
-    @GetMapping("/questions/{questionId}/feedbacks")
+    @GetMapping("/{questionId}/feedbacks")
     public ResponseEntity<List<FeedbackQuestionResponse>> listFeedbacksForQuestion(@PathVariable UUID questionId) {
         // The use case already handles validation for question existence
         List<FeedbackQuestion> feedbacks = listFeedbacksForQuestionUseCase.listFeedbacksForQuestion(questionId);
