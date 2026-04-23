@@ -39,8 +39,6 @@ public class AdminQuestionController {
     private final QuestionMapper questionMapper;
     private final SecurityContextService securityContextService;
 
-    // Question Domain
-
     @GetMapping
     public ResponseEntity<List<QuestionResponse>> listAllQuestions(
             @RequestParam(required = false) Set<KnowledgeArea> knowledgeAreas,
@@ -99,10 +97,5 @@ public class AdminQuestionController {
         QuestionResponse responseDto = questionMapper.toResponseDto(moderatedQuestion);
         return ResponseEntity.ok(responseDto);
     }
-
-    // Metrics Domain - Votes
-
-    // TODO: Consider creating a separate public endpoint (e.g., /questions/{questionId}/vote-summary)
-    // that returns only aggregate vote counts (e.g., total approves, total rejects) for non-admin users.
 
 }
