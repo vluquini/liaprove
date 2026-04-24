@@ -8,8 +8,8 @@ import com.lia.liaprove.infrastructure.entities.metrics.FeedbackQuestionEntity;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackAssessmentMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
-import com.lia.liaprove.infrastructure.repositories.FeedbackAssessmentJpaRepository;
-import com.lia.liaprove.infrastructure.repositories.FeedbackQuestionJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.metrics.FeedbackAssessmentJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.metrics.FeedbackQuestionJpaRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 

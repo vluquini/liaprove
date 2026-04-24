@@ -4,7 +4,7 @@ import com.lia.liaprove.application.gateways.metrics.VoteGateway;
 import com.lia.liaprove.core.domain.metrics.Vote;
 import com.lia.liaprove.infrastructure.entities.metrics.VoteEntity;
 import com.lia.liaprove.infrastructure.mappers.metrics.VoteMapper;
-import com.lia.liaprove.infrastructure.repositories.VoteJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.metrics.VoteJpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

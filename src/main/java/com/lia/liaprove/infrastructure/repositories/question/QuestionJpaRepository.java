@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.repositories;
+package com.lia.liaprove.infrastructure.repositories.question;
 
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;

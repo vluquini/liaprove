@@ -8,7 +8,7 @@ import com.lia.liaprove.infrastructure.dtos.question.AlternativeRequestDto;
 import com.lia.liaprove.infrastructure.dtos.question.CreateOpenQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.question.SubmitMultipleChoiceQuestionRequest;
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
-import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.user.UserJpaRepository;
 
 import java.util.List;
 import java.util.Set;

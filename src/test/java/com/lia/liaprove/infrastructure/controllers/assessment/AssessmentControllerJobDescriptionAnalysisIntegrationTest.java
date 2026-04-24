@@ -6,7 +6,7 @@ import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.usecases.assessments.AnalyzeJobDescriptionUseCase;
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
-import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.user.UserJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

@@ -1,7 +1,7 @@
 package com.lia.liaprove.infrastructure.security;
 
 import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
-import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.user.UserJpaRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

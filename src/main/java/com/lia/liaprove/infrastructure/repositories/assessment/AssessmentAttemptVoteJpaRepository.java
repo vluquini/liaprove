@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.repositories;
+package com.lia.liaprove.infrastructure.repositories.assessment;
 
 import com.lia.liaprove.infrastructure.entities.metrics.AssessmentAttemptVoteEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

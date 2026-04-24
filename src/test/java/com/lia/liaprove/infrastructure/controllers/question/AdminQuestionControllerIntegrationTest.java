@@ -1,10 +1,10 @@
 package com.lia.liaprove.infrastructure.controllers.question;
 
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
-import com.lia.liaprove.infrastructure.repositories.QuestionJpaRepository;
-import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
-import com.lia.liaprove.infrastructure.repositories.FeedbackQuestionJpaRepository;
-import com.lia.liaprove.infrastructure.repositories.VoteJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.question.QuestionJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.user.UserJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.metrics.FeedbackQuestionJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.metrics.VoteJpaRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

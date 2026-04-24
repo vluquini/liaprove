@@ -4,7 +4,7 @@ import com.lia.liaprove.application.gateways.algorithms.genetic.VoteMultiplierGa
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.infrastructure.entities.algorithms.genetic.VoteMultiplierEntity;
 import com.lia.liaprove.infrastructure.entities.algorithms.genetic.VoteMultiplierScope;
-import com.lia.liaprove.infrastructure.repositories.VoteMultiplierJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.metrics.VoteMultiplierJpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

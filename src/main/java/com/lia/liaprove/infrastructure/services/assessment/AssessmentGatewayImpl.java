@@ -7,7 +7,7 @@ import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
 import com.lia.liaprove.infrastructure.mappers.assessment.AssessmentMapper;
-import com.lia.liaprove.infrastructure.repositories.AssessmentJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentJpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

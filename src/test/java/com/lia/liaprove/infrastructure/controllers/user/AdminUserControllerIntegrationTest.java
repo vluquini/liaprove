@@ -2,7 +2,7 @@ package com.lia.liaprove.infrastructure.controllers.user;
 
 import com.lia.liaprove.core.domain.user.UserStatus;
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
-import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.user.UserJpaRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

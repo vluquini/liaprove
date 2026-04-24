@@ -4,7 +4,7 @@ import com.lia.liaprove.application.gateways.metrics.AssessmentAttemptVoteGatewa
 import com.lia.liaprove.core.domain.metrics.AssessmentAttemptVote;
 import com.lia.liaprove.infrastructure.entities.metrics.AssessmentAttemptVoteEntity;
 import com.lia.liaprove.infrastructure.mappers.metrics.AssessmentAttemptVoteMapper;
-import com.lia.liaprove.infrastructure.repositories.AssessmentAttemptVoteJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentAttemptVoteJpaRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;

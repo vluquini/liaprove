@@ -4,7 +4,7 @@ import com.lia.liaprove.core.domain.question.*;
 import com.lia.liaprove.infrastructure.entities.question.OpenQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
-import com.lia.liaprove.infrastructure.repositories.QuestionJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.question.QuestionJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;

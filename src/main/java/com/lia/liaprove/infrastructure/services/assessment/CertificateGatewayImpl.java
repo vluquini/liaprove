@@ -4,7 +4,7 @@ import com.lia.liaprove.application.gateways.assessment.CertificateGateway;
 import com.lia.liaprove.core.domain.assessment.Certificate;
 import com.lia.liaprove.infrastructure.entities.assessment.CertificateEntity;
 import com.lia.liaprove.infrastructure.mappers.assessment.CertificateMapper;
-import com.lia.liaprove.infrastructure.repositories.CertificateJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.assessment.CertificateJpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

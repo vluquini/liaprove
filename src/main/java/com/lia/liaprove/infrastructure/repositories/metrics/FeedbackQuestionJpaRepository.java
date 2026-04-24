@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.repositories;
+package com.lia.liaprove.infrastructure.repositories.metrics;
 
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackQuestionEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

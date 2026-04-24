@@ -3,7 +3,7 @@ package com.lia.liaprove.infrastructure.controllers.assessment;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lia.liaprove.infrastructure.dtos.assessment.CreatePersonalizedAssessmentRequest;
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
-import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.user.UserJpaRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;

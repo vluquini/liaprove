@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.repositories;
+package com.lia.liaprove.infrastructure.repositories.assessment;
 
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;

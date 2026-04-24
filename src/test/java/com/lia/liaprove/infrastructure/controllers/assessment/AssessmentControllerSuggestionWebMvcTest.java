@@ -15,7 +15,7 @@ import com.lia.liaprove.core.usecases.assessments.SuggestQuestionsForAssessmentU
 import com.lia.liaprove.core.usecases.assessments.UpdatePersonalizedAssessmentUseCase;
 import com.lia.liaprove.infrastructure.mappers.assessment.AssessmentDtoMapper;
 import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
-import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.user.UserJpaRepository;
 import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import com.lia.liaprove.infrastructure.security.JwtService;
 import org.junit.jupiter.api.Test;

@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.repositories;
+package com.lia.liaprove.infrastructure.repositories.user;
 
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserRecruiterEntity;

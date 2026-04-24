@@ -14,10 +14,10 @@ import com.lia.liaprove.infrastructure.entities.question.OpenQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserRecruiterEntity;
-import com.lia.liaprove.infrastructure.repositories.AssessmentAttemptJpaRepository;
-import com.lia.liaprove.infrastructure.repositories.AssessmentJpaRepository;
-import com.lia.liaprove.infrastructure.repositories.QuestionJpaRepository;
-import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentAttemptJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.question.QuestionJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.user.UserJpaRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;

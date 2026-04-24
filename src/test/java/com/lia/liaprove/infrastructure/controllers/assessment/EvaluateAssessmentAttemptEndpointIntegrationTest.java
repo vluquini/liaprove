@@ -6,9 +6,9 @@ import com.lia.liaprove.infrastructure.dtos.assessment.EvaluateAssessmentAttempt
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
-import com.lia.liaprove.infrastructure.repositories.AssessmentAttemptJpaRepository;
-import com.lia.liaprove.infrastructure.repositories.AssessmentJpaRepository;
-import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentAttemptJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.user.UserJpaRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

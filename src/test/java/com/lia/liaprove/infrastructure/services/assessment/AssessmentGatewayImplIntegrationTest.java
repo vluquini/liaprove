@@ -7,7 +7,7 @@ import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
-import com.lia.liaprove.infrastructure.repositories.AssessmentJpaRepository;
+import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentJpaRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

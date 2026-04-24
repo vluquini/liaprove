@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.repositories;
+package com.lia.liaprove.infrastructure.repositories.metrics;
 
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.infrastructure.entities.algorithms.genetic.VoteMultiplierEntity;
