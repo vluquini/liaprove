@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.controllers;
+package com.lia.liaprove.infrastructure.controllers.assessment;
 
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;

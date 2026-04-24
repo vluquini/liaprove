@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.controllers;
+package com.lia.liaprove.infrastructure.controllers.user;
 
 import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.usecases.user.ChangePasswordUseCase;

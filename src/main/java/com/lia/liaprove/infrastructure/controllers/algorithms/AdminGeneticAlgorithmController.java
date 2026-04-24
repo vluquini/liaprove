@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.controllers;
+package com.lia.liaprove.infrastructure.controllers.algorithms;
 
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.usecases.algorithms.genetic.ManageVoteWeightUseCase;

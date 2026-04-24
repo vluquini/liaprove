@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.controllers;
+package com.lia.liaprove.infrastructure.controllers.assessment;
 
 import com.lia.liaprove.application.services.assessment.dto.SubmitAssessmentAnswersDto;
 import com.lia.liaprove.application.services.assessment.dto.SuggestionCriteriaDto;

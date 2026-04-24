@@ -1,8 +1,6 @@
 package com.lia.liaprove.infrastructure.controllers.assessment;
 
-import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.application.services.assessment.dto.SuggestionCriteriaDto;
-import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
 import com.lia.liaprove.core.domain.question.QuestionType;
 import com.lia.liaprove.core.usecases.assessments.AnalyzeJobDescriptionUseCase;
 import com.lia.liaprove.core.usecases.assessments.CreatePersonalizedAssessmentUseCase;
@@ -15,7 +13,6 @@ import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SubmitAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SuggestQuestionsForAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.UpdatePersonalizedAssessmentUseCase;
-import com.lia.liaprove.infrastructure.controllers.AssessmentController;
 import com.lia.liaprove.infrastructure.mappers.assessment.AssessmentDtoMapper;
 import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import com.lia.liaprove.infrastructure.repositories.UserJpaRepository;
@@ -29,7 +26,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;

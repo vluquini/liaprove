@@ -1,4 +1,4 @@
-package com.lia.liaprove.infrastructure.controllers;
+package com.lia.liaprove.infrastructure.controllers.metrics;
 
 import com.lia.liaprove.core.domain.metrics.FeedbackQuestion;
 import com.lia.liaprove.core.domain.metrics.Vote;
