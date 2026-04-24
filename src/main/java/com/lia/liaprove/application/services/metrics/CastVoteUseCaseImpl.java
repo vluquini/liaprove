@@ -11,6 +11,8 @@ import com.lia.liaprove.core.exceptions.question.QuestionNotFoundException;
 import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
 import com.lia.liaprove.core.usecases.metrics.CastVoteUseCase;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
 
 public class CastVoteUseCaseImpl implements CastVoteUseCase {
@@ -33,8 +35,28 @@ public class CastVoteUseCaseImpl implements CastVoteUseCase {
         Question question = questionGateway.findById(questionId)
                 .orElseThrow(() -> new QuestionNotFoundException("Question not found with id: " + questionId));
 
-        Vote vote = new Vote(user, question, voteType);
+        List<Vote> existingVotes = voteGateway.findByUserIdAndQuestionId(userId, questionId);
+        if (existingVotes.isEmpty()) {
+            voteGateway.save(new Vote(user, question, voteType));
+            return;
+        }
 
-        voteGateway.save(vote);
+        handleExistingVotes(existingVotes, user, question, voteType);
+    }
+
+    private void handleExistingVotes(List<Vote> existingVotes, User user, Question question, VoteType requestedVoteType) {
+        Vote latestVote = existingVotes.stream()
+                .max(Comparator.comparing(Vote::getCreatedAt))
+                .orElseThrow();
+
+        for (Vote existingVote : existingVotes) {
+            voteGateway.delete(existingVote);
+        }
+
+        if (latestVote.getVoteType() == requestedVoteType) {
+            return;
+        }
+
+        voteGateway.save(new Vote(user, question, requestedVoteType));
     }
 }

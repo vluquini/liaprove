@@ -13,4 +13,15 @@ import java.util.UUID;
 public interface VoteJpaRepository extends JpaRepository<VoteEntity, UUID> {
     @Query("SELECT v FROM VoteEntity v JOIN FETCH v.user JOIN FETCH v.question q LEFT JOIN FETCH TREAT(q AS MultipleChoiceQuestionEntity).alternatives a WHERE v.question.id = :questionId")
     List<VoteEntity> findWithDetailsByQuestionId(@Param("questionId") UUID questionId);
+
+    @Query("""
+            SELECT DISTINCT v
+            FROM VoteEntity v
+            JOIN FETCH v.user
+            JOIN FETCH v.question q
+            LEFT JOIN FETCH TREAT(q AS MultipleChoiceQuestionEntity).alternatives a
+            WHERE v.user.id = :userId
+              AND v.question.id = :questionId
+            """)
+    List<VoteEntity> findByUserIdAndQuestionId(@Param("userId") UUID userId, @Param("questionId") UUID questionId);
 }

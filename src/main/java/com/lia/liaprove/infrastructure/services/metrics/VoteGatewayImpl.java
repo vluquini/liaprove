@@ -31,6 +31,18 @@ public class VoteGatewayImpl implements VoteGateway {
     }
 
     @Override
+    public List<Vote> findByUserIdAndQuestionId(UUID userId, UUID questionId) {
+        return voteJpaRepository.findByUserIdAndQuestionId(userId, questionId).stream()
+                .map(voteMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public void delete(Vote vote) {
+        voteJpaRepository.deleteById(vote.getId());
+    }
+
+    @Override
     public List<Vote> findVotesByQuestionId(UUID questionId) {
         List<VoteEntity> voteEntities = voteJpaRepository.findWithDetailsByQuestionId(questionId);
         return voteEntities.stream()
