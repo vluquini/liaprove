@@ -5,17 +5,17 @@
 
 ## 1 - Descrição Geral
 
-Plataforma colaborativa onde usuários profissionais de TI e recrutadores podem submeter questões e mini projetos para compor avaliações técnicas alinhadas a contextos reais do mercado de trabalho. As contribuições passam por curadoria da comunidade e apoiam tanto a autoavaliação dos participantes quanto a criação de avaliações personalizadas por recrutadores. Ao finalizar uma avaliação de múltipla escolha e obter pelo menos 70% de acertos, o usuário recebe um certificado de comprovação de conhecimento.
+Plataforma colaborativa onde usuários profissionais de TI e recrutadores podem submeter questões e mini projetos para compor avaliações técnicas alinhadas a contextos reais do mercado de trabalho. As contribuições passam por curadoria da comunidade e apoiam tanto a autoavaliação dos participantes quanto a criação de avaliações personalizadas por recrutadores. A plataforma também utiliza Inteligência Artificial para apoiar a pré-análise de questões, a estruturação de descrições de vaga e a interpretação de tentativas em avaliações personalizadas. Ao finalizar uma avaliação de múltipla escolha e obter pelo menos 70% de acertos, o usuário recebe um certificado de comprovação de conhecimento.
 
 ## 2 - Detalhamento da Proposta
 
 ### 2.1 - Descrição
 
-A plataforma permite que profissionais de TI e recrutadores criem e submetam questões e mini projetos para validar conhecimentos técnicos em áreas relevantes para o mercado de trabalho. As submissões passam por pré-avaliação feita por uma LLM (por exemplo, ChatGPT via API) e, depois, por votação da comunidade; cada usuário pode atribuir notas a cada questão.
+A plataforma permite que profissionais de TI e recrutadores criem e submetam questões e mini projetos para validar conhecimentos técnicos em áreas relevantes para o mercado de trabalho. As submissões passam por pré-análise feita por uma LLM e, depois, por votação da comunidade; cada usuário pode atribuir notas a cada questão.
 
 Após a submissão e a votação, uma **Rede Bayesiana** apura os votos e decide se a questão será incorporada às avaliações da plataforma. **Algoritmos Genéticos** monitoram e ajustam periodicamente o peso dos votos dos recrutadores, aumentando ou diminuindo conforme sinais de uso e qualidade. Hoje, o ajuste considera: uso recente (avaliações criadas/usadas no período), média das avaliações (rating médio das assessments), quantidade de questões aprovadas, razão de likes em comentários (likes/(likes+dislikes)) e o peso atual para estabilidade. A Rede Bayesiana também auxilia recrutadores ao sugerir questões frequentemente escolhidas por outros recrutadores no momento da criação de avaliações personalizadas.
 
-No contexto de recrutadores, a plataforma atua como ferramenta de apoio à avaliação técnica. Ela ajuda a estruturar critérios, selecionar questões e interpretar resultados, mas a decisão final de aprovar ou reprovar um candidato em um processo seletivo permanece humana e externa à regra automática da plataforma.
+No contexto de recrutadores, a plataforma atua como ferramenta de apoio à avaliação técnica. Ela ajuda a estruturar critérios a partir de descrições de vaga, sugerir pesos entre hard skills, soft skills e experiência, selecionar questões e interpretar tentativas com apoio de IA. A decisão final de aprovar ou reprovar um candidato em um processo seletivo permanece humana e externa à regra automática da plataforma.
 
 ### 2.1.1 - Visão do Usuário Profissional
 
@@ -33,15 +33,21 @@ Um usuário do tipo profissional pode:
 O recrutador possui as mesmas funcionalidades do profissional e, adicionalmente:
 
 - Pode criar avaliações personalizadas (selecionar questões e definir o percentual de aprovação).
+
+- Pode criar questões abertas para uso em avaliações personalizadas, com visibilidade privada ou compartilhada entre recrutadores.
     
 - Tem votos com peso maior na avaliação das questões (peso ajustável por Algoritmos Genéticos).
     
+- Pode solicitar à IA uma análise estruturada da descrição de uma vaga, obtendo áreas de conhecimento, hard skills, soft skills e sugestão de pesos para apoiar a montagem da avaliação.
+
+- Pode solicitar uma pré-análise explicável das tentativas realizadas em suas avaliações personalizadas, como apoio à interpretação técnica do desempenho do candidato.
+
 - Recebe sugestões inteligentes de questões e critérios de avaliação com base no contexto da vaga e em padrões de escolha de outros recrutadores.
     
 
 ### 2.1.3 - Tipos de Avaliação
 
-A plataforma oferecerá dois tipos de avaliação:
+A plataforma trabalha com avaliações do sistema e avaliações personalizadas:
 
 1. **Prova de múltipla escolha**
     
@@ -58,6 +64,14 @@ A plataforma oferecerá dois tipos de avaliação:
     - Os usuários submetem soluções práticas; tanto o enunciado quanto as respostas podem ser avaliados pela comunidade.
         
     - O certificado para mini projeto é concedido somente após avaliação comunitária das entregas.
+
+3. **Avaliações personalizadas**
+
+    - São criadas por recrutadores a partir do banco de questões da plataforma.
+
+    - Podem combinar questões de múltipla escolha, mini projetos e questões abertas.
+
+    - Podem incorporar critérios e pesos definidos pelo recrutador, além de um snapshot da análise da vaga realizada por IA.
         
 
 ### 2.1.4 - Categoria das questões
@@ -98,31 +112,29 @@ Os usuários terão uma área para visualizar todas as questões submetidas, ava
 - Histórico de avaliações e comentários podem ser mantidos para transparência e auditoria.
     
 
-### 2.1.8 - Assistente de Revisão e Qualidade com IA
+### 2.1.8 - Assistente de Revisão e Apoio com IA
 
-A LLM será usada para uma pré-análise das questões, com as seguintes funções sugeridas:
+A LLM já é utilizada em três fluxos principais da plataforma:
 
-a) **Revisão de linguagem e clareza**
+1. **Pré-análise de questões**
 
-- Verifica gramática, coerência e clareza; sugere reformulações para evitar ambiguidades.
-    
+- Apoia a revisão de clareza, coerência e relevância das questões submetidas.
 
-b) **Detecção de viés ou ambiguidade**
+- Pode sugerir ajustes no conteúdo antes que ele siga para a curadoria colaborativa.
 
-- Identifica itens tendenciosos ou ambíguos e propõe ajustes para neutralidade.
-    
+2. **Análise de descrição de vaga**
 
-c) **Sugestão de alternativas (distratores)**
+- Recebe a descrição textual de uma vaga informada pelo recrutador.
 
-- Gera alternativas plausíveis para aumentar a qualidade das questões.
-    
+- Retorna uma estrutura com áreas de conhecimento sugeridas, hard skills, soft skills e pesos entre hard skills, soft skills e experiência.
 
-d) **Análise de complexidade de texto**
+- Esse resultado pode ser salvo como contexto de uma avaliação personalizada.
 
-- Estima o nível de dificuldade a partir da complexidade lexical e sintática do enunciado.
-    
+3. **Pré-análise explicável de tentativas**
 
-e) **Avaliação de consistência entre tópicos**
+- Permite que o recrutador solicite uma análise textual auxiliar de uma tentativa realizada em sua avaliação personalizada.
 
-- Detecta desalinhamentos de escopo, dificuldade ou relevância em conjuntos de questões sobre o mesmo tema.
+- A IA pode considerar questões de múltipla escolha e questões abertas, resumindo pontos fortes, pontos de atenção e uma justificativa textual.
+
+- Questões de mini-projeto são explicitamente ignoradas nesse fluxo por enquanto, permanecendo dependentes de avaliação humana.
 
