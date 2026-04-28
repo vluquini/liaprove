@@ -39,7 +39,7 @@ build/
 /data
 
 ### Temporary Files ###
-/utils
+/docs
 
 ### LLM API Configs ###
 src/main/resources/ai.properties
