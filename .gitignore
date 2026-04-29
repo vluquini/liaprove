@@ -39,7 +39,8 @@ build/
 /data
 
 ### Temporary Files ###
-/docs
+/docs/*
+!/docs/research/
 
 ### LLM API Configs ###
 src/main/resources/ai.properties
