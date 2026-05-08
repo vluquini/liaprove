@@ -94,6 +94,8 @@ Os usuários terão uma área para visualizar todas as questões submetidas, ava
 - Os votos dos recrutadores têm maior peso — pois o objetivo é alinhar a plataforma às necessidades do mercado de trabalho — mas a decisão final usa uma Rede Bayesiana que combina todos os votos para evitar viés excessivo.
     
 - O peso dos votos dos recrutadores é atualizado por Algoritmos Genéticos periodicamente, com base em um conjunto de sinais: uso recente (avaliações criadas/usadas), média de avaliações, quantidade de questões aprovadas, razão de likes em comentários e o peso atual para estabilidade. Esses sinais ajudam a medir eficiência, qualidade e aderência à plataforma.
+
+> **Observação:** para fins demonstrativos, a decisão bayesiana de aprovação ou reprovação de questões é simulada pela classe `MockEvaluateVotingResultUseCaseImpl`, acionada periodicamente pelo scheduler `QuestionVotingEvaluatorScheduler`.
     
 
 ### 2.1.6 - Certificação
