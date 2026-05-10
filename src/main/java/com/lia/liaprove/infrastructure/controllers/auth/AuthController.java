@@ -1,9 +1,11 @@
 package com.lia.liaprove.infrastructure.controllers.auth;
 
 import com.lia.liaprove.core.domain.user.User;
+import com.lia.liaprove.core.domain.user.UserRecruiter;
 import com.lia.liaprove.core.domain.user.UserStatus;
 import com.lia.liaprove.core.usecases.user.CreateUserUseCase;
 import com.lia.liaprove.application.gateways.user.UserGateway;
+import com.lia.liaprove.infrastructure.dtos.user.AuthenticatedUserResponse;
 import com.lia.liaprove.infrastructure.dtos.user.AuthenticationRequest;
 import com.lia.liaprove.infrastructure.dtos.user.AuthenticationResponse;
 import com.lia.liaprove.infrastructure.dtos.user.CreateUserRequest;
@@ -49,9 +51,9 @@ public class AuthController {
         );
 
         UserDetails userDetails = new CustomUserDetails(newUser);
-        final String jwtToken = jwtService.generateToken(userDetails);
+        JwtService.GeneratedToken generatedToken = jwtService.generateToken(userDetails);
 
-        return ResponseEntity.ok(AuthenticationResponse.builder().token(jwtToken).build());
+        return ResponseEntity.ok(buildAuthenticationResponse(generatedToken, newUser));
     }
 
     @PostMapping("/login")
@@ -72,7 +74,37 @@ public class AuthController {
             userGateway.save(user);
         }
 
-        final String jwtToken = jwtService.generateToken(userDetails);
-        return ResponseEntity.ok(AuthenticationResponse.builder().token(jwtToken).build());
+        JwtService.GeneratedToken generatedToken = jwtService.generateToken(userDetails);
+        return ResponseEntity.ok(buildAuthenticationResponse(generatedToken, user));
+    }
+
+    private AuthenticationResponse buildAuthenticationResponse(JwtService.GeneratedToken generatedToken, User user) {
+        return AuthenticationResponse.builder()
+                .token(generatedToken.token())
+                .tokenType("Bearer")
+                .expiresAt(generatedToken.expiresAt())
+                .user(toAuthenticatedUserResponse(user))
+                .build();
+    }
+
+    private AuthenticatedUserResponse toAuthenticatedUserResponse(User user) {
+        String companyName = null;
+        String companyEmail = null;
+        if (user instanceof UserRecruiter recruiter) {
+            companyName = recruiter.getCompanyName();
+            companyEmail = recruiter.getCompanyEmail();
+        }
+
+        return new AuthenticatedUserResponse(
+                user.getId(),
+                user.getName(),
+                user.getEmail(),
+                user.getRole(),
+                user.getStatus(),
+                user.getOccupation(),
+                user.getExperienceLevel(),
+                companyName,
+                companyEmail
+        );
     }
 }

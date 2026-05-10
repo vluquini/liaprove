@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Date;
 
 @Service
@@ -22,13 +23,17 @@ public class JwtService {
         return decodedJWT.getSubject();
     }
 
-    public String generateToken(UserDetails userDetails) {
+    public GeneratedToken generateToken(UserDetails userDetails) {
+        Instant issuedAt = Instant.now();
+        Instant expiresAt = issuedAt.plusMillis(EXPIRATION_TIME);
         Algorithm algorithm = Algorithm.HMAC256(SECRET_KEY);
-        return JWT.create()
+        String token = JWT.create()
                 .withSubject(userDetails.getUsername())
-                .withIssuedAt(new Date(System.currentTimeMillis()))
-                .withExpiresAt(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .withIssuedAt(Date.from(issuedAt))
+                .withExpiresAt(Date.from(expiresAt))
                 .sign(algorithm);
+
+        return new GeneratedToken(token, expiresAt);
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
@@ -42,5 +47,8 @@ public class JwtService {
         } catch (Exception exception) {
             return false;
         }
+    }
+
+    public record GeneratedToken(String token, Instant expiresAt) {
     }
 }
