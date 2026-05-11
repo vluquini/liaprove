@@ -37,9 +37,9 @@ const roleOptions = [
 ]
 
 const experienceOptions = [
-  { label: 'Junior', value: 'JUNIOR' },
+  { label: 'Júnior', value: 'JUNIOR' },
   { label: 'Pleno', value: 'PLENO' },
-  { label: 'Senior', value: 'SENIOR' },
+  { label: 'Sênior', value: 'SENIOR' },
 ]
 
 const loading = ref(false)
@@ -105,37 +105,37 @@ async function submit(): Promise<void> {
 
 <template>
   <PublicAuthLayout>
-    <Card class="border border-slate-200 shadow-sm">
+    <Card class="auth-card">
       <template #title>
-        <span class="text-2xl font-semibold text-slate-950">Criar cadastro</span>
+        <span class="auth-display text-3xl font-bold text-[var(--liaprove-ink)]">Criar cadastro</span>
       </template>
 
       <template #subtitle>
-        <span>Cadastre-se como profissional ou recrutador.</span>
+        <span>Escolha o perfil e preencha os dados essenciais.</span>
       </template>
 
       <template #content>
-        <form class="space-y-5" @submit.prevent="submit">
+        <form class="mt-2 space-y-5" @submit.prevent="submit">
           <Message v-if="errorMessage" severity="error" :closable="false">{{ errorMessage }}</Message>
 
           <div class="grid gap-4 sm:grid-cols-2">
-            <label class="block sm:col-span-2">
-              <span class="mb-2 block text-sm font-medium text-slate-700">Tipo de conta</span>
+            <label class="auth-field block sm:col-span-2">
+              <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Tipo de conta</span>
               <Select v-model="form.role" class="w-full" :options="roleOptions" option-label="label" option-value="value" />
             </label>
 
-            <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-700">Nome</span>
+            <label class="auth-field block">
+              <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Nome</span>
               <InputText v-model="form.name" class="w-full" autocomplete="name" />
             </label>
 
-            <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-700">Email</span>
+            <label class="auth-field block">
+              <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Email</span>
               <InputText v-model="form.email" class="w-full" type="email" autocomplete="email" />
             </label>
 
-            <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-700">Senha</span>
+            <label class="auth-field block">
+              <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Senha</span>
               <Password
                 v-model="form.password"
                 class="w-full"
@@ -146,8 +146,8 @@ async function submit(): Promise<void> {
               />
             </label>
 
-            <label class="block">
-              <span class="mb-2 block text-sm font-medium text-slate-700">Nivel de experiencia</span>
+            <label class="auth-field block">
+              <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Nível de experiência</span>
               <Select
                 v-model="form.experienceLevel"
                 class="w-full"
@@ -157,44 +157,44 @@ async function submit(): Promise<void> {
               />
             </label>
 
-            <label class="block sm:col-span-2">
-              <span class="mb-2 block text-sm font-medium text-slate-700">Ocupacao</span>
+            <label class="auth-field block sm:col-span-2">
+              <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Ocupação</span>
               <InputText v-model="form.occupation" class="w-full" placeholder="Desenvolvedor Java" />
             </label>
 
-            <label class="block sm:col-span-2">
-              <span class="mb-2 block text-sm font-medium text-slate-700">Hard skills</span>
+            <label class="auth-field block sm:col-span-2">
+              <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Hard skills</span>
               <InputText v-model="form.hardSkillsText" class="w-full" placeholder="Java, Spring Boot, SQL" />
             </label>
 
-            <label class="block sm:col-span-2">
-              <span class="mb-2 block text-sm font-medium text-slate-700">Soft skills</span>
-              <InputText v-model="form.softSkillsText" class="w-full" placeholder="Comunicacao, lideranca" />
+            <label class="auth-field block sm:col-span-2">
+              <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Soft skills</span>
+              <InputText v-model="form.softSkillsText" class="w-full" placeholder="Comunicação, liderança" />
             </label>
 
-            <label class="block sm:col-span-2">
-              <span class="mb-2 block text-sm font-medium text-slate-700">Bio</span>
+            <label class="auth-field block sm:col-span-2">
+              <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Bio</span>
               <Textarea v-model="form.bio" class="w-full" rows="3" />
             </label>
 
             <template v-if="isRecruiter">
-              <label class="block">
-                <span class="mb-2 block text-sm font-medium text-slate-700">Empresa</span>
+              <label class="auth-field block">
+                <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Empresa</span>
                 <InputText v-model="form.companyName" class="w-full" />
               </label>
 
-              <label class="block">
-                <span class="mb-2 block text-sm font-medium text-slate-700">Email corporativo</span>
+              <label class="auth-field block">
+                <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Email corporativo</span>
                 <InputText v-model="form.companyEmail" class="w-full" type="email" />
               </label>
             </template>
           </div>
 
-          <Button class="w-full" label="Criar cadastro" type="submit" :loading="loading" />
+          <Button class="auth-primary w-full" label="Criar cadastro" type="submit" :loading="loading" />
 
-          <p class="text-center text-sm text-slate-600">
-            Ja tem conta?
-            <RouterLink class="font-medium text-cyan-700" to="/login">Entrar</RouterLink>
+          <p class="border-t border-[var(--liaprove-line)] pt-5 text-center text-sm text-[var(--liaprove-muted)]">
+            Já tem conta?
+            <RouterLink class="auth-link" to="/login">Entrar</RouterLink>
           </p>
         </form>
       </template>

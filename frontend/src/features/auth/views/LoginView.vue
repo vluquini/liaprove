@@ -47,26 +47,26 @@ async function submit(): Promise<void> {
 
 <template>
   <PublicAuthLayout>
-    <Card class="border border-slate-200 shadow-sm">
+    <Card class="auth-card">
       <template #title>
-        <span class="text-2xl font-semibold text-slate-950">Entrar</span>
+        <span class="auth-display text-3xl font-bold text-[var(--liaprove-ink)]">Entrar</span>
       </template>
 
       <template #subtitle>
-        <span>Acesse sua conta para continuar.</span>
+        <span>Use suas credenciais para acessar seu painel.</span>
       </template>
 
       <template #content>
-        <form class="space-y-5" @submit.prevent="submit">
+        <form class="mt-2 space-y-5" @submit.prevent="submit">
           <Message v-if="errorMessage" severity="error" :closable="false">{{ errorMessage }}</Message>
 
-          <label class="block">
-            <span class="mb-2 block text-sm font-medium text-slate-700">Email</span>
+          <label class="auth-field block">
+            <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Email</span>
             <InputText v-model="form.email" class="w-full" type="email" autocomplete="email" />
           </label>
 
-          <label class="block">
-            <span class="mb-2 block text-sm font-medium text-slate-700">Senha</span>
+          <label class="auth-field block">
+            <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Senha</span>
             <Password
               v-model="form.password"
               class="w-full"
@@ -77,11 +77,11 @@ async function submit(): Promise<void> {
             />
           </label>
 
-          <Button class="w-full" label="Entrar" type="submit" :loading="loading" />
+          <Button class="auth-primary w-full" label="Entrar" type="submit" :loading="loading" />
 
-          <p class="text-center text-sm text-slate-600">
-            Ainda nao tem conta?
-            <RouterLink class="font-medium text-cyan-700" to="/register">Criar cadastro</RouterLink>
+          <p class="border-t border-[var(--liaprove-line)] pt-5 text-center text-sm text-[var(--liaprove-muted)]">
+            Ainda não tem conta?
+            <RouterLink class="auth-link" to="/register">Criar cadastro</RouterLink>
           </p>
         </form>
       </template>

@@ -15,7 +15,7 @@ type BackendErrorBody = {
 
 export function normalizeApiError(error: unknown): ApiError {
   if (!axios.isAxiosError(error)) {
-    return { message: 'Nao foi possivel concluir a operacao.' }
+    return { message: 'Não foi possível concluir a operação.' }
   }
 
   const axiosError = error as AxiosError<BackendErrorBody>
@@ -23,7 +23,7 @@ export function normalizeApiError(error: unknown): ApiError {
 
   return {
     status: axiosError.response?.status,
-    message: body?.message ?? body?.error ?? 'Nao foi possivel concluir a operacao.',
+    message: body?.message ?? body?.error ?? 'Não foi possível concluir a operação.',
     fieldErrors: body?.fieldErrors ?? body?.errors,
   }
 }
