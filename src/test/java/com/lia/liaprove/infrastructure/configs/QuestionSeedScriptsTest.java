@@ -27,7 +27,7 @@ class QuestionSeedScriptsTest {
 
     @Test
     void shouldSeedOpenQuestionInPostgresScript() throws IOException {
-        String script = readScript("src/main/resources/db/populate-questions.sql");
+        String script = readScript("src/main/resources/db/postgres-populate-questions.sql");
 
         assertAll(
                 () -> assertTrue(script.contains("'OPEN'")),
