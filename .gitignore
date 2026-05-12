@@ -38,6 +38,10 @@ build/
 ### Postgres and H2 Data Files ###
 /data
 
+### Playwright ###
+frontend/test-results/
+frontend/playwright-report/
+
 ### Temporary Files ###
 /docs/*
 !/docs/research/
