@@ -61,7 +61,7 @@ async function submit(): Promise<void> {
           <Message v-if="errorMessage" severity="error" :closable="false">{{ errorMessage }}</Message>
 
           <label class="auth-field block">
-            <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Email</span>
+            <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">E-mail</span>
             <InputText v-model="form.email" class="w-full" type="email" autocomplete="email" />
           </label>
 

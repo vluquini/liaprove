@@ -130,7 +130,7 @@ async function submit(): Promise<void> {
             </label>
 
             <label class="auth-field block">
-              <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Email</span>
+              <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">E-mail</span>
               <InputText v-model="form.email" class="w-full" type="email" autocomplete="email" />
             </label>
 
@@ -184,7 +184,7 @@ async function submit(): Promise<void> {
               </label>
 
               <label class="auth-field block">
-                <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">Email corporativo</span>
+                <span class="mb-2 block text-sm font-bold text-[var(--liaprove-ink)]">E-mail corporativo</span>
                 <InputText v-model="form.companyEmail" class="w-full" type="email" />
               </label>
             </template>

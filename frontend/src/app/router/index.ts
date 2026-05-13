@@ -1,5 +1,6 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type Router } from 'vue-router'
 import { redirectAuthenticated, requireAuth } from './guards'
+import { useAuthStore } from '@/shared/stores/auth'
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -27,6 +28,12 @@ export const router = createRouter({
       component: () => import('@/features/dashboard/views/DashboardView.vue'),
     },
     {
+      path: '/profile',
+      name: 'profile',
+      beforeEnter: requireAuth,
+      component: () => import('@/features/profile/views/ProfileView.vue'),
+    },
+    {
       path: '/forbidden',
       name: 'forbidden',
       component: () => import('@/features/errors/views/ForbiddenView.vue'),
@@ -43,8 +50,13 @@ export const router = createRouter({
   ],
 })
 
-window.addEventListener('liaprove:session-expired', () => {
-  if (router.currentRoute.value.path !== '/login') {
-    router.push('/login')
+export function handleSessionExpired(targetRouter: Router = router): void {
+  const auth = useAuthStore()
+  auth.logout()
+
+  if (targetRouter.currentRoute.value.path !== '/login') {
+    targetRouter.push('/login')
   }
-})
+}
+
+window.addEventListener('liaprove:session-expired', () => handleSessionExpired())

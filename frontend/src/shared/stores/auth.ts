@@ -61,6 +61,20 @@ export const useAuthStore = defineStore('auth', () => {
     clearStoredSession()
   }
 
+  function updateUser(nextUser: AuthenticatedUserResponse): void {
+    if (!session.value) {
+      return
+    }
+
+    saveSession({
+      ...session.value,
+      user: {
+        ...session.value.user,
+        ...nextUser,
+      },
+    })
+  }
+
   function hasAnyRole(roles: UserRole[]): boolean {
     return Boolean(user.value && roles.includes(user.value.role))
   }
@@ -72,6 +86,7 @@ export const useAuthStore = defineStore('auth', () => {
     login,
     register,
     logout,
+    updateUser,
     hasAnyRole,
   }
 })
