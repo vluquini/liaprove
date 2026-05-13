@@ -156,3 +156,133 @@ a {
 .dashboard-card .p-card-content p {
   color: #ffffff !important;
 }
+
+.app-shell {
+  background:
+    linear-gradient(120deg, rgba(21, 32, 31, 0.05) 0 1px, transparent 1px 28px),
+    #f3f6f4;
+}
+
+.shell-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.25rem;
+  border: 1px solid var(--liaprove-line);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.45rem 0.75rem;
+  color: var(--liaprove-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.shell-nav-link.router-link-active,
+.shell-nav-link:hover {
+  border-color: rgba(4, 125, 117, 0.35);
+  color: var(--liaprove-accent-strong);
+}
+
+.dashboard-hero {
+  border: 1px solid var(--liaprove-line);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ffffff, #eef7f4);
+  padding: clamp(1.25rem, 2vw, 2rem);
+}
+
+.action-card,
+.profile-summary-card,
+.profile-card {
+  --p-card-background: #ffffff;
+  --p-card-color: var(--liaprove-ink);
+  --p-card-subtitle-color: var(--liaprove-muted);
+  height: 100%;
+  border: 1px solid var(--liaprove-line);
+  border-radius: 8px;
+  background: #ffffff !important;
+  color: var(--liaprove-ink) !important;
+  box-shadow: none;
+}
+
+.action-card .p-card-body,
+.action-card .p-card-content {
+  height: 100%;
+}
+
+.action-card :is(.p-card-title, .p-card-content),
+.profile-summary-card :is(.p-card-title, .p-card-content),
+.profile-card :is(.p-card-title, .p-card-content) {
+  color: var(--liaprove-ink) !important;
+}
+
+.action-icon {
+  display: inline-grid;
+  width: 2.35rem;
+  height: 2.35rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(4, 125, 117, 0.1);
+  color: var(--liaprove-accent-strong);
+}
+
+.profile-field {
+  display: grid;
+  gap: 0.4rem;
+  color: var(--liaprove-ink);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.profile-field :is(.p-inputtext, .p-password, .p-select, textarea) {
+  width: 100%;
+}
+
+.profile-field :is(.p-inputtext, .p-password-input, textarea) {
+  border-radius: 8px;
+}
+
+.profile-password-dialog {
+  --p-dialog-background: #151719;
+  --p-dialog-color: #f8fafc;
+  --p-dialog-header-color: #ffffff;
+  --p-dialog-border-color: rgba(255, 255, 255, 0.12);
+}
+
+.profile-password-dialog .profile-field {
+  color: #f8fafc;
+}
+
+.profile-password-dialog .profile-field > span {
+  color: #f8fafc !important;
+}
+
+.profile-password-dialog .profile-field .p-inputtext {
+  border-color: rgba(248, 250, 252, 0.28);
+  background: #0b0d0f;
+  color: #ffffff !important;
+}
+
+.profile-password-dialog .profile-field .p-inputtext:enabled:focus {
+  border-color: #34d399;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.18);
+}
+
+.status-message {
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  font-weight: 600;
+}
+
+.status-message-success {
+  border: 1px solid rgba(4, 125, 117, 0.25);
+  background: rgba(4, 125, 117, 0.1);
+  color: var(--liaprove-accent-strong);
+}
+
+.status-message-error {
+  border: 1px solid rgba(185, 28, 28, 0.25);
+  background: rgba(254, 226, 226, 0.8);
+  color: #991b1b;
+}

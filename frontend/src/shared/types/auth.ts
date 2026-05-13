@@ -28,7 +28,10 @@ export interface AuthenticatedUserResponse {
   role: UserRole
   status: UserStatus
   occupation?: string | null
+  bio?: string | null
   experienceLevel?: ExperienceLevel | null
+  hardSkills?: string[] | null
+  softSkills?: string[] | null
   companyName?: string | null
   companyEmail?: string | null
 }
