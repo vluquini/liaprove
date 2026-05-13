@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test('registers a professional user and logs in with the same credentials', async ({ page }) => {
+test('registers, logs in, and opens the authenticated profile flow', async ({ page }) => {
   const email = `e2e-${Date.now()}-${Math.random().toString(16).slice(2)}@example.com`
   const password = 'Teste123!'
   const name = 'Usuário E2E'
@@ -17,8 +17,11 @@ test('registers a professional user and logs in with the same credentials', asyn
   await page.getByRole('button', { name: 'Criar cadastro' }).click()
 
   await expect(page).toHaveURL(/\/dashboard$/)
-  await expect(page.getByText('Dashboard')).toBeVisible()
-  await expect(page.getByText(`Olá, ${name}. Seu perfil atual é PROFESSIONAL.`)).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Dashboard' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: `Olá, ${name}` })).toBeVisible()
+  await expect(page.getByText('Resumo do perfil')).toBeVisible()
+  await expect(page.getByText('Tipo')).toBeVisible()
+  await expect(page.getByText('PROFESSIONAL')).toBeVisible()
 
   await page.getByRole('button', { name: 'Sair' }).click()
   await expect(page).toHaveURL(/\/login$/)
@@ -28,5 +31,26 @@ test('registers a professional user and logs in with the same credentials', asyn
   await page.getByRole('button', { name: 'Entrar' }).click()
 
   await expect(page).toHaveURL(/\/dashboard$/)
-  await expect(page.getByText(`Olá, ${name}. Seu perfil atual é PROFESSIONAL.`)).toBeVisible()
+  await expect(page.getByRole('heading', { name: `Olá, ${name}` })).toBeVisible()
+
+  await page.getByRole('link', { name: 'Perfil' }).click()
+
+  await expect(page).toHaveURL(/\/profile$/)
+  await expect(page.getByRole('heading', { name })).toBeVisible()
+  await expect(page.getByText('Revise seus dados básicos')).toBeVisible()
+  await expect(page.getByText('Nome')).toBeVisible()
+  await expect(page.getByText('E-mail')).toBeVisible()
+  await expect(page.locator('[data-test="profile-name"]')).toHaveValue(name)
+  await expect(page.locator('[data-test="profile-email"]')).toHaveValue(email)
+  await expect(page.getByRole('button', { name: 'Salvar perfil' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Alterar senha' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Desativar conta' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Alterar senha' }).click()
+
+  await expect(page.getByRole('dialog', { name: 'Alterar senha' })).toBeVisible()
+  await expect(page.getByText('Senha atual')).toBeVisible()
+  await expect(page.getByText('Nova senha')).toBeVisible()
+  await page.getByRole('button', { name: 'Cancelar' }).click()
+  await expect(page.getByRole('dialog', { name: 'Alterar senha' })).not.toBeVisible()
 })
