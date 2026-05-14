@@ -34,6 +34,24 @@ export const router = createRouter({
       component: () => import('@/features/profile/views/ProfileView.vue'),
     },
     {
+      path: '/questions/voting',
+      name: 'questions-voting',
+      beforeEnter: requireAuth,
+      component: () => import('@/features/questions/views/QuestionsVotingListView.vue'),
+    },
+    {
+      path: '/questions/:id/voting',
+      name: 'question-voting-detail',
+      beforeEnter: requireAuth,
+      component: () => import('@/features/questions/views/QuestionVotingDetailView.vue'),
+    },
+    {
+      path: '/questions/new',
+      name: 'question-new',
+      beforeEnter: requireAuth,
+      component: () => import('@/features/questions/views/QuestionSubmissionView.vue'),
+    },
+    {
       path: '/forbidden',
       name: 'forbidden',
       component: () => import('@/features/errors/views/ForbiddenView.vue'),
