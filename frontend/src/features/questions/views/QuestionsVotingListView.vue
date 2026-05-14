@@ -98,7 +98,7 @@ onMounted(loadQuestions)
         <Card v-for="question in questions" :key="question.id" class="action-card question-card">
           <template #content>
             <div class="flex h-full flex-col gap-4">
-              <div class="flex items-start gap-3">
+              <div class="flex items-center gap-3">
                 <span class="action-icon">
                   <i class="pi pi-check-square" aria-hidden="true" />
                 </span>

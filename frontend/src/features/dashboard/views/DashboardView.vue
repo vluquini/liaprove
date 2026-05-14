@@ -105,7 +105,7 @@ function canShow(action: Action): boolean {
         <Card v-for="action in actions.filter(canShow)" :key="action.label" class="action-card">
           <template #content>
             <div class="flex h-full flex-col gap-4">
-              <div class="flex items-start gap-3">
+              <div class="flex items-center gap-3">
                 <span class="action-icon">
                   <i :class="action.icon" aria-hidden="true" />
                 </span>
