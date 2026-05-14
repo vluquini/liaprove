@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { login as loginRequest, register as registerRequest } from '@/features/auth/services/authService'
+import { devAuthUser, isDevAuthBypassEnabled } from '@/shared/config/authMode'
 import {
   clearStoredSession,
   isSessionExpired,
@@ -25,7 +26,7 @@ function toSession(response: StoredSession): StoredSession {
 }
 
 export const useAuthStore = defineStore('auth', () => {
-  const storedSession = readStoredSession()
+  const storedSession = isDevAuthBypassEnabled ? null : readStoredSession()
   const session = ref<StoredSession | null>(
     storedSession && !isSessionExpired(storedSession.expiresAt) ? storedSession : null,
   )
@@ -34,8 +35,10 @@ export const useAuthStore = defineStore('auth', () => {
     clearStoredSession()
   }
 
-  const user = computed<AuthenticatedUserResponse | null>(() => session.value?.user ?? null)
-  const isAuthenticated = computed(() => Boolean(session.value) && !isExpired())
+  const user = computed<AuthenticatedUserResponse | null>(() =>
+    isDevAuthBypassEnabled ? devAuthUser : session.value?.user ?? null,
+  )
+  const isAuthenticated = computed(() => isDevAuthBypassEnabled || (Boolean(session.value) && !isExpired()))
 
   function isExpired(): boolean {
     return session.value ? isSessionExpired(session.value.expiresAt) : true

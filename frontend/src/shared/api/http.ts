@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { devAuthUser, isDevAuthBypassEnabled } from '@/shared/config/authMode'
 import { clearStoredSession, isSessionExpired, readStoredSession } from '@/shared/utils/session'
 
 export const http = axios.create({
@@ -6,6 +7,11 @@ export const http = axios.create({
 })
 
 http.interceptors.request.use((config) => {
+  if (isDevAuthBypassEnabled) {
+    config.headers.set('X-Dev-User-Email', devAuthUser.email)
+    return config
+  }
+
   const session = readStoredSession()
 
   if (!session) {

@@ -5,6 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:professional": "vite --mode dev-professional",
+    "dev:recruiter": "vite --mode dev-recruiter",
+    "dev:admin": "vite --mode dev-admin",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",

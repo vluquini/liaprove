@@ -1,4 +1,5 @@
 import type { NavigationGuardNext, RouteLocationNormalized } from 'vue-router'
+import { isDevAuthBypassEnabled } from '@/shared/config/authMode'
 import { useAuthStore } from '@/shared/stores/auth'
 import type { UserRole } from '@/shared/types/auth'
 
@@ -14,7 +15,7 @@ export function requireAuth(
   const auth = useAuthStore()
   const allowedRoles = to.meta.roles as UserRole[] | undefined
 
-  if (!auth.isAuthenticated) {
+  if (!isDevAuthBypassEnabled && !auth.isAuthenticated) {
     next({ path: '/login', query: { redirect: to.fullPath } })
     return
   }
@@ -34,7 +35,7 @@ export function redirectAuthenticated(
 ): void {
   const auth = useAuthStore()
 
-  if (auth.isAuthenticated) {
+  if (!isDevAuthBypassEnabled && auth.isAuthenticated) {
     next(dashboardRouteForRole(auth.user?.role))
     return
   }
