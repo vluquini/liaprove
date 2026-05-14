@@ -52,6 +52,9 @@ describe('DashboardView', () => {
   it('shows recruiter quick actions and company context', async () => {
     const wrapper = await mountDashboard('RECRUITER')
 
+    expect(wrapper.text()).toContain('Iniciar avaliação')
+    expect(wrapper.text()).toContain('Submeter questão')
+    expect(wrapper.text()).toContain('Votar em questões')
     expect(wrapper.text()).toContain('Analisar vaga')
     expect(wrapper.text()).toContain('Criar avaliação personalizada')
     expect(wrapper.text()).toContain('Questão aberta')

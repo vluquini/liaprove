@@ -21,14 +21,14 @@ const actions: Action[] = [
     description: 'Comece uma avaliação do sistema.',
     to: '/assessments/start',
     icon: 'pi pi-play-circle',
-    roles: ['PROFESSIONAL', 'ADMIN'],
+    roles: ['PROFESSIONAL', 'RECRUITER', 'ADMIN'],
   },
   {
     label: 'Submeter questão',
     description: 'Envie uma questão para curadoria.',
     to: '/questions/new',
     icon: 'pi pi-plus-circle',
-    roles: ['PROFESSIONAL', 'ADMIN'],
+    roles: ['PROFESSIONAL', 'RECRUITER', 'ADMIN'],
   },
   {
     label: 'Votar em questões',
