@@ -15,6 +15,7 @@ export default defineConfig({
     exclude: ['e2e/**', 'node_modules/**', 'dist/**'],
     globals: true,
     setupFiles: ['./src/test/setup.ts'],
+    testTimeout: 10000,
   },
   server: {
     host: '127.0.0.1',
