@@ -45,6 +45,7 @@ function logout(): void {
             <span class="hidden text-sm text-[var(--liaprove-muted)] sm:inline">{{ auth.user?.name }}</span>
             <Button
               data-test="logout-button"
+              class="shell-logout-button"
               label="Sair"
               icon="pi pi-sign-out"
               severity="secondary"

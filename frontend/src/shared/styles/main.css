@@ -184,6 +184,15 @@ a {
   color: var(--liaprove-accent-strong);
 }
 
+.shell-logout-button.p-button {
+  align-items: center;
+}
+
+.shell-logout-button .p-button-icon {
+  line-height: 1;
+  transform: translateY(1px);
+}
+
 .dashboard-hero {
   border: 1px solid var(--liaprove-line);
   border-radius: 8px;
