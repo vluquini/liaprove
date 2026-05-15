@@ -17,6 +17,7 @@ type NavItem = {
 const navigation: NavItem[] = [
   { label: 'Dashboard', to: '/dashboard', icon: 'pi pi-home' },
   { label: 'Perfil', to: '/profile', icon: 'pi pi-user' },
+  { label: 'Questões', to: '/questions/voting', icon: 'pi pi-check-square' },
   { label: 'Recrutador', to: '/recruiter/job-analysis', icon: 'pi pi-briefcase', roles: ['RECRUITER', 'ADMIN'] },
   { label: 'Admin', to: '/admin/users', icon: 'pi pi-shield', roles: ['ADMIN'] },
 ]
@@ -44,6 +45,7 @@ function logout(): void {
             <span class="hidden text-sm text-[var(--liaprove-muted)] sm:inline">{{ auth.user?.name }}</span>
             <Button
               data-test="logout-button"
+              class="shell-logout-button"
               label="Sair"
               icon="pi pi-sign-out"
               severity="secondary"
