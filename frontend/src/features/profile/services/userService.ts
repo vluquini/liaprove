@@ -22,6 +22,15 @@ export interface ChangePasswordRequest {
   newPassword: string
 }
 
+export interface UserCertificateResponse {
+  certificateNumber: string
+  title: string
+  description: string
+  certificateUrl: string
+  issueDate: string
+  score: number
+}
+
 export async function getUserProfile(id: string): Promise<UserProfileResponse> {
   const response = await http.get<UserProfileResponse>(`/v1/users/${id}`)
   return response.data
@@ -41,4 +50,11 @@ export async function changePassword(id: string, request: ChangePasswordRequest)
 
 export async function deactivateOwnAccount(): Promise<void> {
   await http.patch('/v1/users/me/deactivate')
+}
+
+export async function listMyCertificates(): Promise<UserCertificateResponse[]> {
+  const response = await http.get<UserCertificateResponse[]>('/v1/users/me/certificates', {
+    skipSessionExpiredRedirect: true,
+  })
+  return response.data
 }

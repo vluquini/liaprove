@@ -1,6 +1,7 @@
 package com.lia.liaprove.infrastructure.repositories.assessment;
 
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
+import com.lia.liaprove.infrastructure.entities.assessment.CertificateEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -56,6 +57,15 @@ public interface AssessmentAttemptJpaRepository extends JpaRepository<Assessment
         WHERE c.certificateNumber = :certificateNumber
     """)
     Optional<AssessmentAttemptEntity> findByCertificateNumber(@Param("certificateNumber") String certificateNumber);
+
+    @Query("""
+        SELECT c
+        FROM AssessmentAttemptEntity a
+        JOIN a.certificate c
+        WHERE a.user.id = :userId
+        ORDER BY c.issueDate DESC, c.certificateNumber ASC
+    """)
+    List<CertificateEntity> findCertificatesByUserId(@Param("userId") UUID userId);
 
     @Query("""
         SELECT DISTINCT a
