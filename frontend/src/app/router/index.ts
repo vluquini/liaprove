@@ -22,6 +22,11 @@ export const router = createRouter({
       component: () => import('@/features/auth/views/RegisterView.vue'),
     },
     {
+      path: '/certificates/:certificateNumber',
+      name: 'certificate-public',
+      component: () => import('@/features/certificates/views/CertificateVerificationView.vue'),
+    },
+    {
       path: '/dashboard',
       name: 'dashboard',
       beforeEnter: requireAuth,
@@ -32,6 +37,24 @@ export const router = createRouter({
       name: 'profile',
       beforeEnter: requireAuth,
       component: () => import('@/features/profile/views/ProfileView.vue'),
+    },
+    {
+      path: '/assessments/start',
+      name: 'assessment-start',
+      beforeEnter: requireAuth,
+      component: () => import('@/features/assessments/views/AssessmentStartView.vue'),
+    },
+    {
+      path: '/assessments/attempts/:attemptId',
+      name: 'assessment-attempt',
+      beforeEnter: requireAuth,
+      component: () => import('@/features/assessments/views/AssessmentAttemptView.vue'),
+    },
+    {
+      path: '/assessments/attempts/:attemptId/result',
+      name: 'assessment-result',
+      beforeEnter: requireAuth,
+      component: () => import('@/features/assessments/views/AssessmentResultView.vue'),
     },
     {
       path: '/questions/voting',

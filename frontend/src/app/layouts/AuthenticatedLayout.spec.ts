@@ -16,6 +16,7 @@ function makeRouter() {
       { path: '/login', component: { template: '<div>Login</div>' } },
       { path: '/dashboard', component: { template: '<div>Dashboard</div>' } },
       { path: '/profile', component: { template: '<div>Perfil</div>' } },
+      { path: '/assessments/start', component: { template: '<div>Avaliacoes</div>' } },
       { path: '/questions/voting', component: { template: '<div>Questoes</div>' } },
       { path: '/recruiter/job-analysis', component: { template: '<div>Analise</div>' } },
       { path: '/admin/users', component: { template: '<div>Usuarios</div>' } },
@@ -44,6 +45,7 @@ describe('AuthenticatedLayout', () => {
     expect(wrapper.text()).toContain('Ana Silva')
     expect(wrapper.text()).toContain('Dashboard')
     expect(wrapper.text()).toContain('Perfil')
+    expect(wrapper.text()).toContain('Avaliações')
     expect(wrapper.text()).toContain('Questões')
     expect(wrapper.text()).toContain('Conteudo protegido')
 
