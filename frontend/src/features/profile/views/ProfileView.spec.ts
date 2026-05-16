@@ -29,6 +29,7 @@ function makeRouter() {
     routes: [
       { path: '/login', component: { template: '<div>Login</div>' } },
       { path: '/profile', component: ProfileView },
+      { path: '/certificates/:certificateNumber', component: { template: '<div>Certificado</div>' } },
     ],
   })
 }
@@ -65,6 +66,18 @@ describe('ProfileView', () => {
       http.patch('*/api/v1/users/me/deactivate', () =>
         HttpResponse.text('Account deactivated successfully.'),
       ),
+      http.get('*/api/v1/users/me/certificates', () =>
+        HttpResponse.json([
+          {
+            certificateNumber: 'CERT-123',
+            title: 'Certificado de Conclusão: Avaliação de SOFTWARE_DEVELOPMENT',
+            description: 'Certificado emitido pelo LIA Prove.',
+            certificateUrl: 'https://liaprove.com/certificates/CERT-123',
+            issueDate: '2026-05-16',
+            score: 92,
+          },
+        ]),
+      ),
     )
   })
 
@@ -83,6 +96,42 @@ describe('ProfileView', () => {
 
     expect(wrapper.text()).toContain('Perfil atualizado com sucesso.')
     expect(wrapper.text()).toContain('Ana Souza')
+  })
+
+  it('loads certificates in the user profile', async () => {
+    const { wrapper } = await mountProfile()
+
+    expect(wrapper.text()).toContain('Meus certificados')
+    expect(wrapper.text()).toContain('Certificado de Conclusão: Avaliação de Desenvolvimento de Software')
+    expect(wrapper.text()).toContain('92%')
+    expect(wrapper.get('[data-test="certificate-CERT-123"]').attributes('href')).toBe('/certificates/CERT-123')
+  })
+
+  it('renders certificates before the profile data form', async () => {
+    const { wrapper } = await mountProfile()
+    const certificatesSection = wrapper.get('[data-test="certificates-section"]').element
+    const profileForm = wrapper.get('[data-test="profile-form-section"]').element
+
+    expect(certificatesSection.compareDocumentPosition(profileForm) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
+  it('keeps the profile session when certificates cannot be loaded', async () => {
+    server.use(
+      http.get('*/api/v1/users/me/certificates', () =>
+        HttpResponse.json(
+          { error: 'Unauthorized: Full authentication is required to access this resource' },
+          { status: 401 },
+        ),
+      ),
+    )
+
+    const { wrapper, router } = await mountProfile()
+
+    expect(wrapper.text()).toContain('Ana Silva')
+    expect(wrapper.text()).toContain('Não foi possível carregar seus certificados agora.')
+    expect(wrapper.text()).not.toContain('Unauthorized: Full authentication is required to access this resource')
+    expect(router.currentRoute.value.path).toBe('/profile')
+    expect(localStorage.getItem('liaprove.auth.session')).not.toBeNull()
   })
 
   it('changes password from a separate dialog', async () => {

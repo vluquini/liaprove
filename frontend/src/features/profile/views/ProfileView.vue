@@ -11,11 +11,14 @@ import AuthenticatedLayout from '@/app/layouts/AuthenticatedLayout.vue'
 import { normalizeApiError } from '@/shared/api/errors'
 import { useAuthStore } from '@/shared/stores/auth'
 import type { ExperienceLevel } from '@/shared/types/auth'
+import { formatAssessmentText } from '@/features/assessments/utils/assessmentLabels'
 import {
   changePassword,
   deactivateOwnAccount,
   getUserProfile,
+  listMyCertificates,
   updateUserProfile,
+  type UserCertificateResponse,
   type UserProfileResponse,
 } from '../services/userService'
 
@@ -28,6 +31,9 @@ const passwordDialogVisible = ref(false)
 const passwordSaving = ref(false)
 const message = ref('')
 const errorMessage = ref('')
+const certificateErrorMessage = ref('')
+const certificatesLoading = ref(true)
+const certificates = ref<UserCertificateResponse[]>([])
 
 const experienceOptions: ExperienceLevel[] = ['JUNIOR', 'PLENO', 'SENIOR']
 
@@ -69,6 +75,33 @@ function fillForm(profile: UserProfileResponse): void {
   form.softSkillsText = skillsToText(profile.softSkills)
 }
 
+function formatDate(value: string): string {
+  return new Intl.DateTimeFormat('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  }).format(new Date(`${value}T00:00:00`))
+}
+
+function certificateRoute(certificateUrl: string): string {
+  const match = certificateUrl.trim().match(/(?:^|\/)certificates\/([^/?#]+)/)
+  return match?.[1] ? `/certificates/${match[1]}` : certificateUrl
+}
+
+function certificateScoreLabel(score: number): string {
+  return `${score}%`
+}
+
+function certificateLoadErrorMessage(error: unknown): string {
+  const apiError = normalizeApiError(error)
+
+  if (apiError.status === 401) {
+    return 'Não foi possível carregar seus certificados agora.'
+  }
+
+  return apiError.message
+}
+
 async function loadProfile(): Promise<void> {
   if (!auth.user) {
     return
@@ -83,6 +116,25 @@ async function loadProfile(): Promise<void> {
     errorMessage.value = normalizeApiError(error).message
   } finally {
     loading.value = false
+  }
+}
+
+async function loadCertificates(): Promise<void> {
+  if (!auth.user) {
+    certificatesLoading.value = false
+    return
+  }
+
+  certificatesLoading.value = true
+  certificateErrorMessage.value = ''
+
+  try {
+    certificates.value = await listMyCertificates()
+  } catch (error) {
+    certificates.value = []
+    certificateErrorMessage.value = certificateLoadErrorMessage(error)
+  } finally {
+    certificatesLoading.value = false
   }
 }
 
@@ -155,7 +207,10 @@ async function deactivateAccount(): Promise<void> {
   }
 }
 
-onMounted(loadProfile)
+onMounted(() => {
+  void loadProfile()
+  void loadCertificates()
+})
 </script>
 
 <template>
@@ -176,7 +231,65 @@ onMounted(loadProfile)
 
       <Card class="profile-card">
         <template #content>
-          <form class="grid gap-5 lg:grid-cols-2" @submit.prevent="saveProfile">
+          <section data-test="certificates-section" class="space-y-4">
+            <div class="flex flex-col gap-1">
+              <p class="auth-kicker text-sm font-semibold uppercase text-[var(--liaprove-accent-strong)]">
+                Certificados
+              </p>
+              <h2 class="text-2xl font-semibold text-[var(--liaprove-ink)]">Meus certificados</h2>
+              <p class="text-[var(--liaprove-muted)]">
+                Consulte os certificados emitidos a partir das suas avaliações aprovadas.
+              </p>
+            </div>
+
+            <p v-if="certificatesLoading" class="status-message status-message-success">Carregando certificados...</p>
+            <p v-else-if="certificateErrorMessage" class="status-message status-message-error">
+              {{ certificateErrorMessage }}
+            </p>
+            <div
+              v-else-if="certificates.length === 0"
+              class="rounded-md border border-[var(--liaprove-line)] bg-white p-4 text-[var(--liaprove-muted)]"
+            >
+              Você ainda não possui certificados emitidos.
+            </div>
+            <div v-else class="grid gap-3 lg:grid-cols-2">
+              <article
+                v-for="certificate in certificates"
+                :key="certificate.certificateNumber"
+                class="rounded-md border border-[var(--liaprove-line)] bg-white p-4 text-[var(--liaprove-ink)]"
+              >
+                <div class="flex flex-col gap-3">
+                  <div>
+                    <p class="text-xs font-semibold uppercase text-[var(--liaprove-muted)]">
+                      {{ certificate.certificateNumber }}
+                    </p>
+                    <h3 class="mt-1 text-lg font-semibold">
+                      {{ formatAssessmentText(certificate.title) }}
+                    </h3>
+                    <p class="mt-2 text-sm text-[var(--liaprove-muted)]">
+                      Emitido em {{ formatDate(certificate.issueDate) }}
+                    </p>
+                  </div>
+
+                  <div class="flex flex-wrap items-center justify-between gap-3">
+                    <span class="assessment-progress-pill">{{ certificateScoreLabel(certificate.score) }}</span>
+                    <RouterLink
+                      :to="certificateRoute(certificate.certificateUrl)"
+                      :data-test="`certificate-${certificate.certificateNumber}`"
+                    >
+                      <Button label="Ver certificado" icon="pi pi-verified" size="small" />
+                    </RouterLink>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </section>
+        </template>
+      </Card>
+
+      <Card class="profile-card">
+        <template #content>
+          <form data-test="profile-form-section" class="grid gap-5 lg:grid-cols-2" @submit.prevent="saveProfile">
             <label class="profile-field">
               <span>Nome</span>
               <InputText data-test="profile-name" v-model="form.name" :disabled="loading" />

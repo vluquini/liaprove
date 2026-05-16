@@ -2,6 +2,7 @@ package com.lia.liaprove.application.gateways.assessment;
 
 import com.lia.liaprove.application.services.assessment.dto.ListAttemptsFilterDto;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
+import com.lia.liaprove.core.domain.assessment.Certificate;
 
 import java.util.List;
 import java.time.LocalDateTime;
@@ -39,6 +40,8 @@ public interface AssessmentAttemptGateway {
      * @return Tentativa correspondente, se encontrada.
      */
     Optional<AssessmentAttempt> findByCertificateNumber(String certificateNumber);
+
+    List<Certificate> findCertificatesByUserId(UUID userId);
 
     /**
      * Busca todas as tentativas para uma avaliação específica.

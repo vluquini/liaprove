@@ -1,7 +1,13 @@
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { server } from '@/test/msw'
-import { changePassword, deactivateOwnAccount, getUserProfile, updateUserProfile } from './userService'
+import {
+  changePassword,
+  deactivateOwnAccount,
+  getUserProfile,
+  listMyCertificates,
+  updateUserProfile,
+} from './userService'
 
 describe('userService', () => {
   it('loads and updates a user profile by id', async () => {
@@ -75,5 +81,30 @@ describe('userService', () => {
       newPassword: 'new-secret',
     })
     expect(deactivateCalled).toBe(true)
+  })
+
+  it('lists certificates for the authenticated user', async () => {
+    server.use(
+      http.get('*/api/v1/users/me/certificates', ({ request }) => {
+        expect(new URL(request.url).pathname).toBe('/api/v1/users/me/certificates')
+
+        return HttpResponse.json([
+          {
+            certificateNumber: 'CERT-123',
+            title: 'Certificado de Conclusão: Avaliação de SOFTWARE_DEVELOPMENT',
+            description: 'Certificado emitido pelo LIA Prove.',
+            certificateUrl: 'https://liaprove.com/certificates/CERT-123',
+            issueDate: '2026-05-16',
+            score: 92,
+          },
+        ])
+      }),
+    )
+
+    const certificates = await listMyCertificates()
+
+    expect(certificates).toHaveLength(1)
+    expect(certificates[0].certificateNumber).toBe('CERT-123')
+    expect(certificates[0].score).toBe(92)
   })
 })

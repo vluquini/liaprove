@@ -3,11 +3,13 @@ package com.lia.liaprove.infrastructure.services.assessment;
 import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
 import com.lia.liaprove.application.services.assessment.dto.ListAttemptsFilterDto;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
+import com.lia.liaprove.core.domain.assessment.Certificate;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.SystemAssessmentEntity;
 import com.lia.liaprove.infrastructure.mappers.assessment.AssessmentAttemptMapper;
+import com.lia.liaprove.infrastructure.mappers.assessment.CertificateMapper;
 import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentAttemptJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentJpaRepository;
 import org.springframework.data.domain.Sort;
@@ -27,15 +29,18 @@ public class AssessmentAttemptGatewayImpl implements AssessmentAttemptGateway {
     private final AssessmentAttemptJpaRepository assessmentAttemptJpaRepository;
     private final AssessmentJpaRepository assessmentJpaRepository;
     private final AssessmentAttemptMapper assessmentAttemptMapper;
+    private final CertificateMapper certificateMapper;
 
     public AssessmentAttemptGatewayImpl(
             AssessmentAttemptJpaRepository assessmentAttemptJpaRepository,
             AssessmentJpaRepository assessmentJpaRepository,
-            AssessmentAttemptMapper assessmentAttemptMapper
+            AssessmentAttemptMapper assessmentAttemptMapper,
+            CertificateMapper certificateMapper
     ) {
         this.assessmentAttemptJpaRepository = assessmentAttemptJpaRepository;
         this.assessmentJpaRepository = assessmentJpaRepository;
         this.assessmentAttemptMapper = assessmentAttemptMapper;
+        this.certificateMapper = certificateMapper;
     }
 
     @Override
@@ -73,6 +78,14 @@ public class AssessmentAttemptGatewayImpl implements AssessmentAttemptGateway {
     public Optional<AssessmentAttempt> findByCertificateNumber(String certificateNumber) {
         return assessmentAttemptJpaRepository.findByCertificateNumber(certificateNumber)
                 .map(assessmentAttemptMapper::toDomainSummary);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<Certificate> findCertificatesByUserId(UUID userId) {
+        return assessmentAttemptJpaRepository.findCertificatesByUserId(userId).stream()
+                .map(certificateMapper::toDomain)
+                .collect(Collectors.toList());
     }
 
     @Override

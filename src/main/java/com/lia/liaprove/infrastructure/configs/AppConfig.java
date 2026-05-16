@@ -95,6 +95,11 @@ public class AppConfig {
     }
 
     @Bean
+    public ListMyCertificatesUseCase listMyCertificatesUseCase(AssessmentAttemptGateway assessmentAttemptGateway) {
+        return new ListMyCertificatesUseCaseImpl(assessmentAttemptGateway);
+    }
+
+    @Bean
     public FindUsersUseCase findUsersUseCase(UserGateway userGateway) {
         return new FindUsersUseCaseImpl(userGateway);
     }
