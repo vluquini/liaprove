@@ -29,4 +29,14 @@ describe('main styles', () => {
     expect(css).toContain('color: #ffffff !important')
     expect(css).toContain('.question-check-option')
   })
+
+  it('keeps assessment and certificate screens readable over the PrimeVue theme', () => {
+    const css = readFileSync(cssPath, 'utf8')
+
+    expect(css).toContain('.assessment-card')
+    expect(css).toContain('.assessment-question-card')
+    expect(css).toContain('.certificate-panel')
+    expect(css).toContain('.assessment-progress-pill')
+    expect(css).toContain('border-radius: 8px')
+  })
 })

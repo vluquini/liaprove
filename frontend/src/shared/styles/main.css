@@ -355,3 +355,34 @@ a {
   height: 1rem;
   accent-color: var(--liaprove-accent);
 }
+
+.assessment-card,
+.assessment-question-card,
+.certificate-panel {
+  --p-card-background: #ffffff;
+  --p-card-color: var(--liaprove-ink);
+  --p-card-subtitle-color: var(--liaprove-muted);
+  border: 1px solid var(--liaprove-line);
+  border-radius: 8px;
+  background: #ffffff !important;
+  color: var(--liaprove-ink) !important;
+  box-shadow: none;
+}
+
+.assessment-card :is(.p-card-title, .p-card-content),
+.assessment-question-card :is(.p-card-title, .p-card-content),
+.certificate-panel :is(.p-card-title, .p-card-content) {
+  color: var(--liaprove-ink) !important;
+}
+
+.assessment-progress-pill {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid rgba(4, 125, 117, 0.2);
+  border-radius: 8px;
+  background: rgba(4, 125, 117, 0.08);
+  padding: 0.2rem 0.55rem;
+  color: var(--liaprove-accent-strong);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
