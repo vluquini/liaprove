@@ -4,6 +4,8 @@ import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway
 import com.lia.liaprove.application.services.assessment.dto.ListAttemptsFilterDto;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.Certificate;
+import com.lia.liaprove.core.domain.question.DifficultyLevel;
+import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
@@ -12,13 +14,17 @@ import com.lia.liaprove.infrastructure.mappers.assessment.AssessmentAttemptMappe
 import com.lia.liaprove.infrastructure.mappers.assessment.CertificateMapper;
 import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentAttemptJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentJpaRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -83,9 +89,38 @@ public class AssessmentAttemptGatewayImpl implements AssessmentAttemptGateway {
     @Override
     @Transactional(readOnly = true)
     public List<Certificate> findCertificatesByUserId(UUID userId) {
-        return assessmentAttemptJpaRepository.findCertificatesByUserId(userId).stream()
+        Map<String, AssessmentAttemptEntity> bestAttemptsByCertificateSlot = new LinkedHashMap<>();
+
+        for (AssessmentAttemptEntity attempt : assessmentAttemptJpaRepository.findCertifiedAttemptsByUserId(userId)) {
+            bestAttemptsByCertificateSlot.merge(
+                    certificateSlotKey(attempt),
+                    attempt,
+                    this::bestCertifiedAttempt
+            );
+        }
+
+        return bestAttemptsByCertificateSlot.values().stream()
+                .sorted(certificateListOrdering())
+                .map(AssessmentAttemptEntity::getCertificate)
                 .map(certificateMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Optional<AssessmentAttempt> findBestCertifiedSystemAttemptByUserAndCriteria(
+            UUID userId,
+            KnowledgeArea knowledgeArea,
+            DifficultyLevel difficultyLevel
+    ) {
+        return assessmentAttemptJpaRepository.findCertifiedSystemAttemptsByUserAndCriteria(
+                        userId,
+                        knowledgeArea,
+                        difficultyLevel,
+                        PageRequest.of(0, 1)
+                ).stream()
+                .findFirst()
+                .map(assessmentAttemptMapper::toDomainSummary);
     }
 
     @Override
@@ -163,5 +198,52 @@ public class AssessmentAttemptGatewayImpl implements AssessmentAttemptGateway {
     public boolean existsByAssessmentIdAndUserId(UUID assessmentId, UUID userId) {
         return assessmentAttemptJpaRepository.existsByAssessmentIdAndUserId(assessmentId, userId);
     }
-}
 
+    private String certificateSlotKey(AssessmentAttemptEntity attempt) {
+        if (attempt.getAssessment() instanceof SystemAssessmentEntity systemAssessment
+                && systemAssessment.getKnowledgeArea() != null
+                && systemAssessment.getDifficultyLevel() != null) {
+            return "system:%s:%s".formatted(
+                    systemAssessment.getKnowledgeArea(),
+                    systemAssessment.getDifficultyLevel()
+            );
+        }
+
+        return "attempt:%s".formatted(attempt.getId());
+    }
+
+    private AssessmentAttemptEntity bestCertifiedAttempt(
+            AssessmentAttemptEntity current,
+            AssessmentAttemptEntity candidate
+    ) {
+        return certificatePriorityOrdering().compare(candidate, current) < 0 ? candidate : current;
+    }
+
+    private Comparator<AssessmentAttemptEntity> certificatePriorityOrdering() {
+        return Comparator
+                .comparing(
+                        (AssessmentAttemptEntity attempt) -> Optional.ofNullable(attempt.getCertificate().getScore()).orElse(-1F),
+                        Comparator.reverseOrder()
+                )
+                .thenComparing(
+                        attempt -> attempt.getCertificate().getIssueDate(),
+                        Comparator.nullsLast(Comparator.reverseOrder())
+                )
+                .thenComparing(
+                        attempt -> attempt.getCertificate().getCertificateNumber(),
+                        Comparator.nullsLast(String::compareTo)
+                );
+    }
+
+    private Comparator<AssessmentAttemptEntity> certificateListOrdering() {
+        return Comparator
+                .comparing(
+                        (AssessmentAttemptEntity attempt) -> attempt.getCertificate().getIssueDate(),
+                        Comparator.nullsLast(Comparator.reverseOrder())
+                )
+                .thenComparing(
+                        attempt -> attempt.getCertificate().getCertificateNumber(),
+                        Comparator.nullsLast(String::compareTo)
+                );
+    }
+}

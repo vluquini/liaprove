@@ -1,8 +1,11 @@
 package com.lia.liaprove.infrastructure.repositories.assessment;
 
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
+import com.lia.liaprove.core.domain.question.DifficultyLevel;
+import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.infrastructure.entities.assessment.CertificateEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -66,6 +69,36 @@ public interface AssessmentAttemptJpaRepository extends JpaRepository<Assessment
         ORDER BY c.issueDate DESC, c.certificateNumber ASC
     """)
     List<CertificateEntity> findCertificatesByUserId(@Param("userId") UUID userId);
+
+    @Query("""
+        SELECT a
+        FROM AssessmentAttemptEntity a
+        JOIN FETCH a.user u
+        JOIN FETCH a.assessment ass
+        JOIN FETCH a.certificate c
+        WHERE u.id = :userId
+        ORDER BY c.issueDate DESC, c.certificateNumber ASC
+    """)
+    List<AssessmentAttemptEntity> findCertifiedAttemptsByUserId(@Param("userId") UUID userId);
+
+    @Query("""
+        SELECT a
+        FROM AssessmentAttemptEntity a
+        JOIN FETCH a.user u
+        JOIN FETCH a.assessment ass
+        JOIN FETCH a.certificate c
+        WHERE u.id = :userId
+          AND TYPE(ass) = SystemAssessmentEntity
+          AND TREAT(ass AS SystemAssessmentEntity).knowledgeArea = :knowledgeArea
+          AND TREAT(ass AS SystemAssessmentEntity).difficultyLevel = :difficultyLevel
+        ORDER BY c.score DESC, c.issueDate DESC, c.certificateNumber ASC
+    """)
+    List<AssessmentAttemptEntity> findCertifiedSystemAttemptsByUserAndCriteria(
+            @Param("userId") UUID userId,
+            @Param("knowledgeArea") KnowledgeArea knowledgeArea,
+            @Param("difficultyLevel") DifficultyLevel difficultyLevel,
+            Pageable pageable
+    );
 
     @Query("""
         SELECT DISTINCT a

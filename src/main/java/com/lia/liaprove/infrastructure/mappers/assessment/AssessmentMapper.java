@@ -67,6 +67,24 @@ public interface AssessmentMapper {
     PersonalizedAssessment toDomain(PersonalizedAssessmentEntity entity);
 
     @ObjectFactory
+    default SystemAssessment createSystemAssessment(SystemAssessmentEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        return new SystemAssessment(
+                entity.getId(),
+                entity.getTitle(),
+                entity.getDescription(),
+                entity.getCreationDate(),
+                null,
+                map(entity.getEvaluationTimerSeconds()),
+                entity.getKnowledgeArea(),
+                entity.getDifficultyLevel()
+        );
+    }
+
+    @ObjectFactory
     default PersonalizedAssessment createPersonalizedAssessment(PersonalizedAssessmentEntity entity) {
         if (entity == null) {
             return null;

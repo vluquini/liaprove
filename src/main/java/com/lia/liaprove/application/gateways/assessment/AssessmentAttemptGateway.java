@@ -3,6 +3,8 @@ package com.lia.liaprove.application.gateways.assessment;
 import com.lia.liaprove.application.services.assessment.dto.ListAttemptsFilterDto;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.Certificate;
+import com.lia.liaprove.core.domain.question.DifficultyLevel;
+import com.lia.liaprove.core.domain.question.KnowledgeArea;
 
 import java.util.List;
 import java.time.LocalDateTime;
@@ -42,6 +44,12 @@ public interface AssessmentAttemptGateway {
     Optional<AssessmentAttempt> findByCertificateNumber(String certificateNumber);
 
     List<Certificate> findCertificatesByUserId(UUID userId);
+
+    Optional<AssessmentAttempt> findBestCertifiedSystemAttemptByUserAndCriteria(
+            UUID userId,
+            KnowledgeArea knowledgeArea,
+            DifficultyLevel difficultyLevel
+    );
 
     /**
      * Busca todas as tentativas para uma avaliação específica.
