@@ -102,7 +102,8 @@ describe('ProfileView', () => {
     const { wrapper } = await mountProfile()
 
     expect(wrapper.text()).toContain('Meus certificados')
-    expect(wrapper.text()).toContain('Certificado de Conclusão: Avaliação de Desenvolvimento de Software')
+    expect(wrapper.text()).toContain('Avaliação de Desenvolvimento de Software')
+    expect(wrapper.text()).not.toContain('Certificado de Conclusão:')
     expect(wrapper.text()).toContain('92%')
     expect(wrapper.get('[data-test="certificate-CERT-123"]').attributes('href')).toBe('/certificates/CERT-123')
   })

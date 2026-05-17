@@ -92,6 +92,10 @@ function certificateScoreLabel(score: number): string {
   return `${score}%`
 }
 
+function certificateTitleLabel(title: string): string {
+  return formatAssessmentText(title).replace(/^Certificado de Conclusão:\s*/u, '')
+}
+
 function certificateLoadErrorMessage(error: unknown): string {
   const apiError = normalizeApiError(error)
 
@@ -264,7 +268,7 @@ onMounted(() => {
                       {{ certificate.certificateNumber }}
                     </p>
                     <h3 class="mt-1 text-lg font-semibold">
-                      {{ formatAssessmentText(certificate.title) }}
+                      {{ certificateTitleLabel(certificate.title) }}
                     </h3>
                     <p class="mt-2 text-sm text-[var(--liaprove-muted)]">
                       Emitido em {{ formatDate(certificate.issueDate) }}
