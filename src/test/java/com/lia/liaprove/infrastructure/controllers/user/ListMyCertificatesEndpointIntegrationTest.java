@@ -2,9 +2,13 @@ package com.lia.liaprove.infrastructure.controllers.user;
 
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
+import com.lia.liaprove.core.domain.question.DifficultyLevel;
+import com.lia.liaprove.core.domain.question.KnowledgeArea;
+import com.lia.liaprove.infrastructure.entities.assessment.AssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.CertificateEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
+import com.lia.liaprove.infrastructure.entities.assessment.SystemAssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserRecruiterEntity;
 import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentAttemptJpaRepository;
@@ -25,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -91,6 +96,44 @@ class ListMyCertificatesEndpointIntegrationTest {
     }
 
     @Test
+    @DisplayName("Should list only the best system certificate for the same knowledge area and difficulty")
+    void shouldListOnlyBestSystemCertificateForSameKnowledgeAreaAndDifficulty() throws Exception {
+        UserEntity candidate = getSeededUser(CANDIDATE_EMAIL);
+        SystemAssessmentEntity mediumSoftwareAssessment = createSystemAssessment(
+                KnowledgeArea.SOFTWARE_DEVELOPMENT,
+                DifficultyLevel.MEDIUM
+        );
+        SystemAssessmentEntity anotherMediumSoftwareAssessment = createSystemAssessment(
+                KnowledgeArea.SOFTWARE_DEVELOPMENT,
+                DifficultyLevel.MEDIUM
+        );
+        SystemAssessmentEntity hardSoftwareAssessment = createSystemAssessment(
+                KnowledgeArea.SOFTWARE_DEVELOPMENT,
+                DifficultyLevel.HARD
+        );
+        SystemAssessmentEntity mediumDatabaseAssessment = createSystemAssessment(
+                KnowledgeArea.DATABASE,
+                DifficultyLevel.MEDIUM
+        );
+
+        createCertifiedAttempt(mediumSoftwareAssessment, candidate, "CERT-SOFT-MEDIUM-77", LocalDate.of(2026, 5, 14), 77F);
+        createCertifiedAttempt(anotherMediumSoftwareAssessment, candidate, "CERT-SOFT-MEDIUM-88", LocalDate.of(2026, 5, 15), 88F);
+        createCertifiedAttempt(hardSoftwareAssessment, candidate, "CERT-SOFT-HARD-75", LocalDate.of(2026, 5, 16), 75F);
+        createCertifiedAttempt(mediumDatabaseAssessment, candidate, "CERT-DATABASE-MEDIUM-81", LocalDate.of(2026, 5, 17), 81F);
+
+        mockMvc.perform(get("/api/v1/users/me/certificates")
+                        .header(DEV_USER_HEADER, candidate.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$").isArray())
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[*].certificateNumber", containsInAnyOrder(
+                        "CERT-SOFT-MEDIUM-88",
+                        "CERT-SOFT-HARD-75",
+                        "CERT-DATABASE-MEDIUM-81"
+                )));
+    }
+
+    @Test
     @DisplayName("Should return unauthorized when header is missing")
     void shouldReturnUnauthorizedWhenHeaderIsMissing() throws Exception {
         mockMvc.perform(get("/api/v1/users/me/certificates"))
@@ -98,7 +141,7 @@ class ListMyCertificatesEndpointIntegrationTest {
     }
 
     private void createCertifiedAttempt(
-            PersonalizedAssessmentEntity assessment,
+            AssessmentEntity assessment,
             UserEntity user,
             String certificateNumber,
             LocalDate issueDate,
@@ -139,6 +182,18 @@ class ListMyCertificatesEndpointIntegrationTest {
         assessment.setStatus(PersonalizedAssessmentStatus.ACTIVE);
         assessment.setMaxAttempts(3);
         assessment.setEvaluationTimerSeconds(1800L);
+        assessment.setQuestions(List.of());
+        return assessmentJpaRepository.save(assessment);
+    }
+
+    private SystemAssessmentEntity createSystemAssessment(KnowledgeArea knowledgeArea, DifficultyLevel difficultyLevel) {
+        SystemAssessmentEntity assessment = new SystemAssessmentEntity();
+        assessment.setTitle("System Certificate Assessment " + UUID.randomUUID());
+        assessment.setDescription("System assessment with certificates.");
+        assessment.setCreationDate(LocalDateTime.now());
+        assessment.setEvaluationTimerSeconds(600L);
+        assessment.setKnowledgeArea(knowledgeArea);
+        assessment.setDifficultyLevel(difficultyLevel);
         assessment.setQuestions(List.of());
         return assessmentJpaRepository.save(assessment);
     }

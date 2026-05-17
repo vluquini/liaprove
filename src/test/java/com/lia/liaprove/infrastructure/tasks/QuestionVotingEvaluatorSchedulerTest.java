@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @AutoConfigureTestEntityManager
+@ActiveProfiles("dev")
 @Transactional
 @ActiveProfiles("dev")
 class QuestionVotingEvaluatorSchedulerTest {

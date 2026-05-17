@@ -6,6 +6,7 @@ import com.lia.liaprove.core.domain.assessment.Answer;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
 import com.lia.liaprove.core.domain.assessment.Certificate;
+import com.lia.liaprove.core.domain.assessment.SystemAssessment;
 import com.lia.liaprove.core.exceptions.assessment.AssessmentAttemptFinishedException;
 import com.lia.liaprove.core.exceptions.assessment.AssessmentNotFoundException;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
@@ -74,7 +75,7 @@ public class SubmitAssessmentUseCaseImpl implements SubmitAssessmentUseCase {
         AssessmentAttempt savedAttempt = attemptGateway.save(attempt);
 
         // 8. Emitir Certificado (Se aprovado)
-        if (savedAttempt.getStatus() == AssessmentAttemptStatus.APPROVED) {
+        if (savedAttempt.getStatus() == AssessmentAttemptStatus.APPROVED && shouldIssueCertificate(savedAttempt)) {
             Certificate certificate = issueCertificateUseCase.execute(savedAttempt);
             savedAttempt.setCertificate(certificate);
             // Salvar novamente para vincular o certificado
@@ -82,5 +83,35 @@ public class SubmitAssessmentUseCaseImpl implements SubmitAssessmentUseCase {
         }
 
         return savedAttempt;
+    }
+
+    private boolean shouldIssueCertificate(AssessmentAttempt attempt) {
+        if (!(attempt.getAssessment() instanceof SystemAssessment systemAssessment)) {
+            return true;
+        }
+
+        if (systemAssessment.getKnowledgeArea() == null || systemAssessment.getDifficultyLevel() == null) {
+            return true;
+        }
+
+        return attemptGateway.findBestCertifiedSystemAttemptByUserAndCriteria(
+                        attempt.getUser().getId(),
+                        systemAssessment.getKnowledgeArea(),
+                        systemAssessment.getDifficultyLevel()
+                )
+                .map(existingAttempt -> isScoreImproved(attempt, existingAttempt))
+                .orElse(true);
+    }
+
+    private boolean isScoreImproved(AssessmentAttempt attempt, AssessmentAttempt existingAttempt) {
+        if (existingAttempt.getCertificate() == null || existingAttempt.getCertificate().getScore() == null) {
+            return true;
+        }
+
+        if (attempt.getAccuracyRate() == null) {
+            return true;
+        }
+
+        return attempt.getAccuracyRate() > existingAttempt.getCertificate().getScore();
     }
 }

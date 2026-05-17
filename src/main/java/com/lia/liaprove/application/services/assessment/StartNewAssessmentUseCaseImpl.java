@@ -111,7 +111,9 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
                 LocalDateTime.now(),
                 questions,
                 // Lógica de tempo pode ser configurada aqui
-                getTimerForAssessment(difficultyLevel, type)
+                getTimerForAssessment(difficultyLevel, type),
+                knowledgeArea,
+                difficultyLevel
         );
     }
 
