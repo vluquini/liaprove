@@ -19,7 +19,7 @@ const navigation: NavItem[] = [
   { label: 'Perfil', to: '/profile', icon: 'pi pi-user' },
   { label: 'Avaliações', to: '/assessments/start', icon: 'pi pi-play-circle' },
   { label: 'Questões', to: '/questions/voting', icon: 'pi pi-check-square' },
-  { label: 'Recrutador', to: '/recruiter/job-analysis', icon: 'pi pi-briefcase', roles: ['RECRUITER', 'ADMIN'] },
+  { label: 'Recrutador', to: '/recruiter', icon: 'pi pi-briefcase', roles: ['RECRUITER', 'ADMIN'] },
   { label: 'Admin', to: '/admin/users', icon: 'pi pi-shield', roles: ['ADMIN'] },
 ]
 

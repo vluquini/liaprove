@@ -1,6 +1,10 @@
 import { createRouter, createWebHistory, type Router } from 'vue-router'
 import { redirectAuthenticated, requireAuth } from './guards'
 import { useAuthStore } from '@/shared/stores/auth'
+import type { UserRole } from '@/shared/types/auth'
+
+const recruiterRoles: UserRole[] = ['RECRUITER', 'ADMIN']
+const pendingFeatureView = { template: '<div />' }
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -45,6 +49,12 @@ export const router = createRouter({
       component: () => import('@/features/assessments/views/AssessmentStartView.vue'),
     },
     {
+      path: '/assessments/personalized/:token/start',
+      name: 'personalized-assessment-start',
+      beforeEnter: requireAuth,
+      component: pendingFeatureView,
+    },
+    {
       path: '/assessments/attempts/:attemptId',
       name: 'assessment-attempt',
       beforeEnter: requireAuth,
@@ -73,6 +83,62 @@ export const router = createRouter({
       name: 'question-new',
       beforeEnter: requireAuth,
       component: () => import('@/features/questions/views/QuestionSubmissionView.vue'),
+    },
+    {
+      path: '/recruiter',
+      name: 'recruiter-home',
+      beforeEnter: requireAuth,
+      meta: { roles: recruiterRoles },
+      component: pendingFeatureView,
+    },
+    {
+      path: '/recruiter/job-analysis',
+      name: 'recruiter-job-analysis',
+      beforeEnter: requireAuth,
+      meta: { roles: recruiterRoles },
+      component: pendingFeatureView,
+    },
+    {
+      path: '/recruiter/assessments/new',
+      name: 'recruiter-assessment-new',
+      beforeEnter: requireAuth,
+      meta: { roles: recruiterRoles },
+      component: pendingFeatureView,
+    },
+    {
+      path: '/recruiter/assessments/:assessmentId',
+      name: 'recruiter-assessment-detail',
+      beforeEnter: requireAuth,
+      meta: { roles: recruiterRoles },
+      component: pendingFeatureView,
+    },
+    {
+      path: '/recruiter/assessments/:assessmentId/edit',
+      name: 'recruiter-assessment-edit',
+      beforeEnter: requireAuth,
+      meta: { roles: recruiterRoles },
+      component: pendingFeatureView,
+    },
+    {
+      path: '/recruiter/assessments/:assessmentId/attempts',
+      name: 'recruiter-assessment-attempts',
+      beforeEnter: requireAuth,
+      meta: { roles: recruiterRoles },
+      component: pendingFeatureView,
+    },
+    {
+      path: '/recruiter/attempts/:attemptId',
+      name: 'recruiter-attempt-detail',
+      beforeEnter: requireAuth,
+      meta: { roles: recruiterRoles },
+      component: pendingFeatureView,
+    },
+    {
+      path: '/recruiter/questions/open/new',
+      name: 'recruiter-open-question-new',
+      beforeEnter: requireAuth,
+      meta: { roles: recruiterRoles },
+      component: pendingFeatureView,
     },
     {
       path: '/forbidden',

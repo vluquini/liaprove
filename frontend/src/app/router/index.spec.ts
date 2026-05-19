@@ -38,4 +38,24 @@ describe('router session handling', () => {
     expect(router.resolve('/assessments/attempts/attempt-1/result').name).toBe('assessment-result')
     expect(router.resolve('/certificates/CERT-123').name).toBe('certificate-public')
   })
+
+  it('registers recruiter and personalized assessment token routes', () => {
+    expect(router.resolve('/recruiter').name).toBe('recruiter-home')
+    expect(router.resolve('/recruiter/job-analysis').name).toBe('recruiter-job-analysis')
+    expect(router.resolve('/recruiter/assessments/new').name).toBe('recruiter-assessment-new')
+    expect(router.resolve('/recruiter/assessments/assessment-1').name).toBe('recruiter-assessment-detail')
+    expect(router.resolve('/recruiter/assessments/assessment-1/edit').name).toBe('recruiter-assessment-edit')
+    expect(router.resolve('/recruiter/assessments/assessment-1/attempts').name).toBe('recruiter-assessment-attempts')
+    expect(router.resolve('/recruiter/attempts/attempt-1').name).toBe('recruiter-attempt-detail')
+    expect(router.resolve('/recruiter/questions/open/new').name).toBe('recruiter-open-question-new')
+    expect(router.resolve('/assessments/personalized/token-1/start').name).toBe('personalized-assessment-start')
+  })
+
+  it('restricts recruiter routes to recruiters and admins', () => {
+    const recruiterRoute = router.resolve('/recruiter/assessments/new')
+    const personalizedTokenRoute = router.resolve('/assessments/personalized/token-1/start')
+
+    expect(recruiterRoute.meta.roles).toEqual(['RECRUITER', 'ADMIN'])
+    expect(personalizedTokenRoute.meta.roles).toBeUndefined()
+  })
 })

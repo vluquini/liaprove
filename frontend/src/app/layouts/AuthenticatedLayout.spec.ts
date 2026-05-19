@@ -18,6 +18,7 @@ function makeRouter() {
       { path: '/profile', component: { template: '<div>Perfil</div>' } },
       { path: '/assessments/start', component: { template: '<div>Avaliacoes</div>' } },
       { path: '/questions/voting', component: { template: '<div>Questoes</div>' } },
+      { path: '/recruiter', component: { template: '<div>Recrutador</div>' } },
       { path: '/recruiter/job-analysis', component: { template: '<div>Analise</div>' } },
       { path: '/admin/users', component: { template: '<div>Usuarios</div>' } },
     ],
@@ -70,6 +71,7 @@ describe('AuthenticatedLayout', () => {
 
     expect(recruiterWrapper.text()).toContain('Recrutador')
     expect(recruiterWrapper.text()).not.toContain('Admin')
+    expect(recruiterWrapper.get('a[href="/recruiter"]').text()).toContain('Recrutador')
 
     recruiterWrapper.unmount()
     localStorage.clear()
