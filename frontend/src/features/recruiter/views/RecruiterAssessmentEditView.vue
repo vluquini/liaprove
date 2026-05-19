@@ -3,7 +3,6 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
-import InputText from 'primevue/inputtext'
 import AuthenticatedLayout from '@/app/layouts/AuthenticatedLayout.vue'
 import { normalizeApiError } from '@/shared/api/errors'
 import {
@@ -140,17 +139,32 @@ async function saveAssessment(): Promise<void> {
 
               <label class="profile-field">
                 <span>Hard skills</span>
-                <InputText data-test="edit-weight-hard" v-model.number="form.hardSkillsWeight" type="number" />
+                <input
+                  data-test="edit-weight-hard"
+                  v-model.number="form.hardSkillsWeight"
+                  class="p-inputtext p-component"
+                  type="number"
+                />
               </label>
 
               <label class="profile-field">
                 <span>Soft skills</span>
-                <InputText data-test="edit-weight-soft" v-model.number="form.softSkillsWeight" type="number" />
+                <input
+                  data-test="edit-weight-soft"
+                  v-model.number="form.softSkillsWeight"
+                  class="p-inputtext p-component"
+                  type="number"
+                />
               </label>
 
               <label class="profile-field">
                 <span>Experiência</span>
-                <InputText data-test="edit-weight-experience" v-model.number="form.experienceWeight" type="number" />
+                <input
+                  data-test="edit-weight-experience"
+                  v-model.number="form.experienceWeight"
+                  class="p-inputtext p-component"
+                  type="number"
+                />
               </label>
 
               <div class="lg:col-span-2">
