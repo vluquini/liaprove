@@ -17,7 +17,9 @@ import com.lia.liaprove.core.usecases.assessments.DeletePersonalizedAssessmentUs
 import com.lia.liaprove.core.usecases.assessments.EvaluateAssessmentAttemptUseCase;
 import com.lia.liaprove.core.usecases.assessments.GetAssessmentAttemptDetailsUseCase;
 import com.lia.liaprove.core.usecases.assessments.GenerateAttemptPreAnalysisUseCase;
+import com.lia.liaprove.core.usecases.assessments.GetPersonalizedAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.ListAttemptsForMyAssessmentUseCase;
+import com.lia.liaprove.core.usecases.assessments.ListPersonalizedAssessmentsUseCase;
 import com.lia.liaprove.core.usecases.assessments.AnalyzeJobDescriptionUseCase;
 import com.lia.liaprove.core.usecases.assessments.StartNewAssessmentUseCase;
 import com.lia.liaprove.core.usecases.assessments.SubmitAssessmentUseCase;
@@ -53,6 +55,8 @@ public class AssessmentController {
     private final ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase;
     private final UpdatePersonalizedAssessmentUseCase updatePersonalizedAssessmentUseCase;
     private final AnalyzeJobDescriptionUseCase analyzeJobDescriptionUseCase;
+    private final ListPersonalizedAssessmentsUseCase listPersonalizedAssessmentsUseCase;
+    private final GetPersonalizedAssessmentUseCase getPersonalizedAssessmentUseCase;
     private final SecurityContextService securityContextService;
     private final AssessmentDtoMapper assessmentDtoMapper;
 
@@ -67,6 +71,8 @@ public class AssessmentController {
                                 ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase,
                                 UpdatePersonalizedAssessmentUseCase updatePersonalizedAssessmentUseCase,
                                 AnalyzeJobDescriptionUseCase analyzeJobDescriptionUseCase,
+                                ListPersonalizedAssessmentsUseCase listPersonalizedAssessmentsUseCase,
+                                GetPersonalizedAssessmentUseCase getPersonalizedAssessmentUseCase,
                                 SecurityContextService securityContextService,
                                 AssessmentDtoMapper assessmentDtoMapper) {
         this.startNewAssessmentUseCase = startNewAssessmentUseCase;
@@ -80,6 +86,8 @@ public class AssessmentController {
         this.listAttemptsForMyAssessmentUseCase = listAttemptsForMyAssessmentUseCase;
         this.updatePersonalizedAssessmentUseCase = updatePersonalizedAssessmentUseCase;
         this.analyzeJobDescriptionUseCase = analyzeJobDescriptionUseCase;
+        this.listPersonalizedAssessmentsUseCase = listPersonalizedAssessmentsUseCase;
+        this.getPersonalizedAssessmentUseCase = getPersonalizedAssessmentUseCase;
         this.securityContextService = securityContextService;
         this.assessmentDtoMapper = assessmentDtoMapper;
     }
@@ -176,6 +184,19 @@ public class AssessmentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(assessmentDtoMapper.toPersonalizedResponse(assessment));
     }
 
+    @GetMapping("/personalized")
+    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
+    public ResponseEntity<List<PersonalizedAssessmentDetailsResponse>> listPersonalizedAssessments() {
+        UUID requesterId = securityContextService.getCurrentUserId();
+
+        List<PersonalizedAssessmentDetailsResponse> response = listPersonalizedAssessmentsUseCase.execute(requesterId)
+                .stream()
+                .map(assessmentDtoMapper::toPersonalizedDetailsResponse)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(response);
+    }
+
     @GetMapping("/personalized/suggestions")
     @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
     public ResponseEntity<SuggestedQuestionsResponse> getSuggestedQuestions(
@@ -216,6 +237,18 @@ public class AssessmentController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/personalized/{assessmentId}")
+    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
+    public ResponseEntity<PersonalizedAssessmentDetailsResponse> getPersonalizedAssessment(
+            @PathVariable UUID assessmentId) {
+
+        UUID requesterId = securityContextService.getCurrentUserId();
+
+        PersonalizedAssessment assessment = getPersonalizedAssessmentUseCase.execute(assessmentId, requesterId);
+
+        return ResponseEntity.ok(assessmentDtoMapper.toPersonalizedDetailsResponse(assessment));
     }
 
     @PostMapping("/{attemptId}/evaluate")
@@ -271,13 +304,13 @@ public class AssessmentController {
     }
 
     @GetMapping("/personalized/{assessmentId}/attempts")
-    @PreAuthorize("hasRole('RECRUITER')")
+    @PreAuthorize("hasAnyRole('RECRUITER', 'ADMIN')")
     public ResponseEntity<List<AssessmentAttemptSummaryResponse>> listAttemptsForMyAssessment(
             @PathVariable UUID assessmentId) {
 
-        UUID recruiterId = securityContextService.getCurrentUserId();
+        UUID requesterId = securityContextService.getCurrentUserId();
 
-        List<AssessmentAttempt> attempts = listAttemptsForMyAssessmentUseCase.execute(assessmentId, recruiterId);
+        List<AssessmentAttempt> attempts = listAttemptsForMyAssessmentUseCase.execute(assessmentId, requesterId);
         List<AssessmentAttemptSummaryResponse> response = attempts.stream()
                 .map(assessmentDtoMapper::toAttemptSummaryResponse)
                 .collect(Collectors.toList());
