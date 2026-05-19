@@ -81,6 +81,40 @@ describe('recruiterAssessmentService', () => {
     expect(suggestions.questions[0].id).toBe('question-1')
   })
 
+  it('normalizes suggested questions returned by the backend page contract', async () => {
+    server.use(
+      http.get('*/api/v1/assessments/personalized/suggestions', () =>
+        HttpResponse.json({
+          content: [
+            {
+              id: 'question-1',
+              title: 'Como validar transacoes?',
+              description: 'Escolha a alternativa correta.',
+              knowledgeAreas: ['SOFTWARE_DEVELOPMENT'],
+              difficultyLevel: 'MEDIUM',
+              score: 0.91,
+            },
+          ],
+          page: 1,
+          size: 10,
+          totalElements: 1,
+          totalPages: 1,
+          last: true,
+        }),
+      ),
+    )
+
+    await expect(listSuggestedQuestions({ page: 1, pageSize: 10 })).resolves.toMatchObject({
+      questions: [
+        {
+          id: 'question-1',
+          difficultyByCommunity: 'MEDIUM',
+        },
+      ],
+      pageSize: 10,
+    })
+  })
+
   it('creates a personalized assessment with a job description snapshot', async () => {
     let payload: unknown
     server.use(

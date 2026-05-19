@@ -172,18 +172,18 @@ function makeAnalysis() {
 
 function makeSuggestions() {
   return {
-    questions: [
+    content: [
       {
         id: 'question-1',
         title: 'Como validar transacoes?',
+        description: 'Escolha a alternativa correta.',
         knowledgeAreas: ['SOFTWARE_DEVELOPMENT'],
-        difficultyByCommunity: 'MEDIUM',
-        submissionDate: '2026-05-18T10:00:00',
+        difficultyLevel: 'MEDIUM',
         score: 0.91,
       },
     ],
     page: 1,
-    pageSize: 10,
+    size: 10,
     totalElements: 1,
     totalPages: 1,
     last: true,

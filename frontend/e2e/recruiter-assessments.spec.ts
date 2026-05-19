@@ -1,6 +1,18 @@
 import { expect, test, type Page, type Route } from '@playwright/test'
 
-const password = 'Teste123!'
+type E2EUser = {
+  id: string
+  name: string
+  email: string
+  role: 'PROFESSIONAL' | 'RECRUITER'
+  occupation: string
+  experienceLevel: 'JUNIOR' | 'PLENO' | 'SENIOR'
+  hardSkills?: string[]
+  softSkills?: string[]
+  companyName?: string
+  companyEmail?: string
+}
+
 const assessmentId = 'assessment-e2e-1'
 const attemptId = 'attempt-e2e-1'
 const token = 'token-e2e-1'
@@ -10,14 +22,27 @@ const alternativeId = 'alternative-e2e-1'
 test('recruiter creates a personalized assessment and evaluates a candidate attempt', async ({ page }) => {
   const id = uniqueId()
   const recruiter = {
+    id: 'recruiter-e2e-1',
     name: `Recrutador ${id}`,
     email: `recruiter-assessment-${id}@example.com`,
+    role: 'RECRUITER',
+    occupation: 'Recrutador Técnico',
+    experienceLevel: 'SENIOR',
+    hardSkills: ['Java', 'Spring Boot', 'SQL'],
+    softSkills: ['Comunicação'],
+    companyName: 'LIA Recruiting',
     companyEmail: `company-${id}@example.com`,
-  }
+  } satisfies E2EUser
   const candidate = {
+    id: 'candidate-e2e-1',
     name: `Candidato ${id}`,
     email: `candidate-assessment-${id}@example.com`,
-  }
+    role: 'PROFESSIONAL',
+    occupation: 'Desenvolvedor Java',
+    experienceLevel: 'SENIOR',
+    hardSkills: ['Java', 'Spring Boot'],
+    softSkills: ['Comunicação'],
+  } satisfies E2EUser
   const state = {
     assessmentCreated: false,
     attemptSubmitted: false,
@@ -25,7 +50,7 @@ test('recruiter creates a personalized assessment and evaluates a candidate atte
   }
 
   await mockRecruiterAssessmentFlow(page, state)
-  await registerRecruiter(page, recruiter)
+  await authenticateAs(page, recruiter)
 
   await page.goto('/recruiter')
   await expect(page.getByRole('heading', { name: 'Área do recrutador' })).toBeVisible()
@@ -51,7 +76,7 @@ test('recruiter creates a personalized assessment and evaluates a candidate atte
   await expect(page.getByText(`/assessments/personalized/${token}/start`)).toBeVisible()
 
   await page.locator('[data-test="logout-button"]').click()
-  await registerProfessional(page, candidate)
+  await authenticateAs(page, candidate)
 
   await page.goto(`/assessments/personalized/${token}/start`)
   await expect(page.getByRole('heading', { name: 'Iniciar avaliação personalizada' })).toBeVisible()
@@ -64,7 +89,7 @@ test('recruiter creates a personalized assessment and evaluates a candidate atte
   await expect(page.getByText('Tentativa registrada para revisão do recrutador.')).toBeVisible()
 
   await page.locator('[data-test="logout-button"]').click()
-  await login(page, recruiter.email)
+  await authenticateAs(page, recruiter)
 
   await page.goto('/recruiter')
   await expect(page.getByText('Java Backend Hiring Challenge')).toBeVisible()
@@ -103,9 +128,9 @@ async function mockRecruiterAssessmentFlow(
 
     if (method === 'GET' && path === '/api/v1/assessments/personalized/suggestions') {
       return fulfillJson(route, {
-        questions: [suggestedQuestion()],
+        content: [suggestedQuestion()],
         page: 1,
-        pageSize: 10,
+        size: 10,
         totalElements: 1,
         totalPages: 1,
         last: true,
@@ -202,8 +227,9 @@ function suggestedQuestion() {
   return {
     id: questionId,
     title: 'Transações em APIs Java',
+    description: 'Qual prática reduz falhas de consistência ao salvar dados relacionados?',
     knowledgeAreas: ['SOFTWARE_DEVELOPMENT'],
-    difficultyByCommunity: 'MEDIUM',
+    difficultyLevel: 'MEDIUM',
     submissionDate: '2026-05-15T10:00:00',
     score: 0.92,
   }
@@ -335,47 +361,34 @@ function attemptDetails(candidate: { name: string; email: string }) {
   }
 }
 
-async function registerRecruiter(
-  page: Page,
-  user: { name: string; email: string; companyEmail: string },
-) {
-  await page.goto('/register')
-
-  await page.locator('.p-select').first().click()
-  await page.getByRole('option', { name: 'Recrutador' }).click()
-  await page.locator('input[autocomplete="name"]').fill(user.name)
-  await page.locator('input[autocomplete="email"]').fill(user.email)
-  await page.locator('input[type="password"]').fill(password)
-  await page.getByPlaceholder('Desenvolvedor Java').fill('Recrutador Técnico')
-  await page.getByPlaceholder('Java, Spring Boot, SQL').fill('Java, Spring Boot, SQL')
-  await page.getByPlaceholder('Comunicação, liderança').fill('Comunicação')
-  await page.locator('label').filter({ hasText: 'Empresa' }).locator('input').fill('LIA Recruiting')
-  await page.locator('label').filter({ hasText: 'E-mail corporativo' }).locator('input').fill(user.companyEmail)
-  await page.getByRole('button', { name: 'Criar cadastro' }).click()
-
-  await expect(page).toHaveURL(/\/dashboard$/)
-}
-
-async function registerProfessional(page: Page, user: { name: string; email: string }) {
-  await page.goto('/register')
-
-  await page.locator('input[autocomplete="name"]').fill(user.name)
-  await page.locator('input[autocomplete="email"]').fill(user.email)
-  await page.locator('input[type="password"]').fill(password)
-  await page.getByPlaceholder('Desenvolvedor Java').fill('Desenvolvedor Java')
-  await page.getByPlaceholder('Java, Spring Boot, SQL').fill('Java, Spring Boot')
-  await page.getByPlaceholder('Comunicação, liderança').fill('Comunicação')
-  await page.getByRole('button', { name: 'Criar cadastro' }).click()
-
-  await expect(page).toHaveURL(/\/dashboard$/)
-}
-
-async function login(page: Page, email: string) {
+async function authenticateAs(page: Page, user: E2EUser) {
   await page.goto('/login')
-
-  await page.locator('input[autocomplete="email"]').fill(email)
-  await page.locator('input[type="password"]').fill(password)
-  await page.getByRole('button', { name: 'Entrar' }).click()
+  await page.evaluate((sessionUser) => {
+    const expiresAt = new Date()
+    expiresAt.setHours(expiresAt.getHours() + 2)
+    localStorage.setItem(
+      'liaprove.auth.session',
+      JSON.stringify({
+        token: `e2e-token-${sessionUser.role.toLowerCase()}`,
+        tokenType: 'Bearer',
+        expiresAt: expiresAt.toISOString(),
+        user: {
+          id: sessionUser.id,
+          name: sessionUser.name,
+          email: sessionUser.email,
+          role: sessionUser.role,
+          status: 'ACTIVE',
+          occupation: sessionUser.occupation,
+          experienceLevel: sessionUser.experienceLevel,
+          hardSkills: sessionUser.hardSkills ?? [],
+          softSkills: sessionUser.softSkills ?? [],
+          companyName: sessionUser.companyName ?? null,
+          companyEmail: sessionUser.companyEmail ?? null,
+        },
+      }),
+    )
+  }, user)
+  await page.goto('/dashboard')
 
   await expect(page).toHaveURL(/\/dashboard$/)
 }

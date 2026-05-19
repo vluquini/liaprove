@@ -76,8 +76,10 @@ export interface SuggestionParams {
 export interface ScoredQuestionResponse {
   id: string
   title: string
+  description?: string | null
   knowledgeAreas: KnowledgeArea[]
   difficultyByCommunity?: DifficultyLevel | null
+  difficultyLevel?: DifficultyLevel | null
   submissionDate?: string | null
   score: number
 }
@@ -86,6 +88,17 @@ export interface SuggestedQuestionsResponse {
   questions: ScoredQuestionResponse[]
   page: number
   pageSize: number
+  totalElements: number
+  totalPages: number
+  last: boolean
+}
+
+interface BackendSuggestedQuestionsResponse {
+  content?: ScoredQuestionResponse[]
+  questions?: ScoredQuestionResponse[]
+  page: number
+  size?: number
+  pageSize?: number
   totalElements: number
   totalPages: number
   last: boolean
@@ -290,10 +303,10 @@ export async function analyzeJobDescription(jobDescription: string): Promise<Job
 }
 
 export async function listSuggestedQuestions(params: SuggestionParams): Promise<SuggestedQuestionsResponse> {
-  const response = await http.get<SuggestedQuestionsResponse>('/v1/assessments/personalized/suggestions', {
+  const response = await http.get<BackendSuggestedQuestionsResponse>('/v1/assessments/personalized/suggestions', {
     params: toSuggestionSearchParams(params),
   })
-  return response.data
+  return normalizeSuggestedQuestionsResponse(response.data)
 }
 
 export async function createPersonalizedAssessment(
@@ -377,4 +390,20 @@ function toSuggestionSearchParams(params: SuggestionParams): URLSearchParams {
 
 function appendAll(searchParams: URLSearchParams, key: string, values: string[] | undefined): void {
   values?.forEach((value) => searchParams.append(key, value))
+}
+
+function normalizeSuggestedQuestionsResponse(response: BackendSuggestedQuestionsResponse): SuggestedQuestionsResponse {
+  const questions = response.questions ?? response.content ?? []
+
+  return {
+    questions: questions.map((question) => ({
+      ...question,
+      difficultyByCommunity: question.difficultyByCommunity ?? question.difficultyLevel ?? null,
+    })),
+    page: response.page,
+    pageSize: response.pageSize ?? response.size ?? questions.length,
+    totalElements: response.totalElements,
+    totalPages: response.totalPages,
+    last: response.last,
+  }
 }
