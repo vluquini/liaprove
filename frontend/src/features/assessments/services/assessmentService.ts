@@ -56,6 +56,11 @@ export async function startSystemAssessment(
   return response.data
 }
 
+export async function startPersonalizedAssessment(token: string): Promise<AssessmentAttemptResponse> {
+  const response = await http.post<AssessmentAttemptResponse>(`/v1/assessments/start-personalized/${token}`)
+  return response.data
+}
+
 export async function submitAssessment(
   attemptId: string,
   request: SubmitAssessmentRequest,

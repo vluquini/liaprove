@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw'
 import { describe, expect, it } from 'vitest'
 import { server } from '@/test/msw'
-import { startSystemAssessment, submitAssessment } from './assessmentService'
+import { startPersonalizedAssessment, startSystemAssessment, submitAssessment } from './assessmentService'
 
 describe('assessmentService', () => {
   it('starts a system assessment with selected criteria', async () => {
@@ -51,6 +51,18 @@ describe('assessmentService', () => {
     })
     expect(result.status).toBe('APPROVED')
     expect(result.certificateUrl).toBe('/certificates/CERT-123')
+  })
+
+  it('starts a personalized assessment by token', async () => {
+    server.use(
+      http.post('*/api/v1/assessments/start-personalized/token-1', () =>
+        HttpResponse.json(makeAttempt(), { status: 201 }),
+      ),
+    )
+
+    await expect(startPersonalizedAssessment('token-1')).resolves.toMatchObject({
+      attemptId: 'attempt-1',
+    })
   })
 })
 

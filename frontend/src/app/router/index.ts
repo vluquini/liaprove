@@ -4,7 +4,6 @@ import { useAuthStore } from '@/shared/stores/auth'
 import type { UserRole } from '@/shared/types/auth'
 
 const recruiterRoles: UserRole[] = ['RECRUITER', 'ADMIN']
-const pendingFeatureView = { template: '<div />' }
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -52,7 +51,7 @@ export const router = createRouter({
       path: '/assessments/personalized/:token/start',
       name: 'personalized-assessment-start',
       beforeEnter: requireAuth,
-      component: pendingFeatureView,
+      component: () => import('@/features/assessments/views/PersonalizedAssessmentStartView.vue'),
     },
     {
       path: '/assessments/attempts/:attemptId',
