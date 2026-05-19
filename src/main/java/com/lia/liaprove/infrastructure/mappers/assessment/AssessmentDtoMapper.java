@@ -22,9 +22,11 @@ import com.lia.liaprove.infrastructure.dtos.assessment.AssessmentCriteriaWeights
 import com.lia.liaprove.infrastructure.dtos.assessment.DeletePersonalizedAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.EvaluateAssessmentAttemptResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.JobDescriptionAnalysisResponse;
+import com.lia.liaprove.infrastructure.dtos.assessment.PersonalizedAssessmentDetailsResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.PersonalizedAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.ScoredQuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.assessment.UpdatePersonalizedAssessmentResponse;
+import com.lia.liaprove.infrastructure.dtos.question.QuestionSummaryResponse;
 import com.lia.liaprove.infrastructure.dtos.user.UserResponseDto;
 import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
 import org.mapstruct.Mapper;
@@ -56,6 +58,41 @@ public interface AssessmentDtoMapper {
     @Mapping(target = "criteriaWeights", expression = "java(toCriteriaWeightsResponse(assessment.getCriteriaWeights()))")
     @Mapping(target = "jobDescriptionAnalysis", expression = "java(toJobDescriptionAnalysisResponse(assessment.getJobDescriptionAnalysis()))")
     PersonalizedAssessmentResponse toPersonalizedResponse(PersonalizedAssessment assessment);
+
+    default PersonalizedAssessmentDetailsResponse toPersonalizedDetailsResponse(PersonalizedAssessment assessment) {
+        if (assessment == null) {
+            return null;
+        }
+
+        List<QuestionSummaryResponse> questions = assessment.getQuestions() == null
+                ? List.of()
+                : assessment.getQuestions().stream()
+                .map(question -> new QuestionSummaryResponse(
+                        question.getId(),
+                        question.getAuthorId(),
+                        question.getTitle(),
+                        question.getKnowledgeAreas(),
+                        question.getSubmissionDate()
+                ))
+                .toList();
+
+        return new PersonalizedAssessmentDetailsResponse(
+                assessment.getId(),
+                assessment.getTitle(),
+                assessment.getDescription(),
+                assessment.getCreationDate(),
+                assessment.getEvaluationTimer() != null ? assessment.getEvaluationTimer().toMinutes() : null,
+                assessment.getExpirationDate(),
+                assessment.getTotalAttempts(),
+                assessment.getMaxAttempts(),
+                assessment.getShareableToken(),
+                assessment.getStatus(),
+                toUserResponseDto(assessment.getCreatedBy()),
+                toCriteriaWeightsResponse(assessment.getCriteriaWeights()),
+                toJobDescriptionAnalysisResponse(assessment.getJobDescriptionAnalysis()),
+                questions
+        );
+    }
 
     default EvaluateAssessmentAttemptResponse toEvaluateAttemptResponse(AssessmentAttempt attempt) {
         if (attempt == null) {
