@@ -103,7 +103,7 @@ export const router = createRouter({
       name: 'recruiter-assessment-new',
       beforeEnter: requireAuth,
       meta: { roles: recruiterRoles },
-      component: pendingFeatureView,
+      component: () => import('@/features/recruiter/views/RecruiterAssessmentCreateView.vue'),
     },
     {
       path: '/recruiter/assessments/:assessmentId',
