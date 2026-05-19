@@ -24,6 +24,7 @@ import java.util.Set;
 
 import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.CANDIDATE_EMAIL;
 import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.DEV_USER_HEADER;
+import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.ADMIN_EMAIL;
 import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.RECRUITER_EMAIL;
 import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.createPersonalizedAssessment;
 import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.deleteAssessmentData;
@@ -96,5 +97,26 @@ class ListPersonalizedAssessmentAttemptsEndpointIntegrationTest {
                 .andExpect(jsonPath("$[0].assessment.jobDescriptionAnalysis.suggestedHardSkills[0]").value("Java"))
                 .andExpect(jsonPath("$[0].assessment.jobDescriptionAnalysis.suggestedCriteriaWeights.hardSkillsWeight")
                         .value(50));
+    }
+
+    @Test
+    @DisplayName("Should list attempts for personalized assessment as admin")
+    void shouldListAttemptsSuccessfullyAsAdmin() throws Exception {
+        UserEntity recruiter = getSeededUser(userJpaRepository, RECRUITER_EMAIL);
+        UserEntity candidate = getSeededUser(userJpaRepository, CANDIDATE_EMAIL);
+        UserEntity admin = getSeededUser(userJpaRepository, ADMIN_EMAIL);
+        PersonalizedAssessmentEntity assessment = createPersonalizedAssessment(assessmentJpaRepository, recruiter);
+        AssessmentAttemptEntity attempt = new AssessmentAttemptEntity();
+        attempt.setAssessment(assessment);
+        attempt.setUser(candidate);
+        attempt.setStartedAt(LocalDateTime.now());
+        attempt.setStatus(AssessmentAttemptStatus.COMPLETED);
+        assessmentAttemptJpaRepository.save(attempt);
+
+        mockMvc.perform(get("/api/v1/assessments/personalized/" + assessment.getId() + "/attempts")
+                        .header(DEV_USER_HEADER, admin.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].attemptId").value(attempt.getId().toString()));
     }
 }
