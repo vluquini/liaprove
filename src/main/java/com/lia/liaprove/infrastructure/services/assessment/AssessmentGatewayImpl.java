@@ -68,7 +68,7 @@ public class AssessmentGatewayImpl implements AssessmentGateway {
     @Override
     @Transactional(readOnly = true)
     public List<PersonalizedAssessment> findPersonalizedAssessmentsByCreatorId(UUID creatorId) {
-        return assessmentJpaRepository.findPersonalizedAssessmentsByCreatorId(creatorId).stream()
+        return assessmentJpaRepository.findPersonalizedByCreatorIdWithDetails(creatorId).stream()
                 .map(assessmentMapper::toDomain)
                 .collect(Collectors.toList());
     }
@@ -76,7 +76,7 @@ public class AssessmentGatewayImpl implements AssessmentGateway {
     @Override
     @Transactional(readOnly = true)
     public List<PersonalizedAssessment> findAllPersonalizedAssessments() {
-        return assessmentJpaRepository.findAllPersonalizedAssessments().stream()
+        return assessmentJpaRepository.findAllPersonalizedWithDetails().stream()
                 .map(assessmentMapper::toDomain)
                 .collect(Collectors.toList());
     }

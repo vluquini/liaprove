@@ -18,9 +18,10 @@ public interface AssessmentJpaRepository extends JpaRepository<AssessmentEntity,
     Optional<PersonalizedAssessmentEntity> findByShareableToken(String shareableToken);
 
     @Query("""
-        SELECT a
+        SELECT DISTINCT a
         FROM AssessmentEntity a
         LEFT JOIN FETCH TREAT(a AS PersonalizedAssessmentEntity).createdBy
+        LEFT JOIN FETCH a.questions
         WHERE a.id = :id
     """)
     Optional<AssessmentEntity> findByIdWithCreator(@Param("id") UUID id);
@@ -32,19 +33,23 @@ public interface AssessmentJpaRepository extends JpaRepository<AssessmentEntity,
     );
 
     @Query("""
-        SELECT pa
+        SELECT DISTINCT pa
         FROM PersonalizedAssessmentEntity pa
         LEFT JOIN FETCH pa.createdBy
+        LEFT JOIN FETCH pa.questions
         WHERE pa.createdBy.id = :creatorId
+        ORDER BY pa.creationDate DESC
     """)
-    List<PersonalizedAssessmentEntity> findPersonalizedAssessmentsByCreatorId(@Param("creatorId") UUID creatorId);
+    List<PersonalizedAssessmentEntity> findPersonalizedByCreatorIdWithDetails(@Param("creatorId") UUID creatorId);
 
     @Query("""
-        SELECT pa
+        SELECT DISTINCT pa
         FROM PersonalizedAssessmentEntity pa
         LEFT JOIN FETCH pa.createdBy
+        LEFT JOIN FETCH pa.questions
+        ORDER BY pa.creationDate DESC
     """)
-    List<PersonalizedAssessmentEntity> findAllPersonalizedAssessments();
+    List<PersonalizedAssessmentEntity> findAllPersonalizedWithDetails();
 
     @Query("SELECT pa.createdBy.id, COUNT(pa) " +
             "FROM PersonalizedAssessmentEntity pa " +
