@@ -13,13 +13,13 @@ import java.util.UUID;
 public interface ListAttemptsForMyAssessmentUseCase {
 
     /**
-     * Retorna a lista de tentativas para uma avaliação, validando se o solicitante é o criador.
+     * Retorna a lista de tentativas para uma avaliação, validando se o solicitante é admin ou criador.
      *
      * @param assessmentId O ID da avaliação.
-     * @param recruiterId  O ID do recrutador que está solicitando.
+     * @param requesterId  O ID do usuário que está solicitando.
      * @return Uma lista de objetos {@link AssessmentAttempt}.
      * @throws AssessmentNotFoundException se a avaliação não for encontrada.
-     * @throws AuthorizationException      se o recrutador não for o criador da avaliação.
+     * @throws AuthorizationException      se o usuário não tiver permissão para visualizar as tentativas.
      */
-    List<AssessmentAttempt> execute(UUID assessmentId, UUID recruiterId);
+    List<AssessmentAttempt> execute(UUID assessmentId, UUID requesterId);
 }

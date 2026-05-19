@@ -386,8 +386,9 @@ public class AppConfig {
 
     @Bean
     public ListAttemptsForMyAssessmentUseCase listAttemptsForMyAssessmentUseCase(AssessmentGateway assessmentGateway,
-                                                                                 AssessmentAttemptGateway assessmentAttemptGateway) {
-        return new ListAttemptsForMyAssessmentUseCaseImpl(assessmentGateway, assessmentAttemptGateway);
+                                                                                 AssessmentAttemptGateway assessmentAttemptGateway,
+                                                                                 UserGateway userGateway) {
+        return new ListAttemptsForMyAssessmentUseCaseImpl(assessmentGateway, assessmentAttemptGateway, userGateway);
     }
 
     @Bean
@@ -399,6 +400,18 @@ public class AppConfig {
     @Bean
     public UpdateExpiredAssessmentsStatusUseCase updateExpiredAssessmentsStatusUseCase(AssessmentGateway assessmentGateway) {
         return new UpdateExpiredAssessmentsStatusUseCaseImpl(assessmentGateway);
+    }
+
+    @Bean
+    public ListPersonalizedAssessmentsUseCase listPersonalizedAssessmentsUseCase(AssessmentGateway assessmentGateway,
+                                                                                 UserGateway userGateway) {
+        return new ListPersonalizedAssessmentsUseCaseImpl(assessmentGateway, userGateway);
+    }
+
+    @Bean
+    public GetPersonalizedAssessmentUseCase getPersonalizedAssessmentUseCase(AssessmentGateway assessmentGateway,
+                                                                             UserGateway userGateway) {
+        return new GetPersonalizedAssessmentUseCaseImpl(assessmentGateway, userGateway);
     }
 
     @Bean

@@ -20,6 +20,10 @@ public interface AssessmentGateway {
 
     void deletePersonalizedAssessmentById(UUID assessmentId);
 
+    List<PersonalizedAssessment> findPersonalizedAssessmentsByCreatorId(UUID creatorId);
+
+    List<PersonalizedAssessment> findAllPersonalizedAssessments();
+
     /**
      * Encontra todas as avaliações personalizadas que estão com status ATIVO,
      * mas cuja data de expiração já passou.

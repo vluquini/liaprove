@@ -31,6 +31,21 @@ public interface AssessmentJpaRepository extends JpaRepository<AssessmentEntity,
             @Param("currentDateTime") LocalDateTime currentDateTime
     );
 
+    @Query("""
+        SELECT pa
+        FROM PersonalizedAssessmentEntity pa
+        LEFT JOIN FETCH pa.createdBy
+        WHERE pa.createdBy.id = :creatorId
+    """)
+    List<PersonalizedAssessmentEntity> findPersonalizedAssessmentsByCreatorId(@Param("creatorId") UUID creatorId);
+
+    @Query("""
+        SELECT pa
+        FROM PersonalizedAssessmentEntity pa
+        LEFT JOIN FETCH pa.createdBy
+    """)
+    List<PersonalizedAssessmentEntity> findAllPersonalizedAssessments();
+
     @Query("SELECT pa.createdBy.id, COUNT(pa) " +
             "FROM PersonalizedAssessmentEntity pa " +
             "GROUP BY pa.createdBy.id")
