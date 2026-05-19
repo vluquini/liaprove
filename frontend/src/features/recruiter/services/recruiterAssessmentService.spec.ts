@@ -217,13 +217,13 @@ describe('recruiterAssessmentService', () => {
       difficultyByCommunity: 'MEDIUM',
       relevanceByCommunity: 'FOUR',
       guideline: 'Avaliar clareza, consistencia e exemplos praticos.',
-      visibility: 'SHARED_WITH_RECRUITERS',
+      visibility: 'SHARED',
     })
 
     expect(payload).toMatchObject({
       type: 'OPEN',
       title: 'Explique transacoes em APIs',
-      visibility: 'SHARED_WITH_RECRUITERS',
+      visibility: 'SHARED',
     })
     expect(question.id).toBe('question-3')
   })

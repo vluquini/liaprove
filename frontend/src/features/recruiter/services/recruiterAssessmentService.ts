@@ -6,7 +6,7 @@ export type QuestionType = 'MULTIPLE_CHOICE' | 'PROJECT' | 'OPEN'
 export type RelevanceLevel = 'ONE' | 'TWO' | 'THREE' | 'FOUR' | 'FIVE'
 export type PersonalizedAssessmentStatus = 'ACTIVE' | 'DEACTIVATED' | 'EXPIRED'
 export type AssessmentAttemptStatus = 'IN_PROGRESS' | 'COMPLETED' | 'APPROVED' | 'FAILED'
-export type OpenQuestionVisibility = 'PRIVATE' | 'SHARED_WITH_RECRUITERS'
+export type OpenQuestionVisibility = 'PRIVATE' | 'SHARED'
 
 export interface CriteriaWeights {
   hardSkillsWeight: number

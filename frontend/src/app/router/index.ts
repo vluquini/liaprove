@@ -138,7 +138,7 @@ export const router = createRouter({
       name: 'recruiter-open-question-new',
       beforeEnter: requireAuth,
       meta: { roles: recruiterRoles },
-      component: pendingFeatureView,
+      component: () => import('@/features/recruiter/views/RecruiterOpenQuestionCreateView.vue'),
     },
     {
       path: '/forbidden',
