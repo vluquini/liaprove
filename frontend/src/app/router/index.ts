@@ -131,7 +131,7 @@ export const router = createRouter({
       name: 'recruiter-attempt-detail',
       beforeEnter: requireAuth,
       meta: { roles: recruiterRoles },
-      component: pendingFeatureView,
+      component: () => import('@/features/recruiter/views/RecruiterAttemptDetailView.vue'),
     },
     {
       path: '/recruiter/questions/open/new',

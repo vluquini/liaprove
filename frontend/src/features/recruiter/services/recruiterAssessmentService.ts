@@ -154,6 +154,70 @@ export interface AssessmentAttemptSummaryResponse {
 
 export interface AssessmentAttemptDetailsResponse {
   attemptId: string
+  status: AssessmentAttemptStatus
+  accuracyRate: number | null
+  startedAt: string
+  finishedAt?: string | null
+  assessment: AssessmentAttemptAssessmentResponse
+  candidate: AssessmentAttemptCandidateResponse
+  explainability: AssessmentExplainabilityResponse
+  questions: AttemptQuestionDetailsResponse[]
+}
+
+export interface AssessmentAttemptAssessmentResponse {
+  id: string
+  title: string
+  description: string
+  evaluationTimerMinutes: number | null
+  criteriaWeights: CriteriaWeights | null
+  jobDescriptionAnalysis: JobDescriptionAnalysisResponse | null
+}
+
+export interface AssessmentAttemptCandidateResponse {
+  id: string
+  name: string
+  email: string
+  role?: string
+  experienceLevel?: string | null
+  hardSkills?: string[] | null
+  softSkills?: string[] | null
+}
+
+export interface AssessmentExplainabilityResponse {
+  totalQuestions: number
+  answeredQuestions: number
+  multipleChoiceQuestions: number
+  openQuestions: number
+  projectQuestions: number
+  candidateExperienceLevel?: string | null
+  candidateHardSkills: string[]
+  candidateSoftSkills: string[]
+  criteriaWeights: CriteriaWeights | null
+}
+
+export interface AttemptQuestionDetailsResponse {
+  id: string
+  title: string
+  description: string
+  guideline?: string | null
+  alternatives: AttemptAlternativeResponse[]
+  answer: AttemptAnswerResponse | null
+}
+
+export interface AttemptAlternativeResponse {
+  id: string
+  text: string
+}
+
+export interface AttemptAnswerResponse {
+  questionId: string
+  selectedAlternativeId?: string | null
+  projectUrl?: string | null
+  textResponse?: string | null
+}
+
+export interface LegacyAssessmentAttemptDetailsResponse {
+  attemptId: string
   candidate: {
     id: string
     name: string
