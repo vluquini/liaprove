@@ -89,14 +89,14 @@ export const router = createRouter({
       name: 'recruiter-home',
       beforeEnter: requireAuth,
       meta: { roles: recruiterRoles },
-      component: pendingFeatureView,
+      component: () => import('@/features/recruiter/views/RecruiterHomeView.vue'),
     },
     {
       path: '/recruiter/job-analysis',
       name: 'recruiter-job-analysis',
       beforeEnter: requireAuth,
       meta: { roles: recruiterRoles },
-      component: pendingFeatureView,
+      component: () => import('@/features/recruiter/views/RecruiterJobAnalysisView.vue'),
     },
     {
       path: '/recruiter/assessments/new',
