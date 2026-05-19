@@ -21,7 +21,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestEntityManager
 @ActiveProfiles("dev")
 @Transactional
-@ActiveProfiles("dev")
 class QuestionVotingEvaluatorSchedulerTest {
 
     @Autowired
