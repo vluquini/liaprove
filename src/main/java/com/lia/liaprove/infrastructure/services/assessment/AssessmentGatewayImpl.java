@@ -7,6 +7,7 @@ import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.assessment.PersonalizedAssessmentEntity;
 import com.lia.liaprove.infrastructure.mappers.assessment.AssessmentMapper;
+import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentAttemptJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentJpaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,10 +22,16 @@ import java.util.stream.Collectors;
 public class AssessmentGatewayImpl implements AssessmentGateway {
 
     private final AssessmentJpaRepository assessmentJpaRepository;
+    private final AssessmentAttemptJpaRepository assessmentAttemptJpaRepository;
     private final AssessmentMapper assessmentMapper;
 
-    public AssessmentGatewayImpl(AssessmentJpaRepository assessmentJpaRepository, AssessmentMapper assessmentMapper) {
+    public AssessmentGatewayImpl(
+            AssessmentJpaRepository assessmentJpaRepository,
+            AssessmentAttemptJpaRepository assessmentAttemptJpaRepository,
+            AssessmentMapper assessmentMapper
+    ) {
         this.assessmentJpaRepository = assessmentJpaRepository;
+        this.assessmentAttemptJpaRepository = assessmentAttemptJpaRepository;
         this.assessmentMapper = assessmentMapper;
     }
 
@@ -32,14 +39,16 @@ public class AssessmentGatewayImpl implements AssessmentGateway {
     @Transactional(readOnly = true)
     public Optional<Assessment> findById(UUID id) {
         return assessmentJpaRepository.findByIdWithCreator(id)
-                .map(assessmentMapper::toDomain);
+                .map(assessmentMapper::toDomain)
+                .map(this::withCurrentAttemptCount);
     }
 
     @Override
     @Transactional(readOnly = true)
     public Optional<Assessment> findByShareableToken(String token) {
         return assessmentJpaRepository.findByShareableToken(token)
-                .map(assessmentMapper::toDomain);
+                .map(assessmentMapper::toDomain)
+                .map(this::withCurrentAttemptCount);
     }
 
     @Override
@@ -70,6 +79,7 @@ public class AssessmentGatewayImpl implements AssessmentGateway {
     public List<PersonalizedAssessment> findPersonalizedAssessmentsByCreatorId(UUID creatorId) {
         return assessmentJpaRepository.findPersonalizedByCreatorIdWithDetails(creatorId).stream()
                 .map(assessmentMapper::toDomain)
+                .map(this::withCurrentAttemptCount)
                 .collect(Collectors.toList());
     }
 
@@ -78,6 +88,7 @@ public class AssessmentGatewayImpl implements AssessmentGateway {
     public List<PersonalizedAssessment> findAllPersonalizedAssessments() {
         return assessmentJpaRepository.findAllPersonalizedWithDetails().stream()
                 .map(assessmentMapper::toDomain)
+                .map(this::withCurrentAttemptCount)
                 .collect(Collectors.toList());
     }
 
@@ -90,6 +101,27 @@ public class AssessmentGatewayImpl implements AssessmentGateway {
                 ).stream()
                 .map(assessmentMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    private Assessment withCurrentAttemptCount(Assessment assessment) {
+        if (assessment instanceof PersonalizedAssessment personalizedAssessment
+                && personalizedAssessment.getId() != null) {
+            personalizedAssessment.setTotalAttempts(
+                    Math.toIntExact(assessmentAttemptJpaRepository.countByAssessmentId(personalizedAssessment.getId()))
+            );
+        }
+
+        return assessment;
+    }
+
+    private PersonalizedAssessment withCurrentAttemptCount(PersonalizedAssessment assessment) {
+        if (assessment != null && assessment.getId() != null) {
+            assessment.setTotalAttempts(
+                    Math.toIntExact(assessmentAttemptJpaRepository.countByAssessmentId(assessment.getId()))
+            );
+        }
+
+        return assessment;
     }
 }
 

@@ -20,9 +20,11 @@ import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentC
 import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.DEV_USER_HEADER;
 import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.OTHER_RECRUITER_EMAIL;
 import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.RECRUITER_EMAIL;
+import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.createAttempt;
 import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.createPersonalizedAssessment;
 import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.deleteAssessmentData;
 import static com.lia.liaprove.infrastructure.controllers.assessment.AssessmentControllerIntegrationTestSupport.getSeededUser;
+import static com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus.COMPLETED;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -74,6 +76,26 @@ class ListPersonalizedAssessmentsEndpointIntegrationTest {
                 .andExpect(jsonPath("$[0].id").value(ownAssessment.getId().toString()))
                 .andExpect(jsonPath("$[0].title").value("Ana Backend Challenge"))
                 .andExpect(jsonPath("$[0].createdBy.email").value(RECRUITER_EMAIL));
+    }
+
+    @Test
+    @DisplayName("Should include persisted attempts in personalized assessment totals")
+    void shouldIncludePersistedAttemptsInAssessmentTotals() throws Exception {
+        UserEntity recruiter = getSeededUser(userJpaRepository, RECRUITER_EMAIL);
+        UserEntity candidate = getSeededUser(userJpaRepository, CANDIDATE_EMAIL);
+        PersonalizedAssessmentEntity assessment = createPersonalizedAssessment(assessmentJpaRepository, recruiter);
+        assessment.setTitle("Assessment with attempts");
+        assessment.setTotalAttempts(0);
+        assessmentJpaRepository.save(assessment);
+        createAttempt(assessmentAttemptJpaRepository, assessment, candidate, COMPLETED);
+
+        mockMvc.perform(get("/api/v1/assessments/personalized")
+                        .header(DEV_USER_HEADER, recruiter.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].title").value("Assessment with attempts"))
+                .andExpect(jsonPath("$[0].totalAttempts").value(1))
+                .andExpect(jsonPath("$[0].maxAttempts").value(3));
     }
 
     @Test
