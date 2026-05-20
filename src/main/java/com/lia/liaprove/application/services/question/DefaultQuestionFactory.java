@@ -57,6 +57,7 @@ public class DefaultQuestionFactory implements QuestionFactory {
         OpenQuestion question = new OpenQuestion(dto.guideline(), dto.visibility());
 
         initCommonFields(question, dto);
+        question.setStatus(QuestionStatus.FINISHED);
 
         return question;
     }

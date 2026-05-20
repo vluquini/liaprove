@@ -43,7 +43,7 @@ class DefaultQuestionFactoryTest {
         assertEquals(QuestionType.OPEN, openQuestion.getQuestionType());
         assertEquals("Mention lazy evaluation and yield semantics.", openQuestion.getGuideline());
         assertEquals(OpenQuestionVisibility.SHARED, openQuestion.getVisibility());
-        assertEquals(QuestionStatus.VOTING, openQuestion.getStatus());
+        assertEquals(QuestionStatus.FINISHED, openQuestion.getStatus());
         assertEquals(dto.title(), openQuestion.getTitle());
     }
 

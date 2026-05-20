@@ -2,6 +2,7 @@ package com.lia.liaprove.infrastructure.controllers.question;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lia.liaprove.core.domain.question.OpenQuestionVisibility;
+import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.core.usecases.question.PreAnalyzeQuestionUseCase;
 import com.lia.liaprove.core.usecases.question.PrepareQuestionSubmissionUseCase;
@@ -25,8 +26,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -78,6 +81,7 @@ class CreateOpenQuestionEndpointIntegrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.type", is("OPEN")))
                 .andExpect(jsonPath("$.title", is(request.getTitle())))
+                .andExpect(jsonPath("$.status", is(QuestionStatus.FINISHED.name())))
                 .andExpect(jsonPath("$.guideline", is(request.getGuideline())))
                 .andExpect(jsonPath("$.visibility", is(request.getVisibility().name())))
                 .andExpect(jsonPath("$.relevanceByLLM", is(RelevanceLevel.THREE.name())));
@@ -89,6 +93,7 @@ class CreateOpenQuestionEndpointIntegrationTest {
 
         assertThat(persistedQuestion).isInstanceOf(OpenQuestionEntity.class);
         OpenQuestionEntity openQuestionEntity = (OpenQuestionEntity) persistedQuestion;
+        assertThat(openQuestionEntity.getStatus()).isEqualTo(QuestionStatus.FINISHED);
         assertThat(openQuestionEntity.getGuideline()).isEqualTo(request.getGuideline());
         assertThat(openQuestionEntity.getVisibility()).isEqualTo(request.getVisibility());
     }
@@ -120,6 +125,28 @@ class CreateOpenQuestionEndpointIntegrationTest {
         assertThat(persistedQuestion).isInstanceOf(OpenQuestionEntity.class);
         OpenQuestionEntity openQuestionEntity = (OpenQuestionEntity) persistedQuestion;
         assertThat(openQuestionEntity.getVisibility()).isEqualTo(OpenQuestionVisibility.PRIVATE);
+    }
+
+    @Test
+    @DisplayName("Should not list recruiter open questions in community voting")
+    void shouldNotListRecruiterOpenQuestionsInCommunityVoting() throws Exception {
+        UserEntity recruiter = QuestionControllerIntegrationTestSupport.getSeededUser(
+                userJpaRepository,
+                QuestionControllerIntegrationTestSupport.RECRUITER_EMAIL
+        );
+        CreateOpenQuestionRequest request =
+                QuestionControllerIntegrationTestSupport.validOpenQuestionRequest(OpenQuestionVisibility.SHARED);
+
+        mockMvc.perform(post("/api/v1/questions/open")
+                        .header(QuestionControllerIntegrationTestSupport.DEV_USER_HEADER, recruiter.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated());
+
+        mockMvc.perform(get("/api/v1/questions/voting")
+                        .header(QuestionControllerIntegrationTestSupport.DEV_USER_HEADER, recruiter.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(0)));
     }
 
     @Test
