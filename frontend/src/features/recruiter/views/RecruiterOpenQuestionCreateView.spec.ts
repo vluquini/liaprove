@@ -91,5 +91,23 @@ describe('RecruiterOpenQuestionCreateView', () => {
       visibility: 'SHARED',
     })
     expect(wrapper.text()).toContain('Questão criada: Explique transacoes em APIs')
+    expect((wrapper.get('[data-test="open-title"]').element as HTMLInputElement).value).toBe('')
+    expect((wrapper.get('[data-test="open-description"]').element as HTMLTextAreaElement).value).toBe('')
+    expect((wrapper.get('[data-test="open-guideline"]').element as HTMLTextAreaElement).value).toBe('')
+    expect((wrapper.get('[data-test="area-SOFTWARE_DEVELOPMENT"]').element as HTMLInputElement).checked).toBe(false)
+    expect((wrapper.get('[data-test="open-difficulty"]').element as HTMLSelectElement).value).toBe('MEDIUM')
+    expect((wrapper.get('[data-test="open-relevance"]').element as HTMLSelectElement).value).toBe('THREE')
+    expect((wrapper.get('[data-test="open-visibility"]').element as HTMLSelectElement).value).toBe('PRIVATE')
+
+    await wrapper.get('[data-test="open-title"]').setValue('Explique filas em APIs')
+    await wrapper
+      .get('[data-test="open-description"]')
+      .setValue('Descreva como voce garantiria processamento resiliente em uma API REST.')
+    await wrapper.get('[data-test="area-DATABASE"]').setValue(true)
+    await wrapper.get('[data-test="open-guideline"]').setValue('Avaliar clareza, consistencia e riscos operacionais.')
+    await wrapper.get('[data-test="create-open-question"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('Informe título, descrição, área, dificuldade, relevância e critério de avaliação.')
   })
 })

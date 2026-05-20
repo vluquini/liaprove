@@ -32,6 +32,7 @@ const form = reactive({
 const submitting = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const formResetKey = ref(0)
 
 function toggleKnowledgeArea(area: KnowledgeArea, checked: boolean): void {
   if (checked && !form.knowledgeAreas.includes(area)) {
@@ -59,6 +60,17 @@ function validateForm(): string | null {
   return null
 }
 
+function resetForm(): void {
+  form.title = ''
+  form.description = ''
+  form.knowledgeAreas = []
+  form.difficultyByCommunity = 'MEDIUM'
+  form.relevanceByCommunity = 'THREE'
+  form.guideline = ''
+  form.visibility = 'PRIVATE'
+  formResetKey.value += 1
+}
+
 async function submitOpenQuestion(): Promise<void> {
   const validationMessage = validateForm()
   if (validationMessage) {
@@ -82,6 +94,7 @@ async function submitOpenQuestion(): Promise<void> {
       visibility: form.visibility,
     })
     successMessage.value = `Questão criada: ${response.title}`
+    resetForm()
   } catch (error) {
     errorMessage.value = normalizeApiError(error).message
   } finally {
@@ -110,7 +123,7 @@ async function submitOpenQuestion(): Promise<void> {
 
       <Card class="question-form-card">
         <template #content>
-          <form class="space-y-5" @submit.prevent="submitOpenQuestion">
+          <form :key="formResetKey" class="space-y-5" @submit.prevent="submitOpenQuestion">
             <div class="grid gap-4 lg:grid-cols-2">
               <label class="profile-field lg:col-span-2">
                 <span>Título</span>
