@@ -200,6 +200,46 @@ a {
   padding: clamp(1.25rem, 2vw, 2rem);
 }
 
+.recruiter-action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.25rem;
+  border: 1px solid var(--liaprove-line);
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.75rem 0.9rem;
+  color: var(--liaprove-ink);
+  font-size: 0.95rem;
+  font-weight: 700;
+  box-shadow: 0 8px 22px rgba(17, 27, 26, 0.04);
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    color 150ms ease,
+    transform 150ms ease;
+}
+
+.recruiter-action-link i {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 8px;
+  background: rgba(4, 125, 117, 0.1);
+  color: var(--liaprove-accent-strong);
+  font-size: 0.95rem;
+}
+
+.recruiter-action-link:hover,
+.recruiter-action-link:focus-visible {
+  border-color: rgba(4, 125, 117, 0.35);
+  color: var(--liaprove-accent-strong);
+  box-shadow: 0 12px 28px rgba(17, 27, 26, 0.08);
+  transform: translateY(-1px);
+}
+
 .action-card,
 .profile-summary-card,
 .profile-card {

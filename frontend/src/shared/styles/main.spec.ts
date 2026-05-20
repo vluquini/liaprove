@@ -18,6 +18,15 @@ describe('main styles', () => {
     expect(css).toContain('.profile-password-dialog .profile-field > span')
   })
 
+  it('styles recruiter quick action links as readable buttons', () => {
+    const css = readFileSync(cssPath, 'utf8')
+
+    expect(css).toContain('.recruiter-action-link')
+    expect(css).toContain('display: inline-flex')
+    expect(css).toContain('gap: 0.75rem')
+    expect(css).toContain('.recruiter-action-link i')
+  })
+
   it('keeps question curation screens readable over the PrimeVue theme', () => {
     const css = readFileSync(cssPath, 'utf8')
 
