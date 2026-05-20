@@ -71,7 +71,8 @@ test('recruiter creates a personalized assessment and evaluates a candidate atte
   await page.locator('[data-test="assessment-timer"]').fill('30')
   await page.locator('[data-test="load-suggestions"]').click()
   await expect(page.getByText('Transações em APIs Java')).toBeVisible()
-  await page.locator(`[data-test="select-question-${questionId}"]`).check()
+  await page.locator(`[data-test="select-question-${questionId}"]`).click()
+  await expect(page.locator(`[data-test="selected-question-${questionId}"]`)).toBeChecked()
   await page.locator('[data-test="create-assessment"]').click()
   await expect(page.getByText(`/assessments/personalized/${token}/start`)).toBeVisible()
 
