@@ -20,6 +20,7 @@ import {
 } from '../services/recruiterAssessmentService'
 
 const LAST_JOB_ANALYSIS_KEY = 'liaprove:recruiter:last-job-analysis'
+const MAX_SELECTED_QUESTIONS = 10
 
 const knowledgeAreaOptions: KnowledgeArea[] = ['SOFTWARE_DEVELOPMENT', 'DATABASE', 'CYBERSECURITY', 'NETWORKS', 'AI']
 const difficultyOptions: DifficultyLevel[] = ['EASY', 'MEDIUM', 'HARD']
@@ -40,17 +41,22 @@ const selectedKnowledgeAreas = ref<KnowledgeArea[]>([])
 const selectedDifficulties = ref<DifficultyLevel[]>([])
 const selectedQuestionTypes = ref<QuestionType[]>([])
 const suggestions = ref<ScoredQuestionResponse[]>([])
-const selectedQuestionIds = ref<string[]>([])
+const selectedQuestions = ref<ScoredQuestionResponse[]>([])
 const jobAnalysis = ref<JobDescriptionAnalysisResponse | null>(null)
 const loadingSuggestions = ref(false)
 const creating = ref(false)
 const errorMessage = ref('')
 const successShareUrl = ref('')
 
+const selectedQuestionIds = computed(() => selectedQuestions.value.map((question) => question.id))
+
 const selectedQuestionsLabel = computed(() => {
   const count = selectedQuestionIds.value.length
-  return count === 1 ? '1 questão selecionada' : `${count} questões selecionadas`
+  const label = count === 1 ? '1 questão selecionada' : `${count} questões selecionadas`
+  return `${label} de ${MAX_SELECTED_QUESTIONS}`
 })
+
+const hasReachedQuestionLimit = computed(() => selectedQuestionIds.value.length >= MAX_SELECTED_QUESTIONS)
 
 onMounted(() => {
   loadSavedJobAnalysis()
@@ -98,8 +104,18 @@ function toggleQuestionType(type: QuestionType, checked: boolean): void {
   selectedQuestionTypes.value = toggleSelection(selectedQuestionTypes.value, type, checked)
 }
 
-function toggleQuestion(questionId: string, checked: boolean): void {
-  selectedQuestionIds.value = toggleSelection(selectedQuestionIds.value, questionId, checked)
+function toggleQuestion(question: ScoredQuestionResponse, checked: boolean): void {
+  if (checked) {
+    if (hasReachedQuestionLimit.value || selectedQuestionIds.value.includes(question.id)) {
+      return
+    }
+
+    selectedQuestions.value = [...selectedQuestions.value, question]
+    suggestions.value = suggestions.value.filter((candidate) => candidate.id !== question.id)
+    return
+  }
+
+  selectedQuestions.value = selectedQuestions.value.filter((candidate) => candidate.id !== question.id)
 }
 
 async function loadSuggestions(): Promise<void> {
@@ -111,10 +127,11 @@ async function loadSuggestions(): Promise<void> {
       knowledgeAreas: selectedKnowledgeAreas.value,
       difficultyLevels: selectedDifficulties.value,
       questionTypes: selectedQuestionTypes.value,
+      excludeIds: selectedQuestionIds.value,
       page: 1,
       pageSize: 10,
     })
-    suggestions.value = response.questions
+    suggestions.value = response.questions.filter((question) => !selectedQuestionIds.value.includes(question.id))
   } catch (error) {
     suggestions.value = []
     errorMessage.value = normalizeApiError(error).message
@@ -155,6 +172,10 @@ function validateForm(): string | null {
     || selectedQuestionIds.value.length === 0
   ) {
     return 'Informe título, descrição, expiração futura, tentativas, tempo e ao menos uma questão.'
+  }
+
+  if (selectedQuestionIds.value.length > MAX_SELECTED_QUESTIONS) {
+    return `Selecione no máximo ${MAX_SELECTED_QUESTIONS} questões.`
   }
 
   if (form.hardSkillsWeight + form.softSkillsWeight + form.experienceWeight !== 100) {
@@ -344,36 +365,69 @@ function toJobDescriptionSnapshot(
             <template #content>
               <div class="space-y-3">
                 <p class="text-sm font-semibold text-[var(--liaprove-muted)]">{{ selectedQuestionsLabel }}</p>
-                <p v-if="suggestions.length === 0" class="text-[var(--liaprove-muted)]">
+                <section v-if="selectedQuestions.length > 0" class="space-y-3">
+                  <h2 class="text-sm font-bold text-[var(--liaprove-ink)]">Questões selecionadas</h2>
+                  <article
+                    v-for="question in selectedQuestions"
+                    :key="question.id"
+                    class="rounded-lg border border-[var(--liaprove-line)] bg-white p-3"
+                  >
+                    <label class="flex items-start gap-3">
+                      <input
+                        :data-test="`selected-question-${question.id}`"
+                        type="checkbox"
+                        checked
+                        @change="toggleQuestion(question, ($event.target as HTMLInputElement).checked)"
+                      />
+                      <span class="min-w-0">
+                        <span class="block font-semibold text-[var(--liaprove-ink)]">{{ question.title }}</span>
+                        <span class="mt-2 flex flex-wrap gap-2">
+                          <Tag
+                            v-for="area in question.knowledgeAreas"
+                            :key="area"
+                            :value="area"
+                            severity="info"
+                          />
+                          <Tag :value="`Score ${Math.round(question.score * 100)}%`" severity="success" />
+                        </span>
+                      </span>
+                    </label>
+                  </article>
+                </section>
+
+                <section v-if="suggestions.length > 0" class="space-y-3">
+                  <h2 class="text-sm font-bold text-[var(--liaprove-ink)]">Novas sugestões</h2>
+                  <article
+                    v-for="question in suggestions"
+                    :key="question.id"
+                    class="rounded-lg border border-[var(--liaprove-line)] bg-white p-3"
+                  >
+                    <label class="flex items-start gap-3">
+                      <input
+                        :data-test="`select-question-${question.id}`"
+                        type="checkbox"
+                        :disabled="hasReachedQuestionLimit"
+                        @change="toggleQuestion(question, ($event.target as HTMLInputElement).checked)"
+                      />
+                      <span class="min-w-0">
+                        <span class="block font-semibold text-[var(--liaprove-ink)]">{{ question.title }}</span>
+                        <span class="mt-2 flex flex-wrap gap-2">
+                          <Tag
+                            v-for="area in question.knowledgeAreas"
+                            :key="area"
+                            :value="area"
+                            severity="info"
+                          />
+                          <Tag :value="`Score ${Math.round(question.score * 100)}%`" severity="success" />
+                        </span>
+                      </span>
+                    </label>
+                  </article>
+                </section>
+
+                <p v-if="selectedQuestions.length === 0 && suggestions.length === 0" class="text-[var(--liaprove-muted)]">
                   Busque sugestões para selecionar questões.
                 </p>
-
-                <article
-                  v-for="question in suggestions"
-                  :key="question.id"
-                  class="rounded-lg border border-[var(--liaprove-line)] bg-white p-3"
-                >
-                  <label class="flex items-start gap-3">
-                    <input
-                      :data-test="`select-question-${question.id}`"
-                      type="checkbox"
-                      :checked="selectedQuestionIds.includes(question.id)"
-                      @change="toggleQuestion(question.id, ($event.target as HTMLInputElement).checked)"
-                    />
-                    <span class="min-w-0">
-                      <span class="block font-semibold text-[var(--liaprove-ink)]">{{ question.title }}</span>
-                      <span class="mt-2 flex flex-wrap gap-2">
-                        <Tag
-                          v-for="area in question.knowledgeAreas"
-                          :key="area"
-                          :value="area"
-                          severity="info"
-                        />
-                        <Tag :value="`Score ${Math.round(question.score * 100)}%`" severity="success" />
-                      </span>
-                    </span>
-                  </label>
-                </article>
               </div>
             </template>
           </Card>

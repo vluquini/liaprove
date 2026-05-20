@@ -113,6 +113,93 @@ describe('RecruiterAssessmentCreateView', () => {
     expect(wrapper.text()).toContain('1 questão selecionada')
   })
 
+  it('keeps selected questions visible when loading more suggestions', async () => {
+    let requestCount = 0
+    const suggestionUrls: URL[] = []
+
+    server.use(
+      http.get('*/api/v1/assessments/personalized/suggestions', ({ request }) => {
+        suggestionUrls.push(new URL(request.url))
+        requestCount += 1
+
+        return HttpResponse.json(requestCount === 1
+          ? makeSuggestions()
+          : makeSuggestions([
+              {
+                id: 'question-2',
+                title: 'Como proteger APIs?',
+                description: 'Escolha a alternativa correta.',
+                knowledgeAreas: ['CYBERSECURITY'],
+                difficultyLevel: 'EASY',
+                score: 0.84,
+              },
+            ]))
+      }),
+    )
+
+    const { wrapper } = await mountCreateView()
+
+    await wrapper.get('[data-test="load-suggestions"]').trigger('click')
+    await flushPromises()
+    await wrapper.get('[data-test="select-question-question-1"]').setValue(true)
+
+    await wrapper.get('[data-test="load-suggestions"]').trigger('click')
+    await flushPromises()
+
+    expect(suggestionUrls[1]?.searchParams.getAll('excludeIds')).toEqual(['question-1'])
+    expect(wrapper.text()).toContain('Questões selecionadas')
+    expect(wrapper.text()).toContain('Como validar transacoes?')
+    expect(wrapper.text()).toContain('Novas sugestões')
+    expect(wrapper.text()).toContain('Como proteger APIs?')
+    expect(wrapper.find('[data-test="selected-question-question-1"]').exists()).toBe(true)
+    expect(wrapper.find('[data-test="select-question-question-1"]').exists()).toBe(false)
+  })
+
+  it('limits the assessment to ten selected questions', async () => {
+    let requestCount = 0
+
+    server.use(
+      http.get('*/api/v1/assessments/personalized/suggestions', () => {
+        requestCount += 1
+
+        return HttpResponse.json(requestCount === 1
+          ? makeSuggestions(Array.from({ length: 10 }, (_, index) => ({
+              id: `question-${index + 1}`,
+              title: `Questao ${index + 1}`,
+              description: 'Escolha a alternativa correta.',
+              knowledgeAreas: ['SOFTWARE_DEVELOPMENT'],
+              difficultyLevel: 'MEDIUM',
+              score: 0.9 - (index / 100),
+            })))
+          : makeSuggestions([
+              {
+                id: 'question-11',
+                title: 'Questao 11',
+                description: 'Escolha a alternativa correta.',
+                knowledgeAreas: ['DATABASE'],
+                difficultyLevel: 'MEDIUM',
+                score: 0.7,
+              },
+            ]))
+      }),
+    )
+
+    const { wrapper } = await mountCreateView()
+
+    await wrapper.get('[data-test="load-suggestions"]').trigger('click')
+    await flushPromises()
+
+    for (let index = 1; index <= 10; index += 1) {
+      await wrapper.get(`[data-test="select-question-question-${index}"]`).setValue(true)
+    }
+
+    await wrapper.get('[data-test="load-suggestions"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('10 questões selecionadas de 10')
+    expect(wrapper.get('[data-test="select-question-question-11"]').attributes('disabled')).toBeDefined()
+  })
+
   it('creates personalized assessment and displays shareable link', async () => {
     sessionStorage.setItem(LAST_JOB_ANALYSIS_KEY, JSON.stringify(makeAnalysis()))
     let createPayload: unknown
@@ -170,21 +257,21 @@ function makeAnalysis() {
   }
 }
 
-function makeSuggestions() {
+function makeSuggestions(content = [
+  {
+    id: 'question-1',
+    title: 'Como validar transacoes?',
+    description: 'Escolha a alternativa correta.',
+    knowledgeAreas: ['SOFTWARE_DEVELOPMENT'],
+    difficultyLevel: 'MEDIUM',
+    score: 0.91,
+  },
+]) {
   return {
-    content: [
-      {
-        id: 'question-1',
-        title: 'Como validar transacoes?',
-        description: 'Escolha a alternativa correta.',
-        knowledgeAreas: ['SOFTWARE_DEVELOPMENT'],
-        difficultyLevel: 'MEDIUM',
-        score: 0.91,
-      },
-    ],
+    content,
     page: 1,
     size: 10,
-    totalElements: 1,
+    totalElements: content.length,
     totalPages: 1,
     last: true,
   }

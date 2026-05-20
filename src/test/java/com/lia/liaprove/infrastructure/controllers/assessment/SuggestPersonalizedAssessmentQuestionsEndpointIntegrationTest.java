@@ -61,7 +61,25 @@ class SuggestPersonalizedAssessmentQuestionsEndpointIntegrationTest {
                         .param("questionTypes", "OPEN")
                         .param("pageSize", "5"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").isArray());
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].title").value("Revision of Pull Request"));
+    }
+
+    @Test
+    @DisplayName("Should get easy multiple choice suggestions when all knowledge areas are selected")
+    void shouldGetEasyMultipleChoiceSuggestionsWhenAllKnowledgeAreasAreSelected() throws Exception {
+        UserEntity recruiter = getSeededUser(userJpaRepository, RECRUITER_EMAIL);
+
+        mockMvc.perform(get("/api/v1/assessments/personalized/suggestions")
+                        .header(DEV_USER_HEADER, recruiter.getEmail())
+                        .param("knowledgeAreas", "SOFTWARE_DEVELOPMENT", "DATABASE", "CYBERSECURITY", "NETWORKS", "AI")
+                        .param("difficultyLevels", "EASY")
+                        .param("questionTypes", "MULTIPLE_CHOICE")
+                        .param("page", "1")
+                        .param("pageSize", "10"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.content[0].title").value("Overfitting in Machine Learning"));
     }
 
     @Test
