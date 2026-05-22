@@ -16,6 +16,7 @@ function makeRouter() {
       { path: '/dashboard', component: DashboardView },
       { path: '/assessments/start', component: { template: '<div>Avaliacao</div>' } },
       { path: '/questions/new', component: { template: '<div>Questao</div>' } },
+      { path: '/mini-projects/public', component: { template: '<div>Mini projetos</div>' } },
       { path: '/recruiter/job-analysis', component: { template: '<div>Vaga</div>' } },
       { path: '/admin/users', component: { template: '<div>Usuarios</div>' } },
     ],
@@ -47,6 +48,7 @@ describe('DashboardView', () => {
     expect(wrapper.text()).toContain('Iniciar avaliação')
     expect(wrapper.text()).toContain('Submeter questão')
     expect(wrapper.text()).toContain('Votar em questões')
+    expect(wrapper.text()).toContain('Avaliar mini-projetos')
   })
 
   it('shows recruiter quick actions and company context', async () => {
@@ -55,6 +57,7 @@ describe('DashboardView', () => {
     expect(wrapper.text()).toContain('Iniciar avaliação')
     expect(wrapper.text()).toContain('Submeter questão')
     expect(wrapper.text()).toContain('Votar em questões')
+    expect(wrapper.text()).toContain('Avaliar mini-projetos')
     expect(wrapper.text()).toContain('Analisar vaga')
     expect(wrapper.text()).toContain('Criar avaliação personalizada')
     expect(wrapper.text()).toContain('Questão aberta')

@@ -18,6 +18,7 @@ function makeRouter() {
       { path: '/profile', component: { template: '<div>Perfil</div>' } },
       { path: '/assessments/start', component: { template: '<div>Avaliacoes</div>' } },
       { path: '/questions/voting', component: { template: '<div>Questoes</div>' } },
+      { path: '/mini-projects/public', component: { template: '<div>Mini projetos</div>' } },
       { path: '/recruiter', component: { template: '<div>Recrutador</div>' } },
       { path: '/recruiter/job-analysis', component: { template: '<div>Analise</div>' } },
       { path: '/admin/users', component: { template: '<div>Usuarios</div>' } },
@@ -48,7 +49,9 @@ describe('AuthenticatedLayout', () => {
     expect(wrapper.text()).toContain('Perfil')
     expect(wrapper.text()).toContain('Avaliações')
     expect(wrapper.text()).toContain('Questões')
+    expect(wrapper.text()).toContain('Mini-projetos')
     expect(wrapper.text()).toContain('Conteudo protegido')
+    expect(wrapper.get('a[href="/mini-projects/public"]').text()).toContain('Mini-projetos')
 
     await wrapper.get('[data-test="logout-button"]').trigger('click')
     await flushPromises()

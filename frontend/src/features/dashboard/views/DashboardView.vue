@@ -38,6 +38,13 @@ const actions: Action[] = [
     roles: ['PROFESSIONAL', 'RECRUITER', 'ADMIN'],
   },
   {
+    label: 'Avaliar mini-projetos',
+    description: 'Revise entregas práticas públicas.',
+    to: '/mini-projects/public',
+    icon: 'pi pi-code',
+    roles: ['PROFESSIONAL', 'RECRUITER', 'ADMIN'],
+  },
+  {
     label: 'Analisar vaga',
     description: 'Extraia competências a partir de uma descrição.',
     to: '/recruiter/job-analysis',

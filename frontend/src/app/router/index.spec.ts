@@ -32,11 +32,12 @@ describe('router session handling', () => {
     expect(pushedPaths).toEqual(['/login'])
   })
 
-  it('registers assessment and public certificate routes', () => {
+  it('registers assessment, public certificate and mini-project routes', () => {
     expect(router.resolve('/assessments/start').name).toBe('assessment-start')
     expect(router.resolve('/assessments/attempts/attempt-1').name).toBe('assessment-attempt')
     expect(router.resolve('/assessments/attempts/attempt-1/result').name).toBe('assessment-result')
     expect(router.resolve('/certificates/CERT-123').name).toBe('certificate-public')
+    expect(router.resolve('/mini-projects/public').name).toBe('mini-projects-public')
   })
 
   it('registers recruiter and personalized assessment token routes', () => {
@@ -54,8 +55,10 @@ describe('router session handling', () => {
   it('restricts recruiter routes to recruiters and admins', () => {
     const recruiterRoute = router.resolve('/recruiter/assessments/new')
     const personalizedTokenRoute = router.resolve('/assessments/personalized/token-1/start')
+    const miniProjectsRoute = router.resolve('/mini-projects/public')
 
     expect(recruiterRoute.meta.roles).toEqual(['RECRUITER', 'ADMIN'])
     expect(personalizedTokenRoute.meta.roles).toBeUndefined()
+    expect(miniProjectsRoute.meta.roles).toBeUndefined()
   })
 })

@@ -66,6 +66,12 @@ export const router = createRouter({
       component: () => import('@/features/assessments/views/AssessmentResultView.vue'),
     },
     {
+      path: '/mini-projects/public',
+      name: 'mini-projects-public',
+      beforeEnter: requireAuth,
+      component: () => import('@/features/mini-projects/views/MiniProjectsPublicView.vue'),
+    },
+    {
       path: '/questions/voting',
       name: 'questions-voting',
       beforeEnter: requireAuth,
