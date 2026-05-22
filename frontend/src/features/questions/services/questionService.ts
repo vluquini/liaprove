@@ -71,20 +71,29 @@ export interface AlternativeRequest {
   correct: boolean
 }
 
-export interface SubmitMultipleChoiceQuestionRequest {
-  type: 'MULTIPLE_CHOICE'
+export interface SubmitQuestionBaseRequest {
   title: string
   description: string
   knowledgeAreas: KnowledgeArea[]
   difficultyByCommunity: DifficultyLevel
   relevanceByCommunity: RelevanceLevel
-  alternatives: AlternativeRequest[]
   acceptedLanguageSuggestions?: string[]
   acceptedBiasOrAmbiguityWarnings?: string[]
   acceptedDistractorSuggestions?: string[]
   acceptedDifficultyLevelByLLM?: string
   acceptedTopicConsistencyNotes?: string[]
 }
+
+export interface SubmitMultipleChoiceQuestionRequest extends SubmitQuestionBaseRequest {
+  type: 'MULTIPLE_CHOICE'
+  alternatives: AlternativeRequest[]
+}
+
+export interface SubmitProjectQuestionRequest extends SubmitQuestionBaseRequest {
+  type: 'PROJECT'
+}
+
+export type SubmitQuestionRequest = SubmitMultipleChoiceQuestionRequest | SubmitProjectQuestionRequest
 
 export interface PreAnalyzeQuestionResponse {
   languageSuggestions: string[]
@@ -120,13 +129,13 @@ export async function reactToFeedback(feedbackId: string, reactionType: Reaction
 }
 
 export async function preAnalyzeQuestion(
-  request: SubmitMultipleChoiceQuestionRequest,
+  request: SubmitQuestionRequest,
 ): Promise<PreAnalyzeQuestionResponse> {
   const response = await http.post<PreAnalyzeQuestionResponse>('/v1/questions/pre-analysis', request)
   return response.data
 }
 
-export async function submitQuestion(request: SubmitMultipleChoiceQuestionRequest): Promise<unknown> {
+export async function submitQuestion(request: SubmitQuestionRequest): Promise<unknown> {
   const response = await http.post('/v1/questions', request)
   return response.data
 }

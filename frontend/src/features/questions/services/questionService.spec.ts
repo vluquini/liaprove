@@ -10,6 +10,7 @@ import {
   submitQuestion,
   submitQuestionFeedback,
   type SubmitMultipleChoiceQuestionRequest,
+  type SubmitProjectQuestionRequest,
 } from './questionService'
 
 describe('questionService', () => {
@@ -104,6 +105,34 @@ describe('questionService', () => {
     expect(calls.preAnalysis).toMatchObject({ type: 'MULTIPLE_CHOICE' })
     expect(calls.submit).toMatchObject({ type: 'MULTIPLE_CHOICE' })
   })
+
+  it('sends project pre-analysis and submission payloads unchanged', async () => {
+    const projectRequest = validProjectRequest()
+    const calls: Record<string, unknown> = {}
+
+    server.use(
+      http.post('*/api/v1/questions/pre-analysis', async ({ request }) => {
+        calls.preAnalysis = await request.json()
+        return HttpResponse.json({
+          languageSuggestions: [],
+          biasOrAmbiguityWarnings: [],
+          distractorSuggestions: [],
+          difficultyLevelByLLM: null,
+          topicConsistencyNotes: [],
+        })
+      }),
+      http.post('*/api/v1/questions', async ({ request }) => {
+        calls.submit = await request.json()
+        return HttpResponse.json({ id: 'project-1', title: projectRequest.title, status: 'VOTING' }, { status: 201 })
+      }),
+    )
+
+    await preAnalyzeQuestion(projectRequest)
+    await submitQuestion(projectRequest)
+
+    expect(calls.preAnalysis).toEqual(projectRequest)
+    expect(calls.submit).toEqual(projectRequest)
+  })
 })
 
 function validMultipleChoiceRequest(): SubmitMultipleChoiceQuestionRequest {
@@ -119,6 +148,22 @@ function validMultipleChoiceRequest(): SubmitMultipleChoiceQuestionRequest {
       { text: 'Ignorar rollback em erros.', correct: false },
       { text: 'Persistir parcialmente os dados.', correct: false },
     ],
+    acceptedLanguageSuggestions: [],
+    acceptedBiasOrAmbiguityWarnings: [],
+    acceptedDistractorSuggestions: [],
+    acceptedDifficultyLevelByLLM: undefined,
+    acceptedTopicConsistencyNotes: [],
+  }
+}
+
+function validProjectRequest(): SubmitProjectQuestionRequest {
+  return {
+    type: 'PROJECT',
+    title: 'Mini-projeto para uma API REST versionada',
+    description: 'Implemente uma API REST com validacao de dados e persistencia transacional.',
+    knowledgeAreas: ['SOFTWARE_DEVELOPMENT'],
+    difficultyByCommunity: 'MEDIUM',
+    relevanceByCommunity: 'FOUR',
     acceptedLanguageSuggestions: [],
     acceptedBiasOrAmbiguityWarnings: [],
     acceptedDistractorSuggestions: [],
