@@ -139,6 +139,18 @@ function resetAcceptedSuggestions(): void {
   acceptDifficultySuggestion.value = false
 }
 
+function selectQuestionType(type: SubmissionQuestionType): void {
+  if (form.type === type) {
+    return
+  }
+
+  form.type = type
+  preAnalysis.value = null
+  message.value = ''
+  errorMessage.value = ''
+  resetAcceptedSuggestions()
+}
+
 async function runPreAnalysis(): Promise<void> {
   const validationMessage = validateForm()
   if (validationMessage) {
@@ -219,7 +231,7 @@ async function sendQuestion(): Promise<void> {
                       severity="secondary"
                       :outlined="form.type !== option.value"
                       :aria-pressed="form.type === option.value"
-                      @click="form.type = option.value"
+                      @click="selectQuestionType(option.value)"
                     />
                   </div>
                 </fieldset>

@@ -72,6 +72,48 @@ describe('QuestionSubmissionView', () => {
     expect(wrapper.text()).toContain('Informe título, descrição, área, dificuldade, relevância e 3 alternativas.')
   })
 
+  it('validates only common fields for a mini-project submission', async () => {
+    const { wrapper } = await mountSubmission()
+
+    await wrapper.get('[data-test="question-type-PROJECT"]').trigger('click')
+    await wrapper.get('[data-test="pre-analyze-question"]').trigger('click')
+
+    expect(wrapper.text()).toContain('Informe título, descrição, área, dificuldade e relevância.')
+    expect(wrapper.text()).not.toContain('3 alternativas')
+  })
+
+  it('clears pre-analysis while preserving alternatives when the question type changes', async () => {
+    server.use(
+      http.post('*/api/v1/questions/pre-analysis', () =>
+        HttpResponse.json({
+          languageSuggestions: ['Deixar o enunciado mais direto.'],
+          biasOrAmbiguityWarnings: [],
+          distractorSuggestions: [],
+          difficultyLevelByLLM: null,
+          topicConsistencyNotes: [],
+        }),
+      ),
+    )
+
+    const { wrapper } = await mountSubmission()
+
+    await fillValidQuestionForm(wrapper)
+    await wrapper.get('[data-test="pre-analyze-question"]').trigger('click')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('Deixar o enunciado mais direto.')
+
+    await wrapper.get('[data-test="question-type-PROJECT"]').trigger('click')
+
+    expect(wrapper.text()).not.toContain('Deixar o enunciado mais direto.')
+
+    await wrapper.get('[data-test="question-type-MULTIPLE_CHOICE"]').trigger('click')
+
+    expect((wrapper.get('[data-test="alternative-0"]').element as HTMLInputElement).value).toBe(
+      'Usar transacoes no caso de uso.',
+    )
+  })
+
   it('runs pre-analysis and submits accepted suggestions', async () => {
     let preAnalysisBody: unknown
     let submitBody: unknown
