@@ -51,7 +51,7 @@ describe('MiniProjectsPublicView', () => {
         HttpResponse.json([
           {
             attemptId: 'attempt-1',
-            assessmentTitle: 'API de pedidos',
+            assessmentTitle: 'Avaliação de SOFTWARE_DEVELOPMENT',
             authorName: 'Ana Silva',
             repositoryLink: 'https://github.com/ana/orders-api',
             finishedAt: '2026-05-18T14:30:00',
@@ -63,7 +63,8 @@ describe('MiniProjectsPublicView', () => {
     const { wrapper } = await mountView()
 
     expect(wrapper.text()).toContain('Mini-projetos públicos')
-    expect(wrapper.text()).toContain('API de pedidos')
+    expect(wrapper.text()).toContain('Avaliação de Desenvolvimento de Software')
+    expect(wrapper.text()).not.toContain('Avaliação de SOFTWARE_DEVELOPMENT')
     expect(wrapper.text()).toContain('Ana Silva')
     expect(wrapper.text()).toContain('18/05/2026')
     expect(wrapper.get('[data-test="mini-project-link-attempt-1"]').attributes('href')).toBe(

@@ -4,6 +4,7 @@ import Button from 'primevue/button'
 import Card from 'primevue/card'
 import Textarea from 'primevue/textarea'
 import AuthenticatedLayout from '@/app/layouts/AuthenticatedLayout.vue'
+import { formatAssessmentText } from '@/features/assessments/utils/assessmentLabels'
 import { normalizeApiError } from '@/shared/api/errors'
 import {
   castMiniProjectAttemptVote,
@@ -149,7 +150,7 @@ onMounted(loadAttempts)
                 </span>
                 <div>
                   <h2 class="text-lg font-semibold text-[var(--liaprove-ink)]">
-                    {{ attempt.assessmentTitle || 'Mini-projeto sem título' }}
+                    {{ formatAssessmentText(attempt.assessmentTitle) || 'Mini-projeto sem título' }}
                   </h2>
                   <p class="mt-1 text-sm text-[var(--liaprove-muted)]">
                     {{ attempt.authorName || 'Autor não informado' }} · Finalizado em {{ formatDate(attempt.finishedAt) }}
