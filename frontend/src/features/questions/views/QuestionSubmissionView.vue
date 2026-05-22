@@ -40,6 +40,7 @@ const selectedBiasWarnings = ref<string[]>([])
 const selectedDistractorSuggestions = ref<string[]>([])
 const selectedTopicNotes = ref<string[]>([])
 const acceptDifficultySuggestion = ref(false)
+let preAnalysisRequestId = 0
 
 const form = reactive({
   type: 'MULTIPLE_CHOICE' as SubmissionQuestionType,
@@ -145,6 +146,8 @@ function selectQuestionType(type: SubmissionQuestionType): void {
   }
 
   form.type = type
+  preAnalysisRequestId += 1
+  analyzing.value = false
   preAnalysis.value = null
   message.value = ''
   errorMessage.value = ''
@@ -158,19 +161,31 @@ async function runPreAnalysis(): Promise<void> {
     return
   }
 
+  const requestId = ++preAnalysisRequestId
   analyzing.value = true
   message.value = ''
   errorMessage.value = ''
   resetAcceptedSuggestions()
 
   try {
-    preAnalysis.value = await preAnalyzeQuestion(buildRequest())
+    const response = await preAnalyzeQuestion(buildRequest())
+    if (requestId !== preAnalysisRequestId) {
+      return
+    }
+
+    preAnalysis.value = response
     message.value = 'Pré-análise concluída. Revise as sugestões antes do envio.'
   } catch (error) {
+    if (requestId !== preAnalysisRequestId) {
+      return
+    }
+
     preAnalysis.value = null
     errorMessage.value = normalizeApiError(error).message
   } finally {
-    analyzing.value = false
+    if (requestId === preAnalysisRequestId) {
+      analyzing.value = false
+    }
   }
 }
 

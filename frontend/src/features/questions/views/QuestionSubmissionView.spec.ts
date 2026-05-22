@@ -114,6 +114,99 @@ describe('QuestionSubmissionView', () => {
     )
   })
 
+  it('keeps pre-analysis state when the current question type is selected again', async () => {
+    server.use(
+      http.post('*/api/v1/questions/pre-analysis', () =>
+        HttpResponse.json({
+          languageSuggestions: ['Deixar o enunciado mais direto.'],
+          biasOrAmbiguityWarnings: [],
+          distractorSuggestions: [],
+          difficultyLevelByLLM: null,
+          topicConsistencyNotes: [],
+        }),
+      ),
+    )
+
+    const { wrapper } = await mountSubmission()
+
+    await fillValidQuestionForm(wrapper)
+    await wrapper.get('[data-test="pre-analyze-question"]').trigger('click')
+    await flushPromises()
+    await wrapper.get('[data-test="accept-language-0"]').setValue(true)
+
+    await wrapper.get('[data-test="question-type-MULTIPLE_CHOICE"]').trigger('click')
+
+    expect(wrapper.text()).toContain('Deixar o enunciado mais direto.')
+    expect((wrapper.get('[data-test="accept-language-0"]').element as HTMLInputElement).checked).toBe(true)
+  })
+
+  it('clears accepted suggestions when the question type changes', async () => {
+    let submitBody: unknown
+
+    server.use(
+      http.post('*/api/v1/questions/pre-analysis', () =>
+        HttpResponse.json({
+          languageSuggestions: ['Deixar o enunciado mais direto.'],
+          biasOrAmbiguityWarnings: [],
+          distractorSuggestions: [],
+          difficultyLevelByLLM: null,
+          topicConsistencyNotes: [],
+        }),
+      ),
+      http.post('*/api/v1/questions', async ({ request }) => {
+        submitBody = await request.json()
+        return HttpResponse.json({ id: 'question-reset', title: 'Nova questão', status: 'VOTING' }, { status: 201 })
+      }),
+    )
+
+    const { wrapper } = await mountSubmission()
+
+    await fillValidQuestionForm(wrapper)
+    await wrapper.get('[data-test="pre-analyze-question"]').trigger('click')
+    await flushPromises()
+    await wrapper.get('[data-test="accept-language-0"]').setValue(true)
+
+    await wrapper.get('[data-test="question-type-PROJECT"]').trigger('click')
+    await wrapper.get('[data-test="question-type-MULTIPLE_CHOICE"]').trigger('click')
+    await wrapper.get('[data-test="submit-question"]').trigger('click')
+    await flushPromises()
+
+    expect(submitBody).toMatchObject({ acceptedLanguageSuggestions: [] })
+  })
+
+  it('ignores an in-flight pre-analysis response after the question type changes', async () => {
+    let resolvePreAnalysis!: () => void
+    const pendingPreAnalysis = new Promise<void>((resolve) => {
+      resolvePreAnalysis = resolve
+    })
+
+    server.use(
+      http.post('*/api/v1/questions/pre-analysis', async () => {
+        await pendingPreAnalysis
+
+        return HttpResponse.json({
+          languageSuggestions: ['Deixar o enunciado mais direto.'],
+          biasOrAmbiguityWarnings: [],
+          distractorSuggestions: [],
+          difficultyLevelByLLM: null,
+          topicConsistencyNotes: [],
+        })
+      }),
+    )
+
+    const { wrapper } = await mountSubmission()
+
+    await fillValidQuestionForm(wrapper)
+    await wrapper.get('[data-test="pre-analyze-question"]').trigger('click')
+    await wrapper.get('[data-test="question-type-PROJECT"]').trigger('click')
+
+    resolvePreAnalysis()
+    await flushPromises()
+
+    expect(wrapper.text()).not.toContain('Deixar o enunciado mais direto.')
+    expect(wrapper.text()).not.toContain('Pré-análise concluída. Revise as sugestões antes do envio.')
+  })
+
   it('runs pre-analysis and submits accepted suggestions', async () => {
     let preAnalysisBody: unknown
     let submitBody: unknown
