@@ -64,12 +64,34 @@ describe('QuestionSubmissionView', () => {
     setActivePinia(createPinia())
   })
 
-  it('validates required fields before pre-analysis', async () => {
+  it('validates the title length before pre-analysis', async () => {
     const { wrapper } = await mountSubmission()
 
     await wrapper.get('[data-test="pre-analyze-question"]').trigger('click')
 
-    expect(wrapper.text()).toContain('Informe título, descrição, área, dificuldade, relevância e 3 alternativas.')
+    expect(wrapper.text()).toContain('O título deve ter entre 10 e 255 caracteres.')
+  })
+
+  it('validates the description length before pre-analysis', async () => {
+    const { wrapper } = await mountSubmission()
+
+    await wrapper.get('[data-test="question-title"]').setValue('Mini-projeto para API REST')
+    await wrapper.get('[data-test="question-description"]').setValue('Curta')
+    await wrapper.get('[data-test="pre-analyze-question"]').trigger('click')
+
+    expect(wrapper.text()).toContain('A descrição deve ter entre 20 e 2000 caracteres.')
+  })
+
+  it('validates the knowledge area before pre-analysis', async () => {
+    const { wrapper } = await mountSubmission()
+
+    await wrapper.get('[data-test="question-title"]').setValue('Mini-projeto para API REST')
+    await wrapper
+      .get('[data-test="question-description"]')
+      .setValue('Implemente uma API REST com persistencia transacional.')
+    await wrapper.get('[data-test="pre-analyze-question"]').trigger('click')
+
+    expect(wrapper.text()).toContain('Selecione ao menos uma área de conhecimento.')
   })
 
   it('validates only common fields for a mini-project submission', async () => {
@@ -78,7 +100,7 @@ describe('QuestionSubmissionView', () => {
     await wrapper.get('[data-test="question-type-PROJECT"]').trigger('click')
     await wrapper.get('[data-test="pre-analyze-question"]').trigger('click')
 
-    expect(wrapper.text()).toContain('Informe título, descrição, área, dificuldade e relevância.')
+    expect(wrapper.text()).toContain('O título deve ter entre 10 e 255 caracteres.')
     expect(wrapper.text()).not.toContain('3 alternativas')
   })
 

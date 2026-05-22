@@ -74,16 +74,18 @@ function setCorrectAlternative(index: number): void {
 }
 
 function validateForm(): string | null {
-  if (
-    form.title.trim().length < 10 ||
-    form.description.trim().length < 20 ||
-    form.knowledgeAreas.length === 0
-  ) {
-    if (form.type === 'PROJECT') {
-      return 'Informe título, descrição, área, dificuldade e relevância.'
-    }
+  const titleLength = form.title.trim().length
+  if (titleLength < 10 || titleLength > 255) {
+    return 'O título deve ter entre 10 e 255 caracteres.'
+  }
 
-    return 'Informe título, descrição, área, dificuldade, relevância e 3 alternativas.'
+  const descriptionLength = form.description.trim().length
+  if (descriptionLength < 20 || descriptionLength > 2000) {
+    return 'A descrição deve ter entre 20 e 2000 caracteres.'
+  }
+
+  if (form.knowledgeAreas.length === 0) {
+    return 'Selecione ao menos uma área de conhecimento.'
   }
 
   if (form.type === 'PROJECT') {
