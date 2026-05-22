@@ -15,14 +15,20 @@ import {
   type KnowledgeArea,
   type PreAnalyzeQuestionResponse,
   type RelevanceLevel,
-  type SubmitMultipleChoiceQuestionRequest,
+  type SubmitQuestionRequest,
 } from '../services/questionService'
 
 const router = useRouter()
 
+type SubmissionQuestionType = SubmitQuestionRequest['type']
+
 const knowledgeAreaOptions: KnowledgeArea[] = ['SOFTWARE_DEVELOPMENT', 'DATABASE', 'CYBERSECURITY', 'NETWORKS', 'AI']
 const difficultyOptions: DifficultyLevel[] = ['EASY', 'MEDIUM', 'HARD']
 const relevanceOptions: RelevanceLevel[] = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE']
+const questionTypeOptions: { label: string; value: SubmissionQuestionType }[] = [
+  { label: 'Múltipla escolha', value: 'MULTIPLE_CHOICE' },
+  { label: 'Mini-projeto', value: 'PROJECT' },
+]
 
 const analyzing = ref(false)
 const submitting = ref(false)
@@ -36,6 +42,7 @@ const selectedTopicNotes = ref<string[]>([])
 const acceptDifficultySuggestion = ref(false)
 
 const form = reactive({
+  type: 'MULTIPLE_CHOICE' as SubmissionQuestionType,
   title: '',
   description: '',
   knowledgeAreas: [] as KnowledgeArea[],
@@ -71,7 +78,15 @@ function validateForm(): string | null {
     form.description.trim().length < 20 ||
     form.knowledgeAreas.length === 0
   ) {
+    if (form.type === 'PROJECT') {
+      return 'Informe título, descrição, área, dificuldade e relevância.'
+    }
+
     return 'Informe título, descrição, área, dificuldade, relevância e 3 alternativas.'
+  }
+
+  if (form.type === 'PROJECT') {
+    return null
   }
 
   const filledAlternatives = form.alternatives.filter((alternative) => alternative.text.trim())
@@ -84,17 +99,13 @@ function validateForm(): string | null {
   return null
 }
 
-function buildRequest(): SubmitMultipleChoiceQuestionRequest {
-  return {
-    type: 'MULTIPLE_CHOICE',
+function buildRequest(): SubmitQuestionRequest {
+  const commonRequest = {
     title: form.title.trim(),
     description: form.description.trim(),
     knowledgeAreas: [...form.knowledgeAreas],
     difficultyByCommunity: form.difficultyByCommunity,
     relevanceByCommunity: form.relevanceByCommunity,
-    alternatives: form.alternatives
-      .filter((alternative) => alternative.text.trim())
-      .map((alternative) => ({ text: alternative.text.trim(), correct: alternative.correct })),
     acceptedLanguageSuggestions: selectedLanguageSuggestions.value,
     acceptedBiasOrAmbiguityWarnings: selectedBiasWarnings.value,
     acceptedDistractorSuggestions: selectedDistractorSuggestions.value,
@@ -102,6 +113,21 @@ function buildRequest(): SubmitMultipleChoiceQuestionRequest {
       ? preAnalysis.value?.difficultyLevelByLLM ?? undefined
       : undefined,
     acceptedTopicConsistencyNotes: selectedTopicNotes.value,
+  }
+
+  if (form.type === 'PROJECT') {
+    return {
+      ...commonRequest,
+      type: 'PROJECT',
+    }
+  }
+
+  return {
+    ...commonRequest,
+    type: 'MULTIPLE_CHOICE',
+    alternatives: form.alternatives
+      .filter((alternative) => alternative.text.trim())
+      .map((alternative) => ({ text: alternative.text.trim(), correct: alternative.correct })),
   }
 }
 
@@ -168,7 +194,7 @@ async function sendQuestion(): Promise<void> {
           </p>
           <h1 class="mt-2 text-3xl font-semibold text-[var(--liaprove-ink)]">Submeter questão</h1>
           <p class="mt-2 max-w-3xl text-[var(--liaprove-muted)]">
-            Crie uma questão de múltipla escolha, execute a pré-análise por IA e envie para curadoria comunitária.
+            Crie uma questão para curadoria comunitária e, se desejar, execute a pré-análise por IA antes do envio.
           </p>
         </div>
       </section>
@@ -181,6 +207,23 @@ async function sendQuestion(): Promise<void> {
           <template #content>
             <form class="space-y-5" @submit.prevent="sendQuestion">
               <div class="grid gap-4 lg:grid-cols-2">
+                <fieldset class="space-y-2 lg:col-span-2">
+                  <legend class="text-sm font-bold text-[var(--liaprove-ink)]">Tipo</legend>
+                  <div class="flex flex-wrap gap-2">
+                    <Button
+                      v-for="option in questionTypeOptions"
+                      :key="option.value"
+                      :data-test="`question-type-${option.value}`"
+                      type="button"
+                      :label="option.label"
+                      severity="secondary"
+                      :outlined="form.type !== option.value"
+                      :aria-pressed="form.type === option.value"
+                      @click="form.type = option.value"
+                    />
+                  </div>
+                </fieldset>
+
                 <label class="profile-field lg:col-span-2">
                   <span>Título</span>
                   <InputText data-test="question-title" v-model="form.title" />
@@ -217,7 +260,7 @@ async function sendQuestion(): Promise<void> {
                 </div>
               </fieldset>
 
-              <fieldset class="space-y-3">
+              <fieldset v-if="form.type === 'MULTIPLE_CHOICE'" class="space-y-3">
                 <legend class="text-sm font-bold text-[var(--liaprove-ink)]">Alternativas</legend>
                 <div v-for="(alternative, index) in form.alternatives" :key="index" class="grid gap-2 sm:grid-cols-[1fr_auto]">
                   <InputText

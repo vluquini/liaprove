@@ -50,6 +50,15 @@ async function fillValidQuestionForm(wrapper: VueWrapper) {
   await wrapper.get('[data-test="alternative-2"]').setValue('Persistir parcialmente os dados.')
 }
 
+async function fillValidProjectQuestionForm(wrapper: VueWrapper) {
+  await wrapper.get('[data-test="question-type-PROJECT"]').trigger('click')
+  await wrapper.get('[data-test="question-title"]').setValue('Mini-projeto para uma API REST versionada')
+  await wrapper
+    .get('[data-test="question-description"]')
+    .setValue('Implemente uma API REST com validacao de dados e persistencia transacional.')
+  await wrapper.get('[data-test="area-SOFTWARE_DEVELOPMENT"]').setValue(true)
+}
+
 describe('QuestionSubmissionView', () => {
   beforeEach(() => {
     setActivePinia(createPinia())
@@ -104,6 +113,45 @@ describe('QuestionSubmissionView', () => {
       type: 'MULTIPLE_CHOICE',
       acceptedLanguageSuggestions: ['Deixar o enunciado mais direto.'],
     })
+    expect(router.currentRoute.value.path).toBe('/questions/voting')
+  })
+
+  it('pre-analyzes and submits mini projects without alternatives', async () => {
+    let preAnalysisBody: unknown
+    let submitBody: unknown
+
+    server.use(
+      http.post('*/api/v1/questions/pre-analysis', async ({ request }) => {
+        preAnalysisBody = await request.json()
+        return HttpResponse.json({
+          languageSuggestions: [],
+          biasOrAmbiguityWarnings: [],
+          distractorSuggestions: [],
+          difficultyLevelByLLM: null,
+          topicConsistencyNotes: [],
+        })
+      }),
+      http.post('*/api/v1/questions', async ({ request }) => {
+        submitBody = await request.json()
+        return HttpResponse.json({ id: 'project-1', title: 'Novo mini-projeto', status: 'VOTING' }, { status: 201 })
+      }),
+    )
+
+    const { wrapper, router } = await mountSubmission()
+
+    await fillValidProjectQuestionForm(wrapper)
+
+    expect(wrapper.find('[data-test="alternative-0"]').exists()).toBe(false)
+
+    await wrapper.get('[data-test="pre-analyze-question"]').trigger('click')
+    await flushPromises()
+    await wrapper.get('[data-test="submit-question"]').trigger('click')
+    await flushPromises()
+
+    expect(preAnalysisBody).toMatchObject({ type: 'PROJECT' })
+    expect(preAnalysisBody).not.toHaveProperty('alternatives')
+    expect(submitBody).toMatchObject({ type: 'PROJECT' })
+    expect(submitBody).not.toHaveProperty('alternatives')
     expect(router.currentRoute.value.path).toBe('/questions/voting')
   })
 })
