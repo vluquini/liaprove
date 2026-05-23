@@ -19,6 +19,7 @@ function makeRouter() {
       { path: '/assessments/start', component: { template: '<div>Avaliacoes</div>' } },
       { path: '/questions/voting', component: { template: '<div>Questoes</div>' } },
       { path: '/mini-projects/public', component: MiniProjectsPublicView },
+      { path: '/mini-projects/public/:attemptId', name: 'mini-project-public-detail', component: { template: '<div>Detalhe</div>' } },
       { path: '/login', component: { template: '<div>Login</div>' } },
     ],
   })
@@ -45,7 +46,7 @@ describe('MiniProjectsPublicView', () => {
     setActivePinia(createPinia())
   })
 
-  it('loads public mini-project attempts and shows delivery links', async () => {
+  it('loads public mini-project attempts and shows detail links', async () => {
     server.use(
       http.get('*/api/v1/assessment-attempts/mini-project/public', () =>
         HttpResponse.json([
@@ -67,8 +68,9 @@ describe('MiniProjectsPublicView', () => {
     expect(wrapper.text()).not.toContain('Avaliação de SOFTWARE_DEVELOPMENT')
     expect(wrapper.text()).toContain('Ana Silva')
     expect(wrapper.text()).toContain('18/05/2026')
-    expect(wrapper.get('[data-test="mini-project-link-attempt-1"]').attributes('href')).toBe(
-      'https://github.com/ana/orders-api',
+    expect(wrapper.get('[data-test="view-mini-project-details-attempt-1"]').text()).toContain('Ver detalhes')
+    expect(wrapper.get('[data-test="view-mini-project-details-attempt-1"]').attributes('href')).toBe(
+      '/mini-projects/public/attempt-1',
     )
   })
 
@@ -92,9 +94,7 @@ describe('MiniProjectsPublicView', () => {
     expect(wrapper.text()).toContain('Falha ao carregar mini-projetos.')
   })
 
-  it('sends votes and feedback for a public mini-project attempt', async () => {
-    const calls: Record<string, unknown> = {}
-
+  it('does not expose voting, feedback or delivery actions in the listing', async () => {
     server.use(
       http.get('*/api/v1/assessment-attempts/mini-project/public', () =>
         HttpResponse.json([
@@ -107,28 +107,18 @@ describe('MiniProjectsPublicView', () => {
           },
         ]),
       ),
-      http.post('*/api/v1/assessment-attempts/attempt-1/vote', async ({ request }) => {
-        calls.vote = await request.json()
-        return new HttpResponse(null, { status: 200 })
-      }),
-      http.post('*/api/v1/assessment-attempts/attempt-1/feedback', async ({ request }) => {
-        calls.feedback = await request.json()
-        return new HttpResponse(null, { status: 200 })
-      }),
     )
 
     const { wrapper } = await mountView()
 
-    await wrapper.get('[data-test="approve-mini-project-attempt-1"]').trigger('click')
-    await flushPromises()
-
-    await wrapper.get('[data-test="feedback-mini-project-attempt-1"]').setValue('Boa entrega e README claro.')
-    await wrapper.get('[data-test="submit-feedback-mini-project-attempt-1"]').trigger('click')
-    await flushPromises()
-
-    expect(calls.vote).toEqual({ voteType: 'APPROVE' })
-    expect(calls.feedback).toEqual({ comment: 'Boa entrega e README claro.' })
-    expect(wrapper.text()).toContain('Voto registrado.')
-    expect(wrapper.text()).toContain('Feedback enviado.')
+    expect(wrapper.find('[data-test="mini-project-link-attempt-1"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="approve-mini-project-attempt-1"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="reject-mini-project-attempt-1"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="feedback-mini-project-attempt-1"]').exists()).toBe(false)
+    expect(wrapper.find('[data-test="submit-feedback-mini-project-attempt-1"]').exists()).toBe(false)
+    expect(wrapper.text()).not.toContain('Abrir entrega')
+    expect(wrapper.text()).not.toContain('Aprovar')
+    expect(wrapper.text()).not.toContain('Rejeitar')
+    expect(wrapper.text()).not.toContain('Enviar feedback')
   })
 })
