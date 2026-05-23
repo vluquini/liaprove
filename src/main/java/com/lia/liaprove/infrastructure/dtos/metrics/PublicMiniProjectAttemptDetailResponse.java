@@ -13,6 +13,6 @@ public record PublicMiniProjectAttemptDetailResponse(
         String textResponse,
         PublicMiniProjectQuestionResponse question,
         VoteSummaryResponse voteSummary,
-        List<Object> feedbacks
+        List<FeedbackAssessmentResponse> feedbacks
 ) {
 }

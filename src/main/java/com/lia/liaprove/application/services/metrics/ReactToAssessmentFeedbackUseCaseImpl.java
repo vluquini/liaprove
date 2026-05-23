@@ -1,0 +1,41 @@
+package com.lia.liaprove.application.services.metrics;
+
+import com.lia.liaprove.application.gateways.metrics.FeedbackGateway;
+import com.lia.liaprove.application.gateways.user.UserGateway;
+import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
+import com.lia.liaprove.core.domain.metrics.ReactionType;
+import com.lia.liaprove.core.domain.user.User;
+import com.lia.liaprove.core.exceptions.metrics.FeedbackNotFoundException;
+import com.lia.liaprove.core.exceptions.user.AuthorizationException;
+import com.lia.liaprove.core.exceptions.user.UserNotFoundException;
+import com.lia.liaprove.core.usecases.metrics.ReactToAssessmentFeedbackUseCase;
+
+import java.util.UUID;
+
+public class ReactToAssessmentFeedbackUseCaseImpl implements ReactToAssessmentFeedbackUseCase {
+
+    private final FeedbackGateway feedbackGateway;
+    private final UserGateway userGateway;
+
+    public ReactToAssessmentFeedbackUseCaseImpl(FeedbackGateway feedbackGateway, UserGateway userGateway) {
+        this.feedbackGateway = feedbackGateway;
+        this.userGateway = userGateway;
+    }
+
+    @Override
+    public void reactToFeedback(UUID userId, UUID feedbackId, ReactionType reactionType) {
+        User user = userGateway.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("User not found with id: " + userId));
+
+        FeedbackAssessment feedback = feedbackGateway.findFeedbackAssessmentById(feedbackId)
+                .orElseThrow(() -> new FeedbackNotFoundException("Feedback not found with id: " + feedbackId));
+
+        if (feedback.getUser().getId().equals(userId)) {
+            throw new AuthorizationException("Users cannot react to their own feedback.");
+        }
+
+        feedback.manageReaction(user, reactionType);
+
+        feedbackGateway.saveAssessmentFeedback(feedback);
+    }
+}

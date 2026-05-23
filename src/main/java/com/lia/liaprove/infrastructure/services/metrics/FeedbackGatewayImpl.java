@@ -42,15 +42,48 @@ public class FeedbackGatewayImpl implements FeedbackGateway {
 
     @Override
     public void saveAssessmentFeedback(FeedbackAssessment feedback) {
-        // Map the domain object to its JPA entity representation
-        FeedbackAssessmentEntity entity = feedbackAssessmentMapper.toEntity(feedback);
-        // Save the entity to the database
-        feedbackAssessmentJpaRepository.save(entity);
+        FeedbackAssessmentEntity managedEntity;
+
+        if (feedback.getId() != null) {
+            managedEntity = feedbackAssessmentJpaRepository.findByIdWithDetails(feedback.getId())
+                    .orElseThrow(() -> new EntityNotFoundException("FeedbackAssessment not found for ID: " + feedback.getId()));
+
+            managedEntity.setComment(feedback.getComment());
+            managedEntity.setVisible(feedback.isVisible());
+            managedEntity.setUpdatedAt(feedback.getUpdatedAt());
+            managedEntity.getReactions().clear();
+            feedback.getReactions().stream()
+                    .map(feedbackAssessmentMapper::reactionToEntity)
+                    .forEach(managedEntity::addReaction);
+        } else {
+            managedEntity = feedbackAssessmentMapper.toEntity(feedback);
+            feedback.getReactions().stream()
+                    .map(feedbackAssessmentMapper::reactionToEntity)
+                    .forEach(managedEntity::addReaction);
+        }
+
+        FeedbackAssessmentEntity savedEntity = feedbackAssessmentJpaRepository.save(managedEntity);
+        if (feedback.getId() == null) {
+            feedback.setId(savedEntity.getId());
+        }
     }
 
     @Override
     public boolean existsAssessmentFeedbackByUserIdAndAttemptId(UUID userId, UUID attemptId) {
         return feedbackAssessmentJpaRepository.existsByUserIdAndAssessmentAttemptId(userId, attemptId);
+    }
+
+    @Override
+    public List<FeedbackAssessment> findAssessmentFeedbacksByAttemptId(UUID attemptId) {
+        return feedbackAssessmentJpaRepository.findVisibleByAssessmentAttemptIdWithDetails(attemptId).stream()
+                .map(feedbackAssessmentMapper::toDomain)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+    @Override
+    public Optional<FeedbackAssessment> findFeedbackAssessmentById(UUID feedbackId) {
+        return feedbackAssessmentJpaRepository.findByIdWithDetails(feedbackId)
+                .map(feedbackAssessmentMapper::toDomain);
     }
 
     @Override

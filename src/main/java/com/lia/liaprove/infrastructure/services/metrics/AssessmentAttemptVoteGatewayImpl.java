@@ -7,7 +7,9 @@ import com.lia.liaprove.infrastructure.mappers.metrics.AssessmentAttemptVoteMapp
 import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentAttemptVoteJpaRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class AssessmentAttemptVoteGatewayImpl implements AssessmentAttemptVoteGateway {
@@ -26,6 +28,13 @@ public class AssessmentAttemptVoteGatewayImpl implements AssessmentAttemptVoteGa
         AssessmentAttemptVoteEntity entity = assessmentAttemptVoteMapper.toEntity(vote);
         assessmentAttemptVoteJpaRepository.save(entity);
         vote.setId(entity.getId());
+    }
+
+    @Override
+    public List<AssessmentAttemptVote> findByAttemptId(UUID attemptId) {
+        return assessmentAttemptVoteJpaRepository.findByAssessmentAttemptIdWithDetails(attemptId).stream()
+                .map(assessmentAttemptVoteMapper::toDomain)
+                .collect(Collectors.toList());
     }
 
     @Override

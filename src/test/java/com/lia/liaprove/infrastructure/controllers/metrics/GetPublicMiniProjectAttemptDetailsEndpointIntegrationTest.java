@@ -1,6 +1,9 @@
 package com.lia.liaprove.infrastructure.controllers.metrics;
 
+import com.lia.liaprove.core.domain.metrics.VoteType;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
+import com.lia.liaprove.infrastructure.entities.metrics.AssessmentAttemptVoteEntity;
+import com.lia.liaprove.infrastructure.entities.metrics.FeedbackAssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentAttemptJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentAttemptVoteJpaRepository;
@@ -21,6 +24,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 import static com.lia.liaprove.infrastructure.controllers.metrics.MetricsControllerIntegrationTestSupport.DEV_USER_HEADER;
 import static com.lia.liaprove.infrastructure.controllers.metrics.MetricsControllerIntegrationTestSupport.OTHER_PROFESSIONAL_EMAIL;
@@ -95,6 +99,11 @@ class GetPublicMiniProjectAttemptDetailsEndpointIntegrationTest {
                 owner,
                 "https://github.com/acme/project-reviewable"
         );
+        createVote(reviewer, attempt, VoteType.APPROVE);
+        createVote(getSeededUser(userJpaRepository, MetricsControllerIntegrationTestSupport.JUNIOR_EMAIL),
+                attempt,
+                VoteType.REJECT);
+        createFeedback(reviewer, attempt, "This mini-project has a clear delivery.");
 
         mockMvc.perform(get("/api/v1/assessment-attempts/mini-project/public/{attemptId}", attempt.getId())
                         .header(DEV_USER_HEADER, reviewer.getEmail()))
@@ -105,10 +114,15 @@ class GetPublicMiniProjectAttemptDetailsEndpointIntegrationTest {
                 .andExpect(jsonPath("$.repositoryLink", is("https://github.com/acme/project-reviewable")))
                 .andExpect(jsonPath("$.question.id", is(attempt.getQuestions().getFirst().getId().toString())))
                 .andExpect(jsonPath("$.question.title", is(attempt.getQuestions().getFirst().getTitle())))
-                .andExpect(jsonPath("$.voteSummary.approves", is(0)))
-                .andExpect(jsonPath("$.voteSummary.rejects", is(0)))
+                .andExpect(jsonPath("$.voteSummary.approves", is(1)))
+                .andExpect(jsonPath("$.voteSummary.rejects", is(1)))
                 .andExpect(jsonPath("$.feedbacks").isArray())
-                .andExpect(jsonPath("$.feedbacks.length()", is(0)));
+                .andExpect(jsonPath("$.feedbacks.length()", is(1)))
+                .andExpect(jsonPath("$.feedbacks[0].comment", is("This mini-project has a clear delivery.")))
+                .andExpect(jsonPath("$.feedbacks[0].author.id", is(reviewer.getId().toString())))
+                .andExpect(jsonPath("$.feedbacks[0].author.name", is(reviewer.getName())))
+                .andExpect(jsonPath("$.feedbacks[0].reactions").isArray())
+                .andExpect(jsonPath("$.feedbacks[0].reactions.length()", is(0)));
     }
 
     @Test
@@ -136,5 +150,25 @@ class GetPublicMiniProjectAttemptDetailsEndpointIntegrationTest {
         mockMvc.perform(get("/api/v1/assessment-attempts/mini-project/public/{attemptId}", UUID.randomUUID())
                         .header(DEV_USER_HEADER, reviewer.getEmail()))
                 .andExpect(status().isNotFound());
+    }
+
+    private void createVote(UserEntity user, AssessmentAttemptEntity attempt, VoteType voteType) {
+        AssessmentAttemptVoteEntity vote = new AssessmentAttemptVoteEntity();
+        vote.setUser(user);
+        vote.setAssessmentAttempt(attempt);
+        vote.setVoteType(voteType);
+        vote.setCreatedAt(LocalDateTime.now());
+        vote.setUpdatedAt(LocalDateTime.now());
+        assessmentAttemptVoteJpaRepository.save(vote);
+    }
+
+    private void createFeedback(UserEntity user, AssessmentAttemptEntity attempt, String comment) {
+        FeedbackAssessmentEntity feedback = new FeedbackAssessmentEntity();
+        feedback.setUser(user);
+        feedback.setAssessmentAttemptId(attempt.getId());
+        feedback.setComment(comment);
+        feedback.setSubmissionDate(LocalDateTime.now().minusMinutes(20));
+        feedback.setVisible(true);
+        feedbackAssessmentJpaRepository.save(feedback);
     }
 }

@@ -1,10 +1,17 @@
 package com.lia.liaprove.application.services.metrics;
 
 import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
+import com.lia.liaprove.application.gateways.metrics.AssessmentAttemptVoteGateway;
+import com.lia.liaprove.application.gateways.metrics.FeedbackGateway;
 import com.lia.liaprove.core.domain.assessment.Answer;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
 import com.lia.liaprove.core.domain.assessment.SystemAssessment;
+import com.lia.liaprove.core.domain.metrics.AssessmentAttemptVote;
+import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
+import com.lia.liaprove.core.domain.metrics.FeedbackAssessmentReaction;
+import com.lia.liaprove.core.domain.metrics.ReactionType;
+import com.lia.liaprove.core.domain.metrics.VoteType;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.ProjectQuestion;
@@ -35,6 +42,12 @@ class GetPublicMiniProjectAttemptDetailsUseCaseImplTest {
     @Mock
     private AssessmentAttemptGateway assessmentAttemptGateway;
 
+    @Mock
+    private AssessmentAttemptVoteGateway assessmentAttemptVoteGateway;
+
+    @Mock
+    private FeedbackGateway feedbackGateway;
+
     @Test
     void shouldReturnPublicMiniProjectAttemptDetailsWhenAttemptIsEligible() {
         UUID currentUserId = UUID.randomUUID();
@@ -46,7 +59,11 @@ class GetPublicMiniProjectAttemptDetailsUseCaseImplTest {
                 .thenReturn(Optional.of(attempt));
 
         GetPublicMiniProjectAttemptDetailsUseCaseImpl useCase =
-                new GetPublicMiniProjectAttemptDetailsUseCaseImpl(assessmentAttemptGateway);
+                new GetPublicMiniProjectAttemptDetailsUseCaseImpl(
+                        assessmentAttemptGateway,
+                        assessmentAttemptVoteGateway,
+                        feedbackGateway
+                );
 
         Optional<PublicMiniProjectAttemptDetails> result = useCase.execute(attemptId, currentUserId);
 
@@ -58,6 +75,7 @@ class GetPublicMiniProjectAttemptDetailsUseCaseImplTest {
         assertThat(details.textResponse()).isNull();
         assertThat(details.approveVotes()).isZero();
         assertThat(details.rejectVotes()).isZero();
+        assertThat(details.feedbacks()).isEmpty();
     }
 
     @Test
@@ -68,11 +86,56 @@ class GetPublicMiniProjectAttemptDetailsUseCaseImplTest {
                 .thenReturn(Optional.empty());
 
         GetPublicMiniProjectAttemptDetailsUseCaseImpl useCase =
-                new GetPublicMiniProjectAttemptDetailsUseCaseImpl(assessmentAttemptGateway);
+                new GetPublicMiniProjectAttemptDetailsUseCaseImpl(
+                        assessmentAttemptGateway,
+                        assessmentAttemptVoteGateway,
+                        feedbackGateway
+                );
 
         Optional<PublicMiniProjectAttemptDetails> result = useCase.execute(attemptId, currentUserId);
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    void shouldReturnVoteSummaryAndAssessmentFeedbacksWhenAttemptHasCommunityActivity() {
+        UUID currentUserId = UUID.randomUUID();
+        UUID attemptId = UUID.randomUUID();
+        ProjectQuestion projectQuestion = projectQuestion();
+        AssessmentAttempt attempt = finishedProjectAttempt(attemptId, projectQuestion, "https://github.com/acme/api");
+        UserProfessional reviewer = professional(UUID.randomUUID(), "Reviewer");
+        UserProfessional reactor = professional(UUID.randomUUID(), "Reactor");
+        FeedbackAssessment feedback = feedback(reviewer, attempt, "Good implementation.");
+        feedback.manageReaction(reactor, ReactionType.LIKE);
+
+        when(assessmentAttemptGateway.findPublicSystemProjectAttemptDetailsExcludingUser(attemptId, currentUserId))
+                .thenReturn(Optional.of(attempt));
+        when(assessmentAttemptVoteGateway.findByAttemptId(attemptId))
+                .thenReturn(List.of(
+                        vote(attempt, VoteType.APPROVE),
+                        vote(attempt, VoteType.APPROVE),
+                        vote(attempt, VoteType.REJECT)
+                ));
+        when(feedbackGateway.findAssessmentFeedbacksByAttemptId(attemptId))
+                .thenReturn(List.of(feedback));
+
+        GetPublicMiniProjectAttemptDetailsUseCaseImpl useCase =
+                new GetPublicMiniProjectAttemptDetailsUseCaseImpl(
+                        assessmentAttemptGateway,
+                        assessmentAttemptVoteGateway,
+                        feedbackGateway
+                );
+
+        Optional<PublicMiniProjectAttemptDetails> result = useCase.execute(attemptId, currentUserId);
+
+        assertThat(result).isPresent();
+        PublicMiniProjectAttemptDetails details = result.orElseThrow();
+        assertThat(details.approveVotes()).isEqualTo(2);
+        assertThat(details.rejectVotes()).isEqualTo(1);
+        assertThat(details.feedbacks()).containsExactly(feedback);
+        assertThat(details.feedbacks().getFirst().getReactions()).hasSize(1);
+        assertThat(details.feedbacks().getFirst().getReactions().getFirst())
+                .isInstanceOf(FeedbackAssessmentReaction.class);
     }
 
     @Test
@@ -86,7 +149,11 @@ class GetPublicMiniProjectAttemptDetailsUseCaseImplTest {
                 .thenReturn(Optional.of(attempt));
 
         GetPublicMiniProjectAttemptDetailsUseCaseImpl useCase =
-                new GetPublicMiniProjectAttemptDetailsUseCaseImpl(assessmentAttemptGateway);
+                new GetPublicMiniProjectAttemptDetailsUseCaseImpl(
+                        assessmentAttemptGateway,
+                        assessmentAttemptVoteGateway,
+                        feedbackGateway
+                );
 
         Optional<PublicMiniProjectAttemptDetails> result = useCase.execute(attemptId, currentUserId);
 
@@ -141,10 +208,14 @@ class GetPublicMiniProjectAttemptDetailsUseCaseImplTest {
     }
 
     private UserProfessional professional(UUID userId) {
+        return professional(userId, "Professional");
+    }
+
+    private UserProfessional professional(UUID userId, String name) {
         return new UserProfessional(
                 userId,
-                "Professional",
-                "professional@example.com",
+                name,
+                "%s@example.com".formatted(name.toLowerCase()),
                 "hashed-password",
                 "Developer",
                 "Bio",
@@ -158,5 +229,21 @@ class GetPublicMiniProjectAttemptDetailsUseCaseImplTest {
                 LocalDateTime.now(),
                 UserStatus.ACTIVE
         );
+    }
+
+    private AssessmentAttemptVote vote(AssessmentAttempt attempt, VoteType voteType) {
+        return new AssessmentAttemptVote(professional(UUID.randomUUID()), attempt, voteType);
+    }
+
+    private FeedbackAssessment feedback(UserProfessional user, AssessmentAttempt attempt, String comment) {
+        FeedbackAssessment feedback = new FeedbackAssessment(
+                user,
+                attempt,
+                comment,
+                LocalDateTime.now().minusMinutes(30),
+                true
+        );
+        feedback.setId(UUID.randomUUID());
+        return feedback;
     }
 }

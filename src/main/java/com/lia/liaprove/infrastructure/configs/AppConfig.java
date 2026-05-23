@@ -250,8 +250,14 @@ public class AppConfig {
 
     @Bean
     public GetPublicMiniProjectAttemptDetailsUseCase getPublicMiniProjectAttemptDetailsUseCase(
-            AssessmentAttemptGateway assessmentAttemptGateway) {
-        return new GetPublicMiniProjectAttemptDetailsUseCaseImpl(assessmentAttemptGateway);
+            AssessmentAttemptGateway assessmentAttemptGateway,
+            AssessmentAttemptVoteGateway assessmentAttemptVoteGateway,
+            FeedbackGateway feedbackGateway) {
+        return new GetPublicMiniProjectAttemptDetailsUseCaseImpl(
+                assessmentAttemptGateway,
+                assessmentAttemptVoteGateway,
+                feedbackGateway
+        );
     }
 
     @Bean
@@ -279,6 +285,12 @@ public class AppConfig {
     @Bean
     public ReactToFeedbackUseCase reactToFeedbackUseCase(FeedbackGateway feedbackGateway, UserGateway userGateway) {
         return new ReactToFeedbackUseCaseImpl(feedbackGateway, userGateway);
+    }
+
+    @Bean
+    public ReactToAssessmentFeedbackUseCase reactToAssessmentFeedbackUseCase(FeedbackGateway feedbackGateway,
+                                                                             UserGateway userGateway) {
+        return new ReactToAssessmentFeedbackUseCaseImpl(feedbackGateway, userGateway);
     }
 
     @Bean

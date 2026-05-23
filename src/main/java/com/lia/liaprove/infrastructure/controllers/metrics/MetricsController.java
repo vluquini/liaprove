@@ -5,13 +5,18 @@ import com.lia.liaprove.core.usecases.metrics.CastVoteOnAssessmentAttemptUseCase
 import com.lia.liaprove.core.usecases.metrics.CastVoteUseCase;
 import com.lia.liaprove.core.usecases.metrics.GetPublicMiniProjectAttemptDetailsUseCase;
 import com.lia.liaprove.core.usecases.metrics.ListPublicMiniProjectAttemptsUseCase;
+import com.lia.liaprove.core.usecases.metrics.ReactToAssessmentFeedbackUseCase;
 import com.lia.liaprove.core.usecases.metrics.ReactToFeedbackUseCase;
 import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase;
 import com.lia.liaprove.core.usecases.metrics.UpdateFeedbackCommentUseCase;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
+import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
+import com.lia.liaprove.core.domain.metrics.FeedbackAssessmentReaction;
 import com.lia.liaprove.core.domain.question.ProjectQuestion;
 import com.lia.liaprove.application.services.metrics.PublicMiniProjectAttemptDetails;
 import com.lia.liaprove.infrastructure.dtos.metrics.CastVoteRequest;
+import com.lia.liaprove.infrastructure.dtos.metrics.FeedbackAssessmentReactionResponse;
+import com.lia.liaprove.infrastructure.dtos.metrics.FeedbackAssessmentResponse;
 import com.lia.liaprove.infrastructure.dtos.metrics.PublicMiniProjectAttemptDetailResponse;
 import com.lia.liaprove.infrastructure.dtos.metrics.PublicMiniProjectAttemptResponse;
 import com.lia.liaprove.infrastructure.dtos.metrics.PublicMiniProjectQuestionResponse;
@@ -20,6 +25,7 @@ import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackOnAssessmentRe
 import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.UpdateFeedbackCommentRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.VoteSummaryResponse;
+import com.lia.liaprove.infrastructure.dtos.user.AuthorDto;
 import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -45,6 +51,7 @@ public class MetricsController {
     private final ListPublicMiniProjectAttemptsUseCase listPublicMiniProjectAttemptsUseCase;
     private final GetPublicMiniProjectAttemptDetailsUseCase getPublicMiniProjectAttemptDetailsUseCase;
     private final ReactToFeedbackUseCase reactToFeedbackUseCase;
+    private final ReactToAssessmentFeedbackUseCase reactToAssessmentFeedbackUseCase;
     private final UpdateFeedbackCommentUseCase updateFeedbackCommentUseCase;
     private final SecurityContextService securityContextService;
 
@@ -136,6 +143,19 @@ public class MetricsController {
         return ResponseEntity.ok().build();
     }
 
+    @PostMapping("/assessment-feedbacks/{feedbackId}/react")
+    public ResponseEntity<Void> reactToAssessmentFeedback(@PathVariable UUID feedbackId,
+                                                          @Valid @RequestBody ReactToFeedbackRequest request) {
+        UUID userId = securityContextService.getCurrentUserId();
+
+        reactToAssessmentFeedbackUseCase.reactToFeedback(
+                userId,
+                feedbackId,
+                request.getReactionType()
+        );
+        return ResponseEntity.ok().build();
+    }
+
     @PatchMapping("/feedbacks/{feedbackId}")
     public ResponseEntity<Void> updateFeedbackComment(@PathVariable UUID feedbackId,
                                                       @Valid @RequestBody UpdateFeedbackCommentRequest request) {
@@ -176,7 +196,9 @@ public class MetricsController {
                 details.textResponse(),
                 toPublicMiniProjectQuestionResponse(details.question()),
                 new VoteSummaryResponse(details.approveVotes(), details.rejectVotes()),
-                List.of()
+                details.feedbacks().stream()
+                        .map(this::toFeedbackAssessmentResponse)
+                        .toList()
         );
     }
 
@@ -188,6 +210,33 @@ public class MetricsController {
                 question.getKnowledgeAreas(),
                 question.getDifficultyByCommunity(),
                 question.getRelevanceByCommunity()
+        );
+    }
+
+    private FeedbackAssessmentResponse toFeedbackAssessmentResponse(FeedbackAssessment feedback) {
+        AuthorDto author = feedback.getUser() == null
+                ? null
+                : new AuthorDto(feedback.getUser().getId(), feedback.getUser().getName());
+
+        return new FeedbackAssessmentResponse(
+                feedback.getId(),
+                feedback.getComment(),
+                author,
+                feedback.getSubmissionDate(),
+                feedback.getReactions().stream()
+                        .map(this::toFeedbackAssessmentReactionResponse)
+                        .toList()
+        );
+    }
+
+    private FeedbackAssessmentReactionResponse toFeedbackAssessmentReactionResponse(
+            FeedbackAssessmentReaction reaction) {
+        return new FeedbackAssessmentReactionResponse(
+                reaction.getId(),
+                reaction.getUser() != null ? reaction.getUser().getId() : null,
+                reaction.getUser() != null ? reaction.getUser().getName() : null,
+                reaction.getType(),
+                reaction.getCreatedAt()
         );
     }
 }

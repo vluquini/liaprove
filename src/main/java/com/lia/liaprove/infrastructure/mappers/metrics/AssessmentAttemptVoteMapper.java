@@ -13,4 +13,8 @@ public interface AssessmentAttemptVoteMapper {
     @Mapping(source = "user", target = "user")
     @Mapping(source = "assessmentAttempt", target = "assessmentAttempt")
     AssessmentAttemptVoteEntity toEntity(AssessmentAttemptVote domain);
+
+    @Mapping(source = "user", target = "user")
+    @Mapping(target = "assessmentAttempt", ignore = true)
+    AssessmentAttemptVote toDomain(AssessmentAttemptVoteEntity entity);
 }
