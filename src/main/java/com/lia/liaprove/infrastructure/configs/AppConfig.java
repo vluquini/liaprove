@@ -249,6 +249,12 @@ public class AppConfig {
     }
 
     @Bean
+    public GetPublicMiniProjectAttemptDetailsUseCase getPublicMiniProjectAttemptDetailsUseCase(
+            AssessmentAttemptGateway assessmentAttemptGateway) {
+        return new GetPublicMiniProjectAttemptDetailsUseCaseImpl(assessmentAttemptGateway);
+    }
+
+    @Bean
     public ListFeedbacksForQuestionUseCase listFeedbacksForQuestionUseCase(FeedbackGateway feedbackGateway,
                                                                            QuestionGateway questionGateway) {
         return new ListFeedbacksForQuestionUseCaseImpl(feedbackGateway, questionGateway);

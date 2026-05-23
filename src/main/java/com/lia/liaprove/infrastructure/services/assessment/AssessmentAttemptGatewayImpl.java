@@ -181,6 +181,13 @@ public class AssessmentAttemptGatewayImpl implements AssessmentAttemptGateway {
 
     @Override
     @Transactional(readOnly = true)
+    public Optional<AssessmentAttempt> findPublicSystemProjectAttemptDetailsExcludingUser(UUID attemptId, UUID userId) {
+        return assessmentAttemptJpaRepository.findPublicSystemProjectAttemptDetailsExcludingUser(attemptId, userId)
+                .map(assessmentAttemptMapper::toDomain);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<AssessmentAttempt> findCompletedSystemProjectAttemptsReadyForCommunityDecision(LocalDateTime cutoff) {
         return assessmentAttemptJpaRepository.findCompletedSystemProjectAttemptsReadyForCommunityDecision(cutoff).stream()
                 .map(assessmentAttemptMapper::toDomain)

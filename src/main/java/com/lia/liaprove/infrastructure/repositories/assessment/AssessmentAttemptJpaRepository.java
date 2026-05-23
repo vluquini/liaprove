@@ -118,6 +118,26 @@ public interface AssessmentAttemptJpaRepository extends JpaRepository<Assessment
     @Query("""
         SELECT DISTINCT a
         FROM AssessmentAttemptEntity a
+        JOIN FETCH a.user u
+        JOIN FETCH a.assessment ass
+        JOIN FETCH a.answers ans
+        WHERE a.id = :attemptId
+          AND TYPE(ass) = SystemAssessmentEntity
+          AND a.finishedAt IS NOT NULL
+          AND u.id <> :userId
+          AND (
+            (ans.projectUrl IS NOT NULL AND ans.projectUrl <> '')
+            OR (ans.textResponse IS NOT NULL AND ans.textResponse <> '')
+          )
+    """)
+    Optional<AssessmentAttemptEntity> findPublicSystemProjectAttemptDetailsExcludingUser(
+            @Param("attemptId") UUID attemptId,
+            @Param("userId") UUID userId
+    );
+
+    @Query("""
+        SELECT DISTINCT a
+        FROM AssessmentAttemptEntity a
         JOIN FETCH a.assessment ass
         JOIN FETCH a.user u
         JOIN FETCH a.answers ans

@@ -3,17 +3,23 @@ package com.lia.liaprove.infrastructure.controllers.metrics;
 import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnAssessmentUseCase;
 import com.lia.liaprove.core.usecases.metrics.CastVoteOnAssessmentAttemptUseCase;
 import com.lia.liaprove.core.usecases.metrics.CastVoteUseCase;
+import com.lia.liaprove.core.usecases.metrics.GetPublicMiniProjectAttemptDetailsUseCase;
 import com.lia.liaprove.core.usecases.metrics.ListPublicMiniProjectAttemptsUseCase;
 import com.lia.liaprove.core.usecases.metrics.ReactToFeedbackUseCase;
 import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase;
 import com.lia.liaprove.core.usecases.metrics.UpdateFeedbackCommentUseCase;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
+import com.lia.liaprove.core.domain.question.ProjectQuestion;
+import com.lia.liaprove.application.services.metrics.PublicMiniProjectAttemptDetails;
 import com.lia.liaprove.infrastructure.dtos.metrics.CastVoteRequest;
+import com.lia.liaprove.infrastructure.dtos.metrics.PublicMiniProjectAttemptDetailResponse;
 import com.lia.liaprove.infrastructure.dtos.metrics.PublicMiniProjectAttemptResponse;
+import com.lia.liaprove.infrastructure.dtos.metrics.PublicMiniProjectQuestionResponse;
 import com.lia.liaprove.infrastructure.dtos.metrics.ReactToFeedbackRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackOnAssessmentRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.SubmitFeedbackQuestionRequest;
 import com.lia.liaprove.infrastructure.dtos.metrics.UpdateFeedbackCommentRequest;
+import com.lia.liaprove.infrastructure.dtos.metrics.VoteSummaryResponse;
 import com.lia.liaprove.infrastructure.security.SecurityContextService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +27,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +43,7 @@ public class MetricsController {
     private final CastVoteUseCase castVoteUseCase;
     private final CastVoteOnAssessmentAttemptUseCase castVoteOnAssessmentAttemptUseCase;
     private final ListPublicMiniProjectAttemptsUseCase listPublicMiniProjectAttemptsUseCase;
+    private final GetPublicMiniProjectAttemptDetailsUseCase getPublicMiniProjectAttemptDetailsUseCase;
     private final ReactToFeedbackUseCase reactToFeedbackUseCase;
     private final UpdateFeedbackCommentUseCase updateFeedbackCommentUseCase;
     private final SecurityContextService securityContextService;
@@ -61,6 +69,20 @@ public class MetricsController {
                 .toList();
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/assessment-attempts/mini-project/public/{attemptId}")
+    public ResponseEntity<PublicMiniProjectAttemptDetailResponse> getPublicMiniProjectAttemptDetails(
+            @PathVariable UUID attemptId) {
+        UUID userId = securityContextService.getCurrentUserId();
+
+        PublicMiniProjectAttemptDetails details = getPublicMiniProjectAttemptDetailsUseCase.execute(attemptId, userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Public mini-project attempt not found"
+                ));
+
+        return ResponseEntity.ok(toPublicMiniProjectAttemptDetailResponse(details));
     }
 
     @PostMapping("/assessment-attempts/{attemptId}/vote")
@@ -137,6 +159,35 @@ public class MetricsController {
                 authorName,
                 repositoryLink,
                 attempt.getFinishedAt()
+        );
+    }
+
+    private PublicMiniProjectAttemptDetailResponse toPublicMiniProjectAttemptDetailResponse(
+            PublicMiniProjectAttemptDetails details) {
+        AssessmentAttempt attempt = details.attempt();
+        String authorName = attempt.getUser() != null ? attempt.getUser().getName() : null;
+
+        return new PublicMiniProjectAttemptDetailResponse(
+                attempt.getId(),
+                attempt.getAssessment() != null ? attempt.getAssessment().getTitle() : null,
+                authorName,
+                attempt.getFinishedAt(),
+                details.repositoryLink(),
+                details.textResponse(),
+                toPublicMiniProjectQuestionResponse(details.question()),
+                new VoteSummaryResponse(details.approveVotes(), details.rejectVotes()),
+                List.of()
+        );
+    }
+
+    private PublicMiniProjectQuestionResponse toPublicMiniProjectQuestionResponse(ProjectQuestion question) {
+        return new PublicMiniProjectQuestionResponse(
+                question.getId(),
+                question.getTitle(),
+                question.getDescription(),
+                question.getKnowledgeAreas(),
+                question.getDifficultyByCommunity(),
+                question.getRelevanceByCommunity()
         );
     }
 }

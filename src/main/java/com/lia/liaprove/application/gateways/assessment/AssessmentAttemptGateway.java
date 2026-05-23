@@ -74,6 +74,8 @@ public interface AssessmentAttemptGateway {
 
     List<AssessmentAttempt> findPublicSystemProjectAttemptsExcludingUser(UUID userId);
 
+    Optional<AssessmentAttempt> findPublicSystemProjectAttemptDetailsExcludingUser(UUID attemptId, UUID userId);
+
     List<AssessmentAttempt> findCompletedSystemProjectAttemptsReadyForCommunityDecision(LocalDateTime cutoff);
 
     /**
