@@ -18,7 +18,11 @@ function makeRouter() {
       { path: '/questions/new', component: { template: '<div>Questao</div>' } },
       { path: '/mini-projects/public', component: { template: '<div>Mini projetos</div>' } },
       { path: '/recruiter/job-analysis', component: { template: '<div>Vaga</div>' } },
+      { path: '/admin', component: { template: '<div>Admin</div>' } },
       { path: '/admin/users', component: { template: '<div>Usuarios</div>' } },
+      { path: '/admin/questions', component: { template: '<div>Questoes admin</div>' } },
+      { path: '/admin/assessments/attempts', component: { template: '<div>Tentativas admin</div>' } },
+      { path: '/admin/algorithms/genetic', component: { template: '<div>Algoritmo genetico</div>' } },
     ],
   })
 }
@@ -69,6 +73,11 @@ describe('DashboardView', () => {
 
     expect(wrapper.text()).toContain('Gerenciar usuários')
     expect(wrapper.text()).toContain('Moderar questões')
+    expect(wrapper.text()).toContain('Ver tentativas')
     expect(wrapper.text()).toContain('Algoritmo genético')
+    expect(wrapper.get('a[href="/admin/users"]').text()).toContain('Abrir')
+    expect(wrapper.get('a[href="/admin/questions"]').text()).toContain('Abrir')
+    expect(wrapper.get('a[href="/admin/assessments/attempts"]').text()).toContain('Abrir')
+    expect(wrapper.get('a[href="/admin/algorithms/genetic"]').text()).toContain('Abrir')
   })
 })

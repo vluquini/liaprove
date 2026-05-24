@@ -21,7 +21,7 @@ const navigation: NavItem[] = [
   { label: 'Questões', to: '/questions/voting', icon: 'pi pi-check-square' },
   { label: 'Mini-projetos', to: '/mini-projects/public', icon: 'pi pi-code' },
   { label: 'Recrutador', to: '/recruiter', icon: 'pi pi-briefcase', roles: ['RECRUITER', 'ADMIN'] },
-  { label: 'Admin', to: '/admin/users', icon: 'pi pi-shield', roles: ['ADMIN'] },
+  { label: 'Admin', to: '/admin', icon: 'pi pi-shield', roles: ['ADMIN'] },
 ]
 
 function canShow(item: NavItem): boolean {

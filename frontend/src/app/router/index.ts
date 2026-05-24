@@ -4,6 +4,7 @@ import { useAuthStore } from '@/shared/stores/auth'
 import type { UserRole } from '@/shared/types/auth'
 
 const recruiterRoles: UserRole[] = ['RECRUITER', 'ADMIN']
+const adminRoles: UserRole[] = ['ADMIN']
 
 export const router = createRouter({
   history: createWebHistory(),
@@ -150,6 +151,55 @@ export const router = createRouter({
       beforeEnter: requireAuth,
       meta: { roles: recruiterRoles },
       component: () => import('@/features/recruiter/views/RecruiterOpenQuestionCreateView.vue'),
+    },
+    {
+      path: '/admin',
+      name: 'admin-home',
+      beforeEnter: requireAuth,
+      meta: { roles: adminRoles },
+      component: () => import('@/features/admin/views/AdminHomeView.vue'),
+    },
+    {
+      path: '/admin/users',
+      name: 'admin-users',
+      beforeEnter: requireAuth,
+      meta: { roles: adminRoles },
+      component: () => import('@/features/admin/views/AdminHomeView.vue'),
+    },
+    {
+      path: '/admin/questions',
+      name: 'admin-questions',
+      beforeEnter: requireAuth,
+      meta: { roles: adminRoles },
+      component: () => import('@/features/admin/views/AdminHomeView.vue'),
+    },
+    {
+      path: '/admin/questions/:questionId',
+      name: 'admin-question-detail',
+      beforeEnter: requireAuth,
+      meta: { roles: adminRoles },
+      component: () => import('@/features/admin/views/AdminHomeView.vue'),
+    },
+    {
+      path: '/admin/metrics/questions/:questionId',
+      name: 'admin-question-metrics',
+      beforeEnter: requireAuth,
+      meta: { roles: adminRoles },
+      component: () => import('@/features/admin/views/AdminHomeView.vue'),
+    },
+    {
+      path: '/admin/assessments/attempts',
+      name: 'admin-assessment-attempts',
+      beforeEnter: requireAuth,
+      meta: { roles: adminRoles },
+      component: () => import('@/features/admin/views/AdminHomeView.vue'),
+    },
+    {
+      path: '/admin/algorithms/genetic',
+      name: 'admin-genetic-algorithm',
+      beforeEnter: requireAuth,
+      meta: { roles: adminRoles },
+      component: () => import('@/features/admin/views/AdminHomeView.vue'),
     },
     {
       path: '/forbidden',

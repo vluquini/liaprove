@@ -80,6 +80,13 @@ const actions: Action[] = [
     roles: ['ADMIN'],
   },
   {
+    label: 'Ver tentativas',
+    description: 'Acompanhe tentativas de avaliações.',
+    to: '/admin/assessments/attempts',
+    icon: 'pi pi-list-check',
+    roles: ['ADMIN'],
+  },
+  {
     label: 'Algoritmo genético',
     description: 'Ajuste pesos de votos no contexto do TCC.',
     to: '/admin/algorithms/genetic',

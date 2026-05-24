@@ -21,6 +21,7 @@ function makeRouter() {
       { path: '/mini-projects/public', component: { template: '<div>Mini projetos</div>' } },
       { path: '/recruiter', component: { template: '<div>Recrutador</div>' } },
       { path: '/recruiter/job-analysis', component: { template: '<div>Analise</div>' } },
+      { path: '/admin', component: { template: '<div>Admin</div>' } },
       { path: '/admin/users', component: { template: '<div>Usuarios</div>' } },
     ],
   })
@@ -89,5 +90,6 @@ describe('AuthenticatedLayout', () => {
 
     expect(adminWrapper.text()).toContain('Recrutador')
     expect(adminWrapper.text()).toContain('Admin')
+    expect(adminWrapper.get('a[href="/admin"]').text()).toContain('Admin')
   })
 })

@@ -64,4 +64,23 @@ describe('router session handling', () => {
     expect(miniProjectsRoute.meta.roles).toBeUndefined()
     expect(miniProjectDetailRoute.meta.roles).toBeUndefined()
   })
+
+  it('registers admin routes restricted to admins', () => {
+    const adminRoutes = [
+      ['/admin', 'admin-home'],
+      ['/admin/users', 'admin-users'],
+      ['/admin/questions', 'admin-questions'],
+      ['/admin/questions/question-1', 'admin-question-detail'],
+      ['/admin/metrics/questions/question-1', 'admin-question-metrics'],
+      ['/admin/assessments/attempts', 'admin-assessment-attempts'],
+      ['/admin/algorithms/genetic', 'admin-genetic-algorithm'],
+    ] as const
+
+    for (const [path, name] of adminRoutes) {
+      const route = router.resolve(path)
+
+      expect(route.name).toBe(name)
+      expect(route.meta.roles).toEqual(['ADMIN'])
+    }
+  })
 })
