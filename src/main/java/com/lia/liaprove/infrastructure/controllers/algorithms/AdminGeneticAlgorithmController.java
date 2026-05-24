@@ -1,8 +1,12 @@
 package com.lia.liaprove.infrastructure.controllers.algorithms;
 
+import com.lia.liaprove.core.domain.user.User;
+import com.lia.liaprove.core.domain.user.UserRecruiter;
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.usecases.algorithms.genetic.ManageVoteWeightUseCase;
+import com.lia.liaprove.core.usecases.user.FindUsersUseCase;
 import com.lia.liaprove.infrastructure.dtos.algorithms.genetic.AdjustGeneticWeightsRequest;
+import com.lia.liaprove.infrastructure.dtos.algorithms.genetic.RecruiterVoteWeightResponse;
 import com.lia.liaprove.infrastructure.dtos.algorithms.genetic.UpdateMultiplierRequest;
 import com.lia.liaprove.infrastructure.dtos.algorithms.genetic.UpdateVoteWeightRequest;
 import com.lia.liaprove.infrastructure.security.SecurityContextService;
@@ -11,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -20,11 +25,14 @@ import java.util.UUID;
 public class AdminGeneticAlgorithmController {
 
     private final ManageVoteWeightUseCase manageVoteWeightUseCase;
+    private final FindUsersUseCase findUsersUseCase;
     private final SecurityContextService securityContextService;
 
     public AdminGeneticAlgorithmController(ManageVoteWeightUseCase manageVoteWeightUseCase,
+                                           FindUsersUseCase findUsersUseCase,
                                            SecurityContextService securityContextService) {
         this.manageVoteWeightUseCase = manageVoteWeightUseCase;
+        this.findUsersUseCase = findUsersUseCase;
         this.securityContextService = securityContextService;
     }
 
@@ -42,6 +50,22 @@ public class AdminGeneticAlgorithmController {
         UUID adminId = securityContextService.getCurrentUserId();
         manageVoteWeightUseCase.setRecruiterVoteWeight(id, request.weight(), adminId);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/recruiters/weights")
+    public ResponseEntity<List<RecruiterVoteWeightResponse>> listRecruiterVoteWeights(
+            @RequestParam(required = false) String name,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        List<User> recruiters = findUsersUseCase.findByName(name, UserRole.RECRUITER, page, size);
+        List<RecruiterVoteWeightResponse> response = recruiters.stream()
+                .filter(UserRecruiter.class::isInstance)
+                .map(UserRecruiter.class::cast)
+                .map(this::toRecruiterVoteWeightResponse)
+                .toList();
+
+        return ResponseEntity.ok(response);
     }
 
     @PatchMapping("/roles/{role}/multiplier")
@@ -70,5 +94,17 @@ public class AdminGeneticAlgorithmController {
     public ResponseEntity<Double> getRecruiterMultiplier(@PathVariable UUID id) {
         Double multiplier = manageVoteWeightUseCase.getRecruiterMultiplier(id);
         return ResponseEntity.ok(multiplier);
+    }
+
+    private RecruiterVoteWeightResponse toRecruiterVoteWeightResponse(UserRecruiter recruiter) {
+        return new RecruiterVoteWeightResponse(
+                recruiter.getId(),
+                recruiter.getName(),
+                recruiter.getEmail(),
+                recruiter.getCompanyName(),
+                recruiter.getCompanyEmail(),
+                recruiter.getVoteWeight(),
+                manageVoteWeightUseCase.getRecruiterMultiplier(recruiter.getId())
+        );
     }
 }
