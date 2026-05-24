@@ -133,11 +133,10 @@ onMounted(loadQuestions)
               Status
               <select v-model="statusFilter" data-test="admin-question-filter-status" class="auth-input">
                 <option value="">Todos</option>
-                <option value="SUBMITTED">SUBMITTED</option>
-                <option value="PENDING_REVIEW">PENDING_REVIEW</option>
+                <option value="VOTING">VOTING</option>
                 <option value="APPROVED">APPROVED</option>
+                <option value="FINISHED">FINISHED</option>
                 <option value="REJECTED">REJECTED</option>
-                <option value="NEEDS_REVISION">NEEDS_REVISION</option>
               </select>
             </label>
 

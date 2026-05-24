@@ -30,7 +30,7 @@ const successMessages = ref<string[]>([])
 const title = ref('')
 const description = ref('')
 const area = ref<KnowledgeArea | ''>('')
-const status = ref<QuestionStatus>('PENDING_REVIEW')
+const status = ref<QuestionStatus>('VOTING')
 
 const questionId = computed(() => String(route.params.questionId))
 
@@ -233,11 +233,10 @@ onMounted(loadQuestion)
                 <label class="flex flex-col gap-2 text-sm font-semibold text-[var(--liaprove-ink)]">
                   Novo status
                   <select v-model="status" data-test="admin-question-status" class="auth-input">
-                    <option value="SUBMITTED">SUBMITTED</option>
-                    <option value="PENDING_REVIEW">PENDING_REVIEW</option>
+                    <option value="VOTING">VOTING</option>
                     <option value="APPROVED">APPROVED</option>
+                    <option value="FINISHED">FINISHED</option>
                     <option value="REJECTED">REJECTED</option>
-                    <option value="NEEDS_REVISION">NEEDS_REVISION</option>
                   </select>
                 </label>
 

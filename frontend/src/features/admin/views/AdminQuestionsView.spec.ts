@@ -73,6 +73,20 @@ describe('AdminQuestionsView', () => {
     )
   })
 
+  it('uses only backend-supported question status filter options', async () => {
+    server.use(http.get('*/api/v1/admin/questions', () => HttpResponse.json([makeQuestion()])))
+
+    const { wrapper } = await mountView()
+    const statusOptions = wrapper
+      .findAll('[data-test="admin-question-filter-status"] option')
+      .map((option) => option.text())
+
+    expect(statusOptions).toEqual(['Todos', 'VOTING', 'APPROVED', 'FINISHED', 'REJECTED'])
+    expect(statusOptions).not.toContain('SUBMITTED')
+    expect(statusOptions).not.toContain('PENDING_REVIEW')
+    expect(statusOptions).not.toContain('NEEDS_REVISION')
+  })
+
   it('submits question filters to the admin questions endpoint', async () => {
     const calls: string[] = []
     server.use(

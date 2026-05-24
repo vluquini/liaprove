@@ -102,6 +102,18 @@ describe('AdminQuestionDetailView', () => {
     expect(wrapper.text()).toContain('Feedbacks')
   })
 
+  it('uses only backend-supported question moderation status options', async () => {
+    const { wrapper } = await mountView()
+    const statusOptions = wrapper
+      .findAll('[data-test="admin-question-status"] option')
+      .map((option) => option.text())
+
+    expect(statusOptions).toEqual(['VOTING', 'APPROVED', 'FINISHED', 'REJECTED'])
+    expect(statusOptions).not.toContain('SUBMITTED')
+    expect(statusOptions).not.toContain('PENDING_REVIEW')
+    expect(statusOptions).not.toContain('NEEDS_REVISION')
+  })
+
   it('updates question fields and moderates status', async () => {
     const calls: Record<string, unknown> = {}
     server.use(
