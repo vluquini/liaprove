@@ -164,7 +164,7 @@ export const router = createRouter({
       name: 'admin-users',
       beforeEnter: requireAuth,
       meta: { roles: adminRoles },
-      component: () => import('@/features/admin/views/AdminHomeView.vue'),
+      component: () => import('@/features/admin/views/AdminUsersView.vue'),
     },
     {
       path: '/admin/questions',
