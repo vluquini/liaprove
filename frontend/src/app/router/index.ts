@@ -192,7 +192,7 @@ export const router = createRouter({
       name: 'admin-assessment-attempts',
       beforeEnter: requireAuth,
       meta: { roles: adminRoles },
-      component: () => import('@/features/admin/views/AdminHomeView.vue'),
+      component: () => import('@/features/admin/views/AdminAssessmentAttemptsView.vue'),
     },
     {
       path: '/admin/algorithms/genetic',
