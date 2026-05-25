@@ -199,7 +199,7 @@ export const router = createRouter({
       name: 'admin-genetic-algorithm',
       beforeEnter: requireAuth,
       meta: { roles: adminRoles },
-      component: () => import('@/features/admin/views/AdminHomeView.vue'),
+      component: () => import('@/features/admin/views/AdminGeneticAlgorithmView.vue'),
     },
     {
       path: '/forbidden',
