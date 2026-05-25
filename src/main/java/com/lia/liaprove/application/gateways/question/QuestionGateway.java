@@ -48,12 +48,13 @@ public interface QuestionGateway {
      * @param difficultyLevel Nível de dificuldade para filtrar.
      * @param status Status da questão para filtrar.
      * @param authorId ID do autor para filtrar.
+     * @param authorIds IDs dos autores para filtrar.
      * @param page Número da página para paginação.
      * @param size Tamanho da página para paginação.
      * @return Uma lista de questões que correspondem aos critérios.
      */
     List<Question> findAll(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
-                           QuestionStatus status, UUID authorId, int page, int size);
+                           QuestionStatus status, UUID authorId, Set<UUID> authorIds, int page, int size);
 
     /**
      * Atualiza uma questão existente.

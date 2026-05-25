@@ -48,6 +48,6 @@ public class BayesianGatewayImpl implements BayesianGateway {
     @Override
     public List<Question> getAllQuestions() {
         // Busca um pool suficiente de questões disponíveis antes dos filtros de sugestão.
-        return questionGateway.findAll(null, null, QuestionStatus.FINISHED, null, 0, 200);
+        return questionGateway.findAll(null, null, QuestionStatus.FINISHED, null, null, 0, 200);
     }
 }

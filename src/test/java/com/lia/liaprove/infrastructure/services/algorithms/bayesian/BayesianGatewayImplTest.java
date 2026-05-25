@@ -23,6 +23,6 @@ class BayesianGatewayImplTest {
     void shouldLoadFinishedQuestionsAsSuggestionCandidates() {
         gateway.getAllQuestions();
 
-        verify(questionGateway).findAll(null, null, QuestionStatus.FINISHED, null, 0, 200);
+        verify(questionGateway).findAll(null, null, QuestionStatus.FINISHED, null, null, 0, 200);
     }
 }

@@ -44,12 +44,13 @@ public class AdminQuestionController {
             @RequestParam(required = false) Set<KnowledgeArea> knowledgeAreas,
             @RequestParam(required = false) DifficultyLevel difficultyLevel,
             @RequestParam(required = false) QuestionStatus status,
+            @RequestParam(required = false) String authorName,
             @RequestParam(required = false) UUID authorId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
 
         ListQuestionsUseCase.ListQuestionsQuery query = new ListQuestionsUseCase.ListQuestionsQuery(
-                knowledgeAreas, difficultyLevel, status, authorId, page, size);
+                knowledgeAreas, difficultyLevel, status, authorName, authorId, page, size);
 
         List<Question> questions = listQuestionsUseCase.execute(query);
         List<QuestionResponse> response = questions.stream()

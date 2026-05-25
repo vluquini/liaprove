@@ -18,7 +18,8 @@ const size = 10
 const areaFilter = ref<KnowledgeArea | ''>('')
 const difficultyFilter = ref<DifficultyLevel | ''>('')
 const statusFilter = ref<QuestionStatus | ''>('')
-const authorFilter = ref('')
+const authorNameFilter = ref('')
+const authorIdFilter = ref('')
 const questions = ref<AdminQuestionResponse[]>([])
 const loading = ref(true)
 const errorMessage = ref('')
@@ -43,7 +44,8 @@ function currentParams(): ListAdminQuestionsParams {
     knowledgeAreas: areaFilter.value ? [areaFilter.value] : undefined,
     difficultyLevel: difficultyFilter.value || undefined,
     status: statusFilter.value || undefined,
-    authorId: authorFilter.value.trim() || undefined,
+    authorName: authorNameFilter.value.trim() || undefined,
+    authorId: authorIdFilter.value.trim() || undefined,
     page: page.value,
     size,
   }
@@ -106,7 +108,7 @@ onMounted(loadQuestions)
 
       <Card class="profile-summary-card">
         <template #content>
-          <form class="grid gap-4 lg:grid-cols-5" @submit.prevent="applyFilters">
+          <form class="grid gap-4 lg:grid-cols-[1fr_1fr_1fr_1fr_1fr_auto]" @submit.prevent="applyFilters">
             <label class="flex flex-col gap-2 text-sm font-semibold text-[var(--liaprove-ink)]">
               Área
               <select v-model="areaFilter" data-test="admin-question-filter-area" class="auth-input">
@@ -141,13 +143,24 @@ onMounted(loadQuestions)
             </label>
 
             <label class="flex flex-col gap-2 text-sm font-semibold text-[var(--liaprove-ink)]">
-              Autor
+              Nome do autor
               <input
-                v-model="authorFilter"
-                data-test="admin-question-filter-author"
+                v-model="authorNameFilter"
+                data-test="admin-question-filter-author-name"
                 class="auth-input"
                 type="search"
-                placeholder="UUID do autor"
+                placeholder="Ex.: Ana Pereira"
+              />
+            </label>
+
+            <label class="flex flex-col gap-2 text-sm font-semibold text-[var(--liaprove-ink)]">
+              ID do autor
+              <input
+                v-model="authorIdFilter"
+                data-test="admin-question-filter-author-id"
+                class="auth-input"
+                type="search"
+                placeholder="UUID do usuário"
               />
             </label>
 

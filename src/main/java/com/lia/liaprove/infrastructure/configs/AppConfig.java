@@ -179,8 +179,8 @@ public class AppConfig {
     }
 
     @Bean
-    public ListQuestionsUseCase listQuestionsUseCase(QuestionGateway questionGateway) {
-        return new ListQuestionsUseCaseImpl(questionGateway);
+    public ListQuestionsUseCase listQuestionsUseCase(QuestionGateway questionGateway, UserGateway userGateway) {
+        return new ListQuestionsUseCaseImpl(questionGateway, userGateway);
     }
 
     @Bean

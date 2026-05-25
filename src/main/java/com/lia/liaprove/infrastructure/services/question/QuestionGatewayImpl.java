@@ -50,9 +50,9 @@ public class QuestionGatewayImpl implements QuestionGateway {
     @Override
     @Transactional(readOnly = true)
     public List<Question> findAll(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
-                                  QuestionStatus status, UUID authorId, int page, int size) {
+                                  QuestionStatus status, UUID authorId, Set<UUID> authorIds, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return questionJpaRepository.findAllWithFilters(knowledgeAreas, difficultyLevel, status, authorId, pageable)
+        return questionJpaRepository.findAllWithFilters(knowledgeAreas, difficultyLevel, status, authorId, authorIds, pageable)
                 .stream()
                 .map(questionMapper::toDomain)
                 .collect(Collectors.toList());

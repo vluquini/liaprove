@@ -87,6 +87,24 @@ describe('AdminQuestionsView', () => {
     expect(statusOptions).not.toContain('NEEDS_REVISION')
   })
 
+  it('shows author name before author id in the filter row', async () => {
+    server.use(http.get('*/api/v1/admin/questions', () => HttpResponse.json([makeQuestion()])))
+
+    const { wrapper } = await mountView()
+    const filters = wrapper.findAll('[data-test^="admin-question-filter-"]')
+    const filterOrder = filters.map((filter) => filter.attributes('data-test'))
+
+    expect(filterOrder).toEqual([
+      'admin-question-filter-area',
+      'admin-question-filter-difficulty',
+      'admin-question-filter-status',
+      'admin-question-filter-author-name',
+      'admin-question-filter-author-id',
+    ])
+    expect(wrapper.text()).toContain('Nome do autor')
+    expect(wrapper.text()).toContain('ID do autor')
+  })
+
   it('submits question filters to the admin questions endpoint', async () => {
     const calls: string[] = []
     server.use(
@@ -102,7 +120,8 @@ describe('AdminQuestionsView', () => {
     await wrapper.get('[data-test="admin-question-filter-area"]').setValue('DATABASE')
     await wrapper.get('[data-test="admin-question-filter-difficulty"]').setValue('MEDIUM')
     await wrapper.get('[data-test="admin-question-filter-status"]').setValue('APPROVED')
-    await wrapper.get('[data-test="admin-question-filter-author"]').setValue('author-1')
+    await wrapper.get('[data-test="admin-question-filter-author-name"]').setValue('Ana Pereira')
+    await wrapper.get('[data-test="admin-question-filter-author-id"]').setValue('author-1')
     await wrapper.get('[data-test="admin-question-apply-filters"]').trigger('click')
     await flushPromises()
 
@@ -110,6 +129,7 @@ describe('AdminQuestionsView', () => {
     expect(lastCall).toContain('knowledgeAreas=DATABASE')
     expect(lastCall).toContain('difficultyLevel=MEDIUM')
     expect(lastCall).toContain('status=APPROVED')
+    expect(lastCall).toContain('authorName=Ana+Pereira')
     expect(lastCall).toContain('authorId=author-1')
     expect(lastCall).toContain('page=0')
     expect(lastCall).toContain('size=10')

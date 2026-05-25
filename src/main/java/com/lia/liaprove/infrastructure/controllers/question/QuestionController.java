@@ -108,6 +108,7 @@ public class QuestionController {
                 null,    // knowledgeAreas
                 null,                  // difficultyLevel
                 QuestionStatus.VOTING, // status
+                null,                  // authorName
                 null,                  // authorId
                 page,
                 size

@@ -24,12 +24,14 @@ public interface QuestionJpaRepository extends JpaRepository<QuestionEntity, UUI
            "WHERE ( (:#{#knowledgeAreas == null || #knowledgeAreas.isEmpty()} = true) OR (ka IN (:knowledgeAreas)) ) " +
            "AND (:difficultyByCommunity IS NULL OR q.difficultyByCommunity = :difficultyByCommunity) " +
            "AND (:status IS NULL OR q.status = :status) " +
-           "AND (:authorId IS NULL OR q.authorId = :authorId)")
+           "AND (:authorId IS NULL OR q.authorId = :authorId) " +
+           "AND ( (:#{#authorIds == null || #authorIds.isEmpty()} = true) OR (q.authorId IN (:authorIds)) )")
     List<QuestionEntity> findAllWithFilters(
             @Param("knowledgeAreas") Set<KnowledgeArea> knowledgeAreas,
             @Param("difficultyByCommunity") DifficultyLevel difficultyByCommunity,
             @Param("status") QuestionStatus status,
             @Param("authorId") UUID authorId,
+            @Param("authorIds") Set<UUID> authorIds,
             Pageable pageable
     );
 

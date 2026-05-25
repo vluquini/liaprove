@@ -30,6 +30,7 @@ public interface ListQuestionsUseCase {
             Set<KnowledgeArea> knowledgeAreas,
             DifficultyLevel difficultyLevel,
             QuestionStatus status,
+            String authorName,
             UUID authorId,
             int page,
             int size

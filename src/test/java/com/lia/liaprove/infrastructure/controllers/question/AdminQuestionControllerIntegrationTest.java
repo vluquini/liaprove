@@ -18,7 +18,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -68,5 +73,19 @@ public class AdminQuestionControllerIntegrationTest {
         mockMvc.perform(get("/api/v1/admin/questions/{id}", UUID.randomUUID())
                         .header("X-Dev-User-Email", user.getEmail()))
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Should filter admin questions by author name")
+    void shouldFilterAdminQuestionsByAuthorName() throws Exception {
+        UserEntity admin = getSeededUserEntity("admin@liaprove.com");
+
+        mockMvc.perform(get("/api/v1/admin/questions")
+                        .param("authorName", "Ana Pereira")
+                        .param("size", "20")
+                        .header("X-Dev-User-Email", admin.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(greaterThan(0))))
+                .andExpect(jsonPath("$[*].authorId", everyItem(is("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a15"))));
     }
 }

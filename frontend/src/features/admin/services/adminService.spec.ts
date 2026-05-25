@@ -68,6 +68,7 @@ describe('adminService', () => {
         expect(url.searchParams.getAll('knowledgeAreas')).toEqual(['SOFTWARE_DEVELOPMENT', 'DATABASE'])
         expect(url.searchParams.get('difficultyLevel')).toBe('MEDIUM')
         expect(url.searchParams.get('status')).toBe('APPROVED')
+        expect(url.searchParams.get('authorName')).toBe('Ana Pereira')
         expect(url.searchParams.get('authorId')).toBe('author-1')
         expect(url.searchParams.get('page')).toBe('1')
         expect(url.searchParams.get('size')).toBe('10')
@@ -80,6 +81,7 @@ describe('adminService', () => {
       knowledgeAreas: ['SOFTWARE_DEVELOPMENT', 'DATABASE'],
       difficultyLevel: 'MEDIUM',
       status: 'APPROVED',
+      authorName: 'Ana Pereira',
       authorId: 'author-1',
       page: 1,
       size: 10,

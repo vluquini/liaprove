@@ -59,6 +59,7 @@ export interface ListAdminQuestionsParams {
   knowledgeAreas?: KnowledgeArea[]
   difficultyLevel?: DifficultyLevel
   status?: QuestionStatus
+  authorName?: string
   authorId?: string
   page?: number
   size?: number
@@ -278,6 +279,7 @@ function toAdminQuestionSearchParams(params: ListAdminQuestionsParams): URLSearc
   appendAll(searchParams, 'knowledgeAreas', params.knowledgeAreas)
   appendOptional(searchParams, 'difficultyLevel', params.difficultyLevel)
   appendOptional(searchParams, 'status', params.status)
+  appendOptional(searchParams, 'authorName', params.authorName)
   appendOptional(searchParams, 'authorId', params.authorId)
   appendOptionalNumber(searchParams, 'page', params.page)
   appendOptionalNumber(searchParams, 'size', params.size)
