@@ -71,22 +71,6 @@ class QuestionGatewayImplTest {
     }
 
     @Test
-    void shouldRouteOpenQuestionClassToOpenQuestionEntityInRandomSearch() {
-        QuestionGatewayImpl gateway = new QuestionGatewayImpl(questionJpaRepository, questionMapper);
-        Set<KnowledgeArea> areas = Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT);
-
-        when(questionJpaRepository.findRandomQuestionIds(anySet(), any(DifficultyLevel.class), any(Class.class), any(QuestionStatus.class), any(Pageable.class)))
-                .thenReturn(List.of());
-
-        gateway.findRandomByCriteria(areas, DifficultyLevel.EASY, QuestionStatus.VOTING, 3, OpenQuestion.class);
-
-        @SuppressWarnings("unchecked")
-        ArgumentCaptor<Class> classCaptor = ArgumentCaptor.forClass(Class.class);
-        verify(questionJpaRepository).findRandomQuestionIds(anySet(), eq(DifficultyLevel.EASY), classCaptor.capture(), eq(QuestionStatus.VOTING), any(Pageable.class));
-        assertEquals(OpenQuestionEntity.class, classCaptor.getValue());
-    }
-
-    @Test
     void shouldDelegateEligibleRandomQuestionSearchWithRequesterFilters() {
         QuestionGatewayImpl gateway = new QuestionGatewayImpl(questionJpaRepository, questionMapper);
         Set<KnowledgeArea> areas = Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT);
@@ -110,7 +94,6 @@ class QuestionGatewayImplTest {
                 requesterId
         );
 
-        @SuppressWarnings("unchecked")
         ArgumentCaptor<Class> classCaptor = ArgumentCaptor.forClass(Class.class);
         verify(questionJpaRepository).findRandomEligibleQuestionIds(
                 eq(areas),

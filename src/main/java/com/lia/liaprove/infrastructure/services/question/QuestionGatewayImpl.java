@@ -88,29 +88,10 @@ public class QuestionGatewayImpl implements QuestionGateway {
     }
 
     @Override
-    public List<Question> findRandomByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
-                                               QuestionStatus status, int limit, Class<? extends Question> questionType) {
-        Class<? extends QuestionEntity> entityClass = questionMapper.mapToEntityClass(questionType);
-        Pageable pageable = PageRequest.of(0, limit);
-
-        List<UUID> randomIds = questionJpaRepository
-                                .findRandomQuestionIds(knowledgeAreas, difficultyLevel, entityClass, status, pageable);
-
-        if (randomIds.isEmpty()) {
-            return List.of();
-        }
-
-        return questionJpaRepository.findAllByIdWithAlternatives(randomIds)
-                .stream()
-                .map(questionMapper::toDomain)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public List<Question> findRandomEligibleByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
                                                        QuestionStatus status, int limit, QuestionType questionType,
                                                        UUID requesterId) {
-        Class<? extends QuestionEntity> entityClass = mapToEntityClass(questionType);
+        Class<? extends QuestionEntity> entityClass = questionMapper.mapToEntityClass(questionType);
         Pageable pageable = PageRequest.of(0, limit);
 
         List<UUID> randomIds = questionJpaRepository
@@ -126,11 +107,4 @@ public class QuestionGatewayImpl implements QuestionGateway {
                 .collect(Collectors.toList());
     }
 
-    private Class<? extends QuestionEntity> mapToEntityClass(QuestionType questionType) {
-        return switch (questionType) {
-            case MULTIPLE_CHOICE -> MultipleChoiceQuestionEntity.class;
-            case PROJECT -> ProjectQuestionEntity.class;
-            case OPEN -> OpenQuestionEntity.class;
-        };
-    }
 }

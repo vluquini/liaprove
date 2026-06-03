@@ -82,11 +82,9 @@ public interface QuestionGateway {
      * @param status O status da questão.
      * @param limit O número de questões a serem retornadas.
      * @param questionType O tipo da questão (MultipleChoiceQuestion.class ou ProjectQuestion.class).
+     * @param requesterId O id do usuário a realizar a avaliação.
      * @return Uma lista de questões aleatórias do tipo especificado.
      */
-    List<Question> findRandomByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
-                                        QuestionStatus status, int limit, Class<? extends Question> questionType);
-
     List<Question> findRandomEligibleByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
                                                 QuestionStatus status, int limit, QuestionType questionType,
                                                 UUID requesterId);

@@ -331,14 +331,11 @@ public interface QuestionMapper {
                 .toList();
     }
 
-    default Class<? extends QuestionEntity> mapToEntityClass(Class<? extends Question> domainClass) {
-        if (MultipleChoiceQuestion.class.equals(domainClass)) {
-            return MultipleChoiceQuestionEntity.class;
-        } else if (ProjectQuestion.class.equals(domainClass)) {
-            return ProjectQuestionEntity.class;
-        } else if (OpenQuestion.class.equals(domainClass)) {
-            return OpenQuestionEntity.class;
-        }
-        return QuestionEntity.class;
+    default Class<? extends QuestionEntity> mapToEntityClass(QuestionType questionType) {
+        return switch (questionType) {
+            case MULTIPLE_CHOICE -> MultipleChoiceQuestionEntity.class;
+            case PROJECT -> ProjectQuestionEntity.class;
+            case OPEN -> OpenQuestionEntity.class;
+        };
     }
 }

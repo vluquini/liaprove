@@ -20,14 +20,14 @@ class QuestionMapperTest {
     void shouldMapOpenQuestionDomainToEntityAndBack() {
         OpenQuestion domain = openQuestion();
 
-        OpenQuestionEntity entity = (OpenQuestionEntity) mapper.toEntity(domain);
+        OpenQuestionEntity entity = mapper.toEntity(domain);
 
         assertEquals(domain.getGuideline(), entity.getGuideline());
         assertEquals(domain.getVisibility(), entity.getVisibility());
         assertEquals(domain.getTitle(), entity.getTitle());
         assertEquals(domain.getQuestionType(), QuestionType.OPEN);
 
-        OpenQuestion mappedBack = (OpenQuestion) mapper.toDomain(entity);
+        OpenQuestion mappedBack = mapper.toDomain(entity);
 
         assertEquals(domain.getGuideline(), mappedBack.getGuideline());
         assertEquals(domain.getVisibility(), mappedBack.getVisibility());
@@ -39,7 +39,7 @@ class QuestionMapperTest {
     void shouldMapOpenQuestionToOpenQuestionResponse() {
         OpenQuestion domain = openQuestion();
 
-        OpenQuestionResponse response = (OpenQuestionResponse) mapper.toResponseDto(domain);
+        OpenQuestionResponse response = mapper.toResponseDto(domain);
 
         assertEquals(domain.getGuideline(), response.getGuideline());
         assertEquals(domain.getVisibility(), response.getVisibility());
@@ -49,7 +49,7 @@ class QuestionMapperTest {
 
     @Test
     void shouldResolveOpenQuestionEntityClass() {
-        assertEquals(OpenQuestionEntity.class, mapper.mapToEntityClass(OpenQuestion.class));
+        assertEquals(OpenQuestionEntity.class, mapper.mapToEntityClass(QuestionType.OPEN));
     }
 
     private OpenQuestion openQuestion() {
