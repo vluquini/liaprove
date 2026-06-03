@@ -37,6 +37,8 @@ public interface QuestionJpaRepository extends JpaRepository<QuestionEntity, UUI
 
     List<QuestionEntity> findByStatusAndVotingEndDateBefore(QuestionStatus status, LocalDateTime votingEndDate);
 
+    List<QuestionEntity> findByStatus(QuestionStatus status);
+
     @Query("SELECT q.id FROM QuestionEntity q LEFT JOIN q.knowledgeAreas ka " +
             "WHERE ka IN (:knowledgeAreas) " +
             "AND q.difficultyByCommunity = :difficultyLevel " +

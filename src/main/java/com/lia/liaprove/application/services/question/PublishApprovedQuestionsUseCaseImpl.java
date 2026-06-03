@@ -23,8 +23,13 @@ public class PublishApprovedQuestionsUseCaseImpl implements PublishApprovedQuest
         Objects.requireNonNull(publicationDelay, "publicationDelay must not be null");
         Objects.requireNonNull(now, "now must not be null");
 
-        LocalDateTime cutoff = now.minus(publicationDelay);
-        List<Question> eligibleQuestions = questionGateway.findByStatusAndVotingEndDateBefore(QuestionStatus.APPROVED, cutoff);
+        List<Question> eligibleQuestions;
+        if (publicationDelay.isZero()) {
+            eligibleQuestions = questionGateway.findByStatus(QuestionStatus.APPROVED);
+        } else {
+            LocalDateTime cutoff = now.minus(publicationDelay);
+            eligibleQuestions = questionGateway.findByStatusAndVotingEndDateBefore(QuestionStatus.APPROVED, cutoff);
+        }
 
         eligibleQuestions.forEach(question -> {
             question.setStatus(QuestionStatus.FINISHED);

@@ -75,6 +75,16 @@ public interface QuestionGateway {
     List<Question> findByStatusAndVotingEndDateBefore(QuestionStatus status, LocalDateTime dateTime);
 
     /**
+     * Encontra questões apenas pelo status.
+     * Alternativa demonstrativa ao método findByStatusAndVotingEndDateBefore, usada quando o fluxo precisa
+     * ignorar votingEndDate para simular transições de status em intervalos curtos.
+     *
+     * @param status O status das questões a serem encontradas.
+     * @return Uma lista de questões com o status informado.
+     */
+    List<Question> findByStatus(QuestionStatus status);
+
+    /**
      * Encontra uma quantidade de questões aleatórias que correspondem a um critério e a um tipo específico.
      *
      * @param knowledgeAreas As áreas de conhecimento.

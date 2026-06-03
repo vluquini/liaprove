@@ -28,6 +28,7 @@ public class ApprovedQuestionPublicationScheduler {
         this.publicationDelay = publicationDelay;
     }
 
+    // Runs every 5 minutes by default. When publicationDelay is PT0S, this demo flow ignores votingEndDate.
     @Scheduled(fixedRateString = "${question.publication.scheduler.fixed-rate-ms:300000}")
     public void publishApprovedQuestions() {
         int publishedCount = publishApprovedQuestionsUseCase.publishEligibleQuestions(publicationDelay, LocalDateTime.now());
