@@ -86,6 +86,43 @@ class QuestionGatewayImplTest {
         assertEquals(OpenQuestionEntity.class, classCaptor.getValue());
     }
 
+    @Test
+    void shouldDelegateEligibleRandomQuestionSearchWithRequesterFilters() {
+        QuestionGatewayImpl gateway = new QuestionGatewayImpl(questionJpaRepository, questionMapper);
+        Set<KnowledgeArea> areas = Set.of(KnowledgeArea.SOFTWARE_DEVELOPMENT);
+        UUID requesterId = UUID.randomUUID();
+
+        when(questionJpaRepository.findRandomEligibleQuestionIds(
+                anySet(),
+                any(DifficultyLevel.class),
+                any(Class.class),
+                any(QuestionStatus.class),
+                any(UUID.class),
+                any(Pageable.class)
+        )).thenReturn(List.of());
+
+        gateway.findRandomEligibleByCriteria(
+                areas,
+                DifficultyLevel.EASY,
+                QuestionStatus.FINISHED,
+                3,
+                QuestionType.OPEN,
+                requesterId
+        );
+
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<Class> classCaptor = ArgumentCaptor.forClass(Class.class);
+        verify(questionJpaRepository).findRandomEligibleQuestionIds(
+                eq(areas),
+                eq(DifficultyLevel.EASY),
+                classCaptor.capture(),
+                eq(QuestionStatus.FINISHED),
+                eq(requesterId),
+                any(Pageable.class)
+        );
+        assertEquals(OpenQuestionEntity.class, classCaptor.getValue());
+    }
+
     private OpenQuestion openQuestion() {
         OpenQuestion question = new OpenQuestion("Use the rubric to justify your answer.", OpenQuestionVisibility.PRIVATE);
         question.setId(UUID.randomUUID());

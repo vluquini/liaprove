@@ -32,16 +32,18 @@ public class GenerateSystemAssessmentUseCaseImpl implements GenerateSystemAssess
     }
 
     @Override
-    public List<Question> createQuestions(KnowledgeArea knowledgeArea, DifficultyLevel difficultyLevel, SystemAssessmentType type) {
+    public List<Question> createQuestions(KnowledgeArea knowledgeArea, DifficultyLevel difficultyLevel,
+                                          SystemAssessmentType type, UUID requesterId) {
         if (type == SystemAssessmentType.PROJECT) {
-            return questionGateway.findRandomByCriteria(Set.of(knowledgeArea), difficultyLevel, QuestionStatus.FINISHED, 1, ProjectQuestion.class);
+            return questionGateway.findRandomEligibleByCriteria(Set.of(knowledgeArea), difficultyLevel,
+                    QuestionStatus.FINISHED, 1, QuestionType.PROJECT, requesterId);
         }
 
         // Caso MULTIPLE_CHOICE
         List<Question> finalQuestions = switch (difficultyLevel) {
-            case EASY -> createEasyAssessmentQuestions(knowledgeArea);
-            case MEDIUM -> createMediumAssessmentQuestions(knowledgeArea);
-            default -> createHardAssessmentQuestions(knowledgeArea);
+            case EASY -> createEasyAssessmentQuestions(knowledgeArea, requesterId);
+            case MEDIUM -> createMediumAssessmentQuestions(knowledgeArea, requesterId);
+            default -> createHardAssessmentQuestions(knowledgeArea, requesterId);
         };
 
         // Embaralha a ordem final das questões
@@ -53,34 +55,35 @@ public class GenerateSystemAssessmentUseCaseImpl implements GenerateSystemAssess
         return finalQuestions;
     }
 
-    private List<Question> createEasyAssessmentQuestions(KnowledgeArea knowledgeArea) {
+    private List<Question> createEasyAssessmentQuestions(KnowledgeArea knowledgeArea, UUID requesterId) {
         int easyCount = (int) (TOTAL_QUESTIONS * EASY_RATIO_EASY);
         int mediumCount = (int) (TOTAL_QUESTIONS * EASY_RATIO_MEDIUM);
         int hardCount = TOTAL_QUESTIONS - easyCount - mediumCount;
-        return fetchAndCombineQuestions(knowledgeArea, easyCount, mediumCount, hardCount);
+        return fetchAndCombineQuestions(knowledgeArea, easyCount, mediumCount, hardCount, requesterId);
     }
 
-    private List<Question> createMediumAssessmentQuestions(KnowledgeArea knowledgeArea) {
+    private List<Question> createMediumAssessmentQuestions(KnowledgeArea knowledgeArea, UUID requesterId) {
         int easyCount = (int) (TOTAL_QUESTIONS * MEDIUM_RATIO_EASY);
         int mediumCount = (int) (TOTAL_QUESTIONS * MEDIUM_RATIO_MEDIUM);
         int hardCount = TOTAL_QUESTIONS - easyCount - mediumCount;
-        return fetchAndCombineQuestions(knowledgeArea, easyCount, mediumCount, hardCount);
+        return fetchAndCombineQuestions(knowledgeArea, easyCount, mediumCount, hardCount, requesterId);
     }
 
-    private List<Question> createHardAssessmentQuestions(KnowledgeArea knowledgeArea) {
+    private List<Question> createHardAssessmentQuestions(KnowledgeArea knowledgeArea, UUID requesterId) {
         int easyCount = (int) (TOTAL_QUESTIONS * HARD_RATIO_EASY);
         int mediumCount = (int) (TOTAL_QUESTIONS * HARD_RATIO_MEDIUM);
         int hardCount = TOTAL_QUESTIONS - easyCount - mediumCount;
-        return fetchAndCombineQuestions(knowledgeArea, easyCount, mediumCount, hardCount);
+        return fetchAndCombineQuestions(knowledgeArea, easyCount, mediumCount, hardCount, requesterId);
     }
 
-    private List<Question> fetchAndCombineQuestions(KnowledgeArea knowledgeArea, int easyCount, int mediumCount, int hardCount) {
-        List<Question> easyQuestions   = questionGateway.findRandomByCriteria(Set.of(knowledgeArea), DifficultyLevel.EASY,
-                                         QuestionStatus.FINISHED, easyCount, MultipleChoiceQuestion.class);
-        List<Question> mediumQuestions = questionGateway.findRandomByCriteria(Set.of(knowledgeArea), DifficultyLevel.MEDIUM,
-                                         QuestionStatus.FINISHED, mediumCount, MultipleChoiceQuestion.class);
-        List<Question> hardQuestions   = questionGateway.findRandomByCriteria(Set.of(knowledgeArea), DifficultyLevel.HARD,
-                                         QuestionStatus.FINISHED, hardCount, MultipleChoiceQuestion.class);
+    private List<Question> fetchAndCombineQuestions(KnowledgeArea knowledgeArea, int easyCount, int mediumCount,
+                                                    int hardCount, UUID requesterId) {
+        List<Question> easyQuestions   = questionGateway.findRandomEligibleByCriteria(Set.of(knowledgeArea), DifficultyLevel.EASY,
+                                         QuestionStatus.FINISHED, easyCount, QuestionType.MULTIPLE_CHOICE, requesterId);
+        List<Question> mediumQuestions = questionGateway.findRandomEligibleByCriteria(Set.of(knowledgeArea), DifficultyLevel.MEDIUM,
+                                         QuestionStatus.FINISHED, mediumCount, QuestionType.MULTIPLE_CHOICE, requesterId);
+        List<Question> hardQuestions   = questionGateway.findRandomEligibleByCriteria(Set.of(knowledgeArea), DifficultyLevel.HARD,
+                                         QuestionStatus.FINISHED, hardCount, QuestionType.MULTIPLE_CHOICE, requesterId);
 
         List<Question> combined = new ArrayList<>();
         combined.addAll(easyQuestions);

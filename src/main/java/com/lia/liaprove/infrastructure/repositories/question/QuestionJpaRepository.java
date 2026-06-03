@@ -51,6 +51,35 @@ public interface QuestionJpaRepository extends JpaRepository<QuestionEntity, UUI
             Pageable pageable
     );
 
+    @Query("""
+            SELECT q.id
+            FROM QuestionEntity q
+            LEFT JOIN q.knowledgeAreas ka
+            WHERE ka IN (:knowledgeAreas)
+              AND q.difficultyByCommunity = :difficultyLevel
+              AND TYPE(q) = :questionType
+              AND (:status IS NULL OR q.status = :status)
+              AND (:requesterId IS NULL OR q.authorId <> :requesterId)
+              AND (
+                  :requesterId IS NULL OR NOT EXISTS (
+                      SELECT v.id
+                      FROM VoteEntity v
+                      WHERE v.question = q
+                        AND v.user.id = :requesterId
+                  )
+              )
+            GROUP BY q.id
+            ORDER BY function('RANDOM')
+            """)
+    List<UUID> findRandomEligibleQuestionIds(
+            @Param("knowledgeAreas") Set<KnowledgeArea> knowledgeAreas,
+            @Param("difficultyLevel") DifficultyLevel difficultyLevel,
+            @Param("questionType") Class<? extends QuestionEntity> questionType,
+            @Param("status") QuestionStatus status,
+            @Param("requesterId") UUID requesterId,
+            Pageable pageable
+    );
+
     @Query("SELECT DISTINCT q FROM QuestionEntity q LEFT JOIN FETCH TREAT(q AS MultipleChoiceQuestionEntity).alternatives WHERE q.id IN :ids")
     List<QuestionEntity> findAllByIdWithAlternatives(@Param("ids") List<UUID> ids);
 

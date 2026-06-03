@@ -4,6 +4,7 @@ import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
+import com.lia.liaprove.core.domain.question.QuestionType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -85,4 +86,8 @@ public interface QuestionGateway {
      */
     List<Question> findRandomByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
                                         QuestionStatus status, int limit, Class<? extends Question> questionType);
+
+    List<Question> findRandomEligibleByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
+                                                QuestionStatus status, int limit, QuestionType questionType,
+                                                UUID requesterId);
 }

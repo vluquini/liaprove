@@ -174,6 +174,11 @@ public class AppConfig {
     }
 
     @Bean
+    public PublishApprovedQuestionsUseCase publishApprovedQuestionsUseCase(QuestionGateway questionGateway) {
+        return new PublishApprovedQuestionsUseCaseImpl(questionGateway);
+    }
+
+    @Bean
     public UpdateQuestionUseCase updateQuestionUseCase(QuestionGateway questionGateway, UserGateway userGateway) {
         return new UpdateQuestionUseCaseImpl(questionGateway, userGateway);
     }

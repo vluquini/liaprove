@@ -4,7 +4,6 @@ import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway
 import com.lia.liaprove.application.services.assessment.dto.SubmitAssessmentAnswersDto;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
-import com.lia.liaprove.core.domain.assessment.Answer;
 import com.lia.liaprove.core.domain.assessment.Certificate;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.assessment.SystemAssessment;
@@ -89,9 +88,9 @@ class SubmitAssessmentUseCaseImplTest {
 
         assertThat(result.getAnswers()).hasSize(1);
         assertThat(attemptCaptor.getValue().getAnswers()).hasSize(1);
-        assertThat(attemptCaptor.getValue().getAnswers().get(0).getSelectedAlternativeId()).isNull();
-        assertThat(attemptCaptor.getValue().getAnswers().get(0).getProjectUrl()).isNull();
-        assertThat(attemptCaptor.getValue().getAnswers().get(0).getTextResponse()).isEqualTo(textResponse);
+        assertThat(attemptCaptor.getValue().getAnswers().getFirst().getSelectedAlternativeId()).isNull();
+        assertThat(attemptCaptor.getValue().getAnswers().getFirst().getProjectUrl()).isNull();
+        assertThat(attemptCaptor.getValue().getAnswers().getFirst().getTextResponse()).isEqualTo(textResponse);
     }
 
     @Test
@@ -127,8 +126,8 @@ class SubmitAssessmentUseCaseImplTest {
 
         assertThat(result.getStatus()).isEqualTo(AssessmentAttemptStatus.COMPLETED);
         assertThat(attemptCaptor.getValue().getAnswers()).hasSize(1);
-        assertThat(attemptCaptor.getValue().getAnswers().get(0).getProjectUrl()).isEqualTo(projectUrl);
-        assertThat(attemptCaptor.getValue().getAnswers().get(0).getTextResponse()).isNull();
+        assertThat(attemptCaptor.getValue().getAnswers().getFirst().getProjectUrl()).isEqualTo(projectUrl);
+        assertThat(attemptCaptor.getValue().getAnswers().getFirst().getTextResponse()).isNull();
     }
 
     @Test
@@ -142,14 +141,10 @@ class SubmitAssessmentUseCaseImplTest {
         AssessmentAttempt attempt = systemAttempt(
                 attemptId,
                 user,
-                List.of(question.question()),
-                KnowledgeArea.SOFTWARE_DEVELOPMENT,
-                DifficultyLevel.MEDIUM
+                List.of(question.question())
         );
         AssessmentAttempt existingCertifiedAttempt = certifiedAttempt(
                 user,
-                KnowledgeArea.SOFTWARE_DEVELOPMENT,
-                DifficultyLevel.MEDIUM,
                 100
         );
 
@@ -191,14 +186,10 @@ class SubmitAssessmentUseCaseImplTest {
         AssessmentAttempt attempt = systemAttempt(
                 attemptId,
                 user,
-                List.of(question.question()),
-                KnowledgeArea.SOFTWARE_DEVELOPMENT,
-                DifficultyLevel.MEDIUM
+                List.of(question.question())
         );
         AssessmentAttempt existingCertifiedAttempt = certifiedAttempt(
                 user,
-                KnowledgeArea.SOFTWARE_DEVELOPMENT,
-                DifficultyLevel.MEDIUM,
                 70
         );
         Certificate newCertificate = new Certificate(
@@ -272,9 +263,7 @@ class SubmitAssessmentUseCaseImplTest {
     private AssessmentAttempt systemAttempt(
             UUID attemptId,
             User user,
-            List<Question> questions,
-            KnowledgeArea knowledgeArea,
-            DifficultyLevel difficultyLevel
+            List<Question> questions
     ) {
         SystemAssessment assessment = new SystemAssessment(
                 UUID.randomUUID(),
@@ -283,8 +272,8 @@ class SubmitAssessmentUseCaseImplTest {
                 LocalDateTime.now(),
                 questions,
                 Duration.ofMinutes(10),
-                knowledgeArea,
-                difficultyLevel
+                KnowledgeArea.SOFTWARE_DEVELOPMENT,
+                DifficultyLevel.MEDIUM
         );
 
         return new AssessmentAttempt(
@@ -304,16 +293,12 @@ class SubmitAssessmentUseCaseImplTest {
 
     private AssessmentAttempt certifiedAttempt(
             User user,
-            KnowledgeArea knowledgeArea,
-            DifficultyLevel difficultyLevel,
             int score
     ) {
         AssessmentAttempt attempt = systemAttempt(
                 UUID.randomUUID(),
                 user,
-                List.of(),
-                knowledgeArea,
-                difficultyLevel
+                List.of()
         );
         attempt.setStatus(AssessmentAttemptStatus.APPROVED);
         attempt.setAccuracyRate(score);

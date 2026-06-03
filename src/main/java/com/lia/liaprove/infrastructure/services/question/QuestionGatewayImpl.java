@@ -2,6 +2,9 @@ package com.lia.liaprove.infrastructure.services.question;
 
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.core.domain.question.*;
+import com.lia.liaprove.infrastructure.entities.question.MultipleChoiceQuestionEntity;
+import com.lia.liaprove.infrastructure.entities.question.OpenQuestionEntity;
+import com.lia.liaprove.infrastructure.entities.question.ProjectQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.repositories.question.QuestionJpaRepository;
@@ -101,5 +104,33 @@ public class QuestionGatewayImpl implements QuestionGateway {
                 .stream()
                 .map(questionMapper::toDomain)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<Question> findRandomEligibleByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
+                                                       QuestionStatus status, int limit, QuestionType questionType,
+                                                       UUID requesterId) {
+        Class<? extends QuestionEntity> entityClass = mapToEntityClass(questionType);
+        Pageable pageable = PageRequest.of(0, limit);
+
+        List<UUID> randomIds = questionJpaRepository
+                .findRandomEligibleQuestionIds(knowledgeAreas, difficultyLevel, entityClass, status, requesterId, pageable);
+
+        if (randomIds.isEmpty()) {
+            return List.of();
+        }
+
+        return questionJpaRepository.findAllByIdWithAlternatives(randomIds)
+                .stream()
+                .map(questionMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    private Class<? extends QuestionEntity> mapToEntityClass(QuestionType questionType) {
+        return switch (questionType) {
+            case MULTIPLE_CHOICE -> MultipleChoiceQuestionEntity.class;
+            case PROJECT -> ProjectQuestionEntity.class;
+            case OPEN -> OpenQuestionEntity.class;
+        };
     }
 }

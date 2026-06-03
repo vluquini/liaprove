@@ -91,7 +91,7 @@ public class StartNewAssessmentUseCaseImpl implements StartNewAssessmentUseCase 
     }
 
     private AssessmentAttempt startSystemAssessment(User user, KnowledgeArea knowledgeArea, DifficultyLevel difficultyLevel, SystemAssessmentType type) {
-        List<Question> questions = generateSystemAssessmentUseCase.createQuestions(knowledgeArea, difficultyLevel, type);
+        List<Question> questions = generateSystemAssessmentUseCase.createQuestions(knowledgeArea, difficultyLevel, type, user.getId());
         if (questions.isEmpty()) {
             throw new AssessmentNotFoundException("It was not possible to generate an assessment. There are not enough questions for the selected criteria.");
         }

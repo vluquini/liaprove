@@ -6,6 +6,7 @@ import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.Question;
 
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Interface responsável por gerar a lista de questões
@@ -18,7 +19,9 @@ public interface GenerateSystemAssessmentUseCase {
      * @param knowledgeArea Área de conhecimento desejada.
      * @param difficultyLevel O nível de dificuldade da avaliação (EASY, MEDIUM, HARD).
      * @param type O tipo de avaliação do sistema (MULTIPLE_CHOICE ou PROJECT).
+     * @param requesterId ID do usuário solicitante, usado para excluir questões inelegíveis.
      * @return Uma lista de questões selecionadas e embaralhadas.
      */
-    List<Question> createQuestions(KnowledgeArea knowledgeArea, DifficultyLevel difficultyLevel, SystemAssessmentType type);
+    List<Question> createQuestions(KnowledgeArea knowledgeArea, DifficultyLevel difficultyLevel,
+                                   SystemAssessmentType type, UUID requesterId);
 }
