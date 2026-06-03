@@ -196,6 +196,14 @@ public class AssessmentAttemptGatewayImpl implements AssessmentAttemptGateway {
 
     @Override
     @Transactional(readOnly = true)
+    public List<AssessmentAttempt> findCompletedSystemProjectAttemptsReadyForDemoCommunityDecision() {
+        return assessmentAttemptJpaRepository.findCompletedSystemProjectAttemptsReadyForDemoCommunityDecision().stream()
+                .map(assessmentAttemptMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public long countByAssessmentId(UUID assessmentId) {
         return assessmentAttemptJpaRepository.countByAssessmentId(assessmentId);
     }

@@ -151,6 +151,20 @@ public interface AssessmentAttemptJpaRepository extends JpaRepository<Assessment
     List<AssessmentAttemptEntity> findCompletedSystemProjectAttemptsReadyForCommunityDecision(@Param("cutoff") LocalDateTime cutoff);
 
     @Query("""
+        SELECT DISTINCT a
+        FROM AssessmentAttemptEntity a
+        JOIN FETCH a.assessment ass
+        JOIN FETCH a.user u
+        JOIN FETCH a.answers ans
+        WHERE TYPE(ass) = SystemAssessmentEntity
+          AND a.status = AssessmentAttemptStatus.COMPLETED
+          AND a.finishedAt IS NOT NULL
+          AND ans.projectUrl IS NOT NULL
+          AND ans.projectUrl <> ''
+    """)
+    List<AssessmentAttemptEntity> findCompletedSystemProjectAttemptsReadyForDemoCommunityDecision();
+
+    @Query("""
         SELECT pa.createdBy.id, AVG(a.accuracyRate)
         FROM AssessmentAttemptEntity a
         JOIN a.assessment ass

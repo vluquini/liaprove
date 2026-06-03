@@ -9,7 +9,6 @@ import com.lia.liaprove.core.exceptions.assessment.InvalidAttemptStatusException
 import com.lia.liaprove.core.exceptions.user.InvalidUserDataException;
 import com.lia.liaprove.core.usecases.assessments.EvaluateCommunityReviewAssessmentAttemptUseCase;
 
-import java.time.LocalDateTime;
 import java.util.Random;
 import java.util.UUID;
 
@@ -19,8 +18,6 @@ import java.util.UUID;
  * bayesiana real da plataforma.
  */
 public class MockEvaluateCommunityReviewAssessmentAttemptUseCaseImpl implements EvaluateCommunityReviewAssessmentAttemptUseCase {
-
-    private static final int COMMUNITY_REVIEW_WINDOW_DAYS = 7;
 
     private final AssessmentAttemptGateway assessmentAttemptGateway;
     private final Random random = new Random();
@@ -59,11 +56,6 @@ public class MockEvaluateCommunityReviewAssessmentAttemptUseCaseImpl implements 
 
         if (attempt.getFinishedAt() == null) {
             throw new InvalidUserDataException("Only finished attempts can be community evaluated.");
-        }
-
-        LocalDateTime cutoff = LocalDateTime.now().minusDays(COMMUNITY_REVIEW_WINDOW_DAYS);
-        if (attempt.getFinishedAt().isAfter(cutoff)) {
-            throw new InvalidUserDataException("Community review is only available after the 7-day voting window.");
         }
     }
 }

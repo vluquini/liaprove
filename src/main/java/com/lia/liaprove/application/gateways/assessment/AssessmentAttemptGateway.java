@@ -79,6 +79,13 @@ public interface AssessmentAttemptGateway {
     List<AssessmentAttempt> findCompletedSystemProjectAttemptsReadyForCommunityDecision(LocalDateTime cutoff);
 
     /**
+     * Busca tentativas COMPLETED de mini-projetos do sistema sem considerar a janela de 7 dias.
+     * Alternativa demonstrativa ao método com cutoff, usada para simular decisões comunitárias
+     * em intervalos curtos durante apresentações.
+     */
+    List<AssessmentAttempt> findCompletedSystemProjectAttemptsReadyForDemoCommunityDecision();
+
+    /**
      * Conta o número de tentativas para uma avaliação específica.
      * @param assessmentId O ID da avaliação.
      * @return O número total de tentativas.
