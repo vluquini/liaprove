@@ -20,7 +20,8 @@ public class GeneticVoteWeightScheduler {
         this.manageVoteWeightUseCase = manageVoteWeightUseCase;
     }
 
-    @Scheduled(cron = "${ga.scheduler.cron:0 0 2 * * *}")
+    // Cron configured by ga.scheduler.cron. Demo profiles run every 5 minutes.
+    @Scheduled(cron = "${ga.scheduler.cron:0 */5 * * * *}")
     public void adjustRecruiterVoteWeights() {
         logger.info("Starting scheduled genetic vote weight adjustment");
         manageVoteWeightUseCase.adjustAllRecruiterWeights(false, null);
