@@ -76,8 +76,8 @@ public class AuthRegisterEndpointIntegrationTest {
         assertThat(entity).isInstanceOf(UserProfessionalEntity.class);
 
         UserProfessionalEntity professional = (UserProfessionalEntity) entity;
-        assertThat(professional.getHardSkills()).containsExactly("Java", "Spring Boot");
-        assertThat(professional.getSoftSkills()).containsExactly("Communication", "Leadership");
+        assertThat(professional.getHardSkills()).containsExactly("java", "spring boot");
+        assertThat(professional.getSoftSkills()).containsExactly("communication", "leadership");
     }
 
     @Test

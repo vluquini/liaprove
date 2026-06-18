@@ -162,8 +162,7 @@ class ReactToAssessmentFeedbackUseCaseImplTest {
                 List.of(),
                 0.0f,
                 LocalDateTime.now().minusDays(10),
-                LocalDateTime.now(),
-                UserStatus.ACTIVE
+                LocalDateTime.now()
         );
     }
 }

@@ -49,11 +49,11 @@ class GetUserByIdEndpointIntegrationTest {
                 .andExpect(jsonPath("$.name").value("Mariana Costa"))
                 .andExpect(jsonPath("$.email").value("mariana.costa@example.com"))
                 .andExpect(jsonPath("$.hardSkills.length()").value(2))
-                .andExpect(jsonPath("$.hardSkills[0]").value("Python"))
-                .andExpect(jsonPath("$.hardSkills[1]").value("Machine Learning"))
+                .andExpect(jsonPath("$.hardSkills[0]").value("python"))
+                .andExpect(jsonPath("$.hardSkills[1]").value("machine learning"))
                 .andExpect(jsonPath("$.softSkills.length()").value(2))
-                .andExpect(jsonPath("$.softSkills[0]").value("Analytical Thinking"))
-                .andExpect(jsonPath("$.softSkills[1]").value("Communication"));
+                .andExpect(jsonPath("$.softSkills[0]").value("analytical thinking"))
+                .andExpect(jsonPath("$.softSkills[1]").value("communication"));
     }
 
     @Test

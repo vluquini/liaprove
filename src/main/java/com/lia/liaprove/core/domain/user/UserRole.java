@@ -12,7 +12,7 @@ public enum UserRole {
     }
 
     public boolean isRecruiter() {
-        return this == RECRUITER;
+        return this == RECRUITER || this == ADMIN;
     }
 
     public boolean isProfessional() {

@@ -1,6 +1,8 @@
 package com.lia.liaprove.core.domain.assessment;
 
 import com.lia.liaprove.core.domain.question.Question;
+import com.lia.liaprove.core.domain.user.User;
+import com.lia.liaprove.core.domain.user.UserStatus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -78,5 +80,18 @@ public abstract class Assessment {
 
     public void setEvaluationTimer(Duration evaluationTimer) {
         this.evaluationTimer = evaluationTimer;
+    }
+
+    public boolean canBeAttemptedBy(User user) {
+        if (user == null || user.getStatus() != UserStatus.ACTIVE) {
+            return false;
+        }
+
+        LocalDateTime registrationDate = user.getRegistrationDate();
+        if (registrationDate == null) {
+            return true;
+        }
+
+        return registrationDate.isBefore(LocalDateTime.now().minusMinutes(1));
     }
 }

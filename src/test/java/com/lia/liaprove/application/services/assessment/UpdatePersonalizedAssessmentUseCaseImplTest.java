@@ -103,8 +103,7 @@ class UpdatePersonalizedAssessmentUseCaseImplTest {
                 List.of(),
                 0.0f,
                 LocalDateTime.now(),
-                LocalDateTime.now(),
-                UserStatus.ACTIVE
+                LocalDateTime.now()
         );
         recruiter.setCompanyEmail("recruiter@example.com");
         recruiter.setCompanyName("Acme");

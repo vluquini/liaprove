@@ -132,8 +132,8 @@ class GenerateAttemptPreAnalysisUseCaseImplTest {
         assertThat(contextCaptor.getValue().assessment().criteriaWeights()).isEqualTo(criteriaWeights);
         assertThat(contextCaptor.getValue().assessment().jobDescriptionAnalysis()).isEqualTo(jobDescriptionAnalysis);
         assertThat(contextCaptor.getValue().candidate().experienceLevel()).isEqualTo(ExperienceLevel.SENIOR);
-        assertThat(contextCaptor.getValue().candidate().hardSkills()).containsExactly("Java", "Spring Boot");
-        assertThat(contextCaptor.getValue().candidate().softSkills()).containsExactly("Communication", "Ownership");
+        assertThat(contextCaptor.getValue().candidate().hardSkills()).containsExactly("java", "spring boot");
+        assertThat(contextCaptor.getValue().candidate().softSkills()).containsExactly("communication", "ownership");
         assertThat(contextCaptor.getValue().supportedQuestions()).hasSize(2);
         assertThat(contextCaptor.getValue().supportedQuestions().get(0).questionType()).isEqualTo(QuestionType.MULTIPLE_CHOICE);
         assertThat(contextCaptor.getValue().supportedQuestions().get(0).selectedAlternativeId()).isEqualTo(correctAlternative.id());
@@ -340,8 +340,7 @@ class GenerateAttemptPreAnalysisUseCaseImplTest {
                 List.of(),
                 82.0f,
                 LocalDateTime.now(),
-                LocalDateTime.now(),
-                UserStatus.ACTIVE
+                LocalDateTime.now()
         );
         professional.setHardSkills(List.of("Java", "Spring Boot"));
         professional.setSoftSkills(List.of("Communication", "Ownership"));
@@ -438,8 +437,7 @@ class GenerateAttemptPreAnalysisUseCaseImplTest {
                 List.of(),
                 0.0f,
                 LocalDateTime.now(),
-                LocalDateTime.now(),
-                UserStatus.ACTIVE
+                LocalDateTime.now()
         );
         recruiter.setCompanyEmail("recruiter@example.com");
         recruiter.setCompanyName("Acme");

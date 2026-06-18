@@ -88,8 +88,8 @@ class HttpQuestionPreAnalysisGatewayImplTest {
             assertThat(payload.at("/assessment/jobDescriptionAnalysis/originalJobDescription").asText())
                     .isEqualTo("Senior backend role focused on Java and APIs");
             assertThat(payload.at("/candidate/experienceLevel").asText()).isEqualTo("SENIOR");
-            assertThat(payload.at("/candidate/hardSkills/0").asText()).isEqualTo("Java");
-            assertThat(payload.at("/candidate/softSkills/1").asText()).isEqualTo("Ownership");
+            assertThat(payload.at("/candidate/hardSkills/0").asText()).isEqualTo("java");
+            assertThat(payload.at("/candidate/softSkills/1").asText()).isEqualTo("ownership");
             assertThat(payload.at("/supportedQuestions/0/questionType").asText()).isEqualTo("MULTIPLE_CHOICE");
             assertThat(payload.at("/supportedQuestions/0/selectedAlternativeId").asText())
                     .isEqualTo("22222222-2222-2222-2222-222222222222");
@@ -331,8 +331,7 @@ class HttpQuestionPreAnalysisGatewayImplTest {
                 List.of(),
                 0.0f,
                 LocalDateTime.now(),
-                LocalDateTime.now(),
-                UserStatus.ACTIVE
+                LocalDateTime.now()
         );
         recruiter.setCompanyEmail("recruiter@example.com");
         recruiter.setCompanyName("Acme");
@@ -351,8 +350,7 @@ class HttpQuestionPreAnalysisGatewayImplTest {
                 List.of(),
                 82.0f,
                 LocalDateTime.now(),
-                LocalDateTime.now(),
-                UserStatus.ACTIVE
+                LocalDateTime.now()
         );
         candidate.setHardSkills(List.of("Java", "Spring Boot"));
         candidate.setSoftSkills(List.of("Communication", "Ownership"));

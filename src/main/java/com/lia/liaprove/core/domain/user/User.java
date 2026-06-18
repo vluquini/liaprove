@@ -37,7 +37,7 @@ public abstract class User {
     public User(UUID id, String name, String email, String passwordHash, String occupation, String bio,
                 ExperienceLevel experienceLevel, UserRole role, Integer voteWeight, Integer totalAssessmentsTaken,
                 List<Certificate> certificates, Float averageScore, LocalDateTime registrationDate,
-                LocalDateTime lastLogin, UserStatus status) {
+                LocalDateTime lastLogin) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -184,7 +184,7 @@ public abstract class User {
 
     // Métodos de conveniência - Possivelmente necessários
     public boolean isRecruiter() {
-        return this.role == UserRole.RECRUITER;
+        return this.role == UserRole.RECRUITER || this.role == UserRole.ADMIN;
     }
 
     public boolean isProfessional() {
@@ -313,7 +313,7 @@ public abstract class User {
         if (email != null && !email.isBlank()) {
             this.setEmail(email.trim());
         }
-        if (occupation != null && !occupation.isBlank()) {
+        if (occupation != null) {
             this.setOccupation(occupation.trim());
         }
         if (bio != null) {

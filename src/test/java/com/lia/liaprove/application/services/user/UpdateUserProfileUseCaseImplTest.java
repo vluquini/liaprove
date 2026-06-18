@@ -181,8 +181,8 @@ class UpdateUserProfileUseCaseImplTest {
         );
 
         assertThat(updatedUser).isSameAs(professional);
-        assertThat(professional.getHardSkills()).containsExactly("Java", "Spring Boot");
-        assertThat(professional.getSoftSkills()).containsExactly("Communication", "Leadership");
+        assertThat(professional.getHardSkills()).containsExactly("java", "spring boot");
+        assertThat(professional.getSoftSkills()).containsExactly("communication", "leadership");
         verify(userGateway).save(professional);
     }
 }

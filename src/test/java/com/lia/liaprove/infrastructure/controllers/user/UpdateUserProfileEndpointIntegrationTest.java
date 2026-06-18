@@ -71,9 +71,9 @@ class UpdateUserProfileEndpointIntegrationTest {
                 .andExpect(jsonPath("$.occupation").value("Senior Developer"))
                 .andExpect(jsonPath("$.bio").value("Updated bio"))
                 .andExpect(jsonPath("$.hardSkills.length()").value(3))
-                .andExpect(jsonPath("$.hardSkills[2]").value("PostgreSQL"))
+                .andExpect(jsonPath("$.hardSkills[2]").value("postgresql"))
                 .andExpect(jsonPath("$.softSkills.length()").value(2))
-                .andExpect(jsonPath("$.softSkills[1]").value("Communication"));
+                .andExpect(jsonPath("$.softSkills[1]").value("communication"));
 
         UserProfessionalEntity updated = (UserProfessionalEntity) userJpaRepository.findById(user.getId()).orElseThrow();
         assertThat(updated.getName()).isEqualTo("Carlos Updated");
@@ -81,8 +81,8 @@ class UpdateUserProfileEndpointIntegrationTest {
         assertThat(updated.getOccupation()).isEqualTo("Senior Developer");
         assertThat(updated.getBio()).isEqualTo("Updated bio");
         assertThat(updated.getExperienceLevel()).isEqualTo(ExperienceLevel.SENIOR);
-        assertThat(updated.getHardSkills()).containsExactly("Java", "Spring Boot", "PostgreSQL");
-        assertThat(updated.getSoftSkills()).containsExactly("Leadership", "Communication");
+        assertThat(updated.getHardSkills()).containsExactly("java", "spring boot", "postgresql");
+        assertThat(updated.getSoftSkills()).containsExactly("leadership", "communication");
     }
 
     @Test
