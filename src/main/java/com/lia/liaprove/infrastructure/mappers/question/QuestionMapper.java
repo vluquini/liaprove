@@ -41,6 +41,7 @@ public interface QuestionMapper {
 
     MultipleChoiceQuestionEntity toEntity(MultipleChoiceQuestion domain);
 
+    @Mapping(target = "projectUrl", ignore = true)
     ProjectQuestionEntity toEntity(ProjectQuestion domain);
 
     OpenQuestionEntity toEntity(OpenQuestion domain);
@@ -85,6 +86,7 @@ public interface QuestionMapper {
     @Mapping(target = "submissionDate", ignore = true)
     @Mapping(target = "votingEndDate", ignore = true)
     @Mapping(target = "recruiterUsageCount", ignore = true)
+    @Mapping(target = "projectUrl", ignore = true)
     void updateEntityFromDomain(ProjectQuestion domain, @MappingTarget ProjectQuestionEntity entity);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

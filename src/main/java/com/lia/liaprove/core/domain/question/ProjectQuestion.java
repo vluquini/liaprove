@@ -18,18 +18,6 @@ public class ProjectQuestion extends Question {
               submissionDate, votingEndDate, status, relevanceByLLM, recruiterUsageCount);
     }
 
-    public String getProjectUrl() {
-        return null;
-    }
-
-    /**
-     * Mantido apenas por compatibilidade com o factory existente.
-     * O payload de submissão agora pertence a Answer.
-     */
-    public void assignProjectSubmission(String projectUrl) {
-        // no-op
-    }
-
     @Override
     public QuestionType getQuestionType() {
         return QuestionType.PROJECT;

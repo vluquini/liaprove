@@ -11,7 +11,7 @@ public abstract class Question {
     private UUID authorId;
     private String title;
     private String description;
-    private Set<KnowledgeArea> knowledgeAreas = new HashSet<>();
+    private Set<KnowledgeArea> knowledgeAreas = Set.of();
     private DifficultyLevel difficultyByCommunity;
     private RelevanceLevel relevanceByCommunity;
     private LocalDateTime submissionDate;
@@ -30,14 +30,14 @@ public abstract class Question {
         this.authorId = authorId;
         this.title = title;
         this.description = description;
-        this.knowledgeAreas = knowledgeAreas;
+        setKnowledgeAreas(knowledgeAreas);
         this.difficultyByCommunity = difficultyByCommunity;
         this.relevanceByCommunity = relevanceByCommunity;
         this.submissionDate = submissionDate;
         this.votingEndDate = votingEndDate;
         this.status = status;
         this.relevanceByLLM = relevanceByLLM;
-        this.recruiterUsageCount = recruiterUsageCount;
+        setRecruiterUsageCount(recruiterUsageCount);
     }
 
     public UUID getId() {
@@ -77,7 +77,13 @@ public abstract class Question {
     }
 
     public void setKnowledgeAreas(Set<KnowledgeArea> knowledgeAreas) {
-        this.knowledgeAreas = knowledgeAreas;
+        if (knowledgeAreas == null || knowledgeAreas.isEmpty()) {
+            throw new IllegalArgumentException("Knowledge areas must not be null or empty.");
+        }
+        if (knowledgeAreas.stream().anyMatch(Objects::isNull)) {
+            throw new IllegalArgumentException("Knowledge areas must not contain null values.");
+        }
+        this.knowledgeAreas = Set.copyOf(knowledgeAreas);
     }
 
     public DifficultyLevel getDifficultyByCommunity() {
@@ -139,6 +145,9 @@ public abstract class Question {
     }
 
     public void setRecruiterUsageCount(int recruiterUsageCount) {
+        if (recruiterUsageCount < 0) {
+            throw new IllegalArgumentException("Recruiter usage count must not be negative.");
+        }
         this.recruiterUsageCount = recruiterUsageCount;
     }
 

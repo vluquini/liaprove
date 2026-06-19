@@ -44,9 +44,6 @@ public class DefaultQuestionFactory implements QuestionFactory {
 
         initCommonFields(question, dto);
 
-        // specific field of project questions
-        question.assignProjectSubmission(null);
-
         return question;
     }
 

@@ -21,4 +21,29 @@ class OpenQuestionTest {
 
         assertEquals(OpenQuestionVisibility.PRIVATE, question.getVisibility());
     }
+
+    @Test
+    void shouldDefaultVisibilityToPrivateInNoArgsConstructor() {
+        OpenQuestion question = new OpenQuestion();
+
+        assertEquals(OpenQuestionVisibility.PRIVATE, question.getVisibility());
+    }
+
+    @Test
+    void shouldDefaultVisibilityToPrivateWhenSetterReceivesNull() {
+        OpenQuestion question = new OpenQuestion("Use the rubric below.", OpenQuestionVisibility.SHARED);
+
+        question.setVisibility(null);
+
+        assertEquals(OpenQuestionVisibility.PRIVATE, question.getVisibility());
+    }
+
+    @Test
+    void shouldUpdateGuideline() {
+        OpenQuestion question = new OpenQuestion("Use the rubric below.", OpenQuestionVisibility.PRIVATE);
+
+        question.setGuideline("Use the updated rubric.");
+
+        assertEquals("Use the updated rubric.", question.getGuideline());
+    }
 }
