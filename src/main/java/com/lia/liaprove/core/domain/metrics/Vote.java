@@ -71,6 +71,7 @@ public class Vote {
     }
 
     public void setVoteType(VoteType voteType) {
+        Objects.requireNonNull(voteType, "voteType cannot be null");
         if (this.voteType != voteType) {
             this.voteType = voteType;
             touchUpdatedAt();
