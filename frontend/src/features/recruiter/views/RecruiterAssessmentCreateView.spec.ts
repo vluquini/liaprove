@@ -11,6 +11,7 @@ import { writeStoredSession } from '@/shared/utils/session'
 import RecruiterAssessmentCreateView from './RecruiterAssessmentCreateView.vue'
 
 const LAST_JOB_ANALYSIS_KEY = 'liaprove:recruiter:last-job-analysis'
+const FUTURE_EXPIRATION_DATE = '2099-06-01T12:00'
 
 function makeRouter() {
   return createRouter({
@@ -47,7 +48,7 @@ async function mountCreateView() {
 async function fillValidAssessmentData(wrapper: VueWrapper) {
   await wrapper.get('[data-test="assessment-title"]').setValue('Java Backend')
   await wrapper.get('[data-test="assessment-description"]').setValue('Avaliacao para backend Java e Spring')
-  await wrapper.get('[data-test="assessment-expiration"]').setValue('2026-06-01T12:00')
+  await wrapper.get('[data-test="assessment-expiration"]').setValue(FUTURE_EXPIRATION_DATE)
   await wrapper.get('[data-test="assessment-max-attempts"]').setValue('2')
   await wrapper.get('[data-test="assessment-timer"]').setValue('45')
   await wrapper.get('[data-test="weight-hard"]').setValue('60')
@@ -228,7 +229,7 @@ describe('RecruiterAssessmentCreateView', () => {
       title: 'Java Backend',
       description: 'Avaliacao para backend Java e Spring',
       questionIds: ['question-1'],
-      expirationDate: '2026-06-01T12:00',
+      expirationDate: FUTURE_EXPIRATION_DATE,
       maxAttempts: 2,
       evaluationTimerMinutes: 45,
       hardSkillsWeight: 60,
