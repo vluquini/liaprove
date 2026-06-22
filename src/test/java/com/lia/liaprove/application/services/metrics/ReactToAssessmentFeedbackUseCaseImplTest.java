@@ -66,7 +66,7 @@ class ReactToAssessmentFeedbackUseCaseImplTest {
         UserProfessional author = professional(UUID.randomUUID(), "Author");
         UserProfessional reactor = professional(UUID.randomUUID(), "Reactor");
         FeedbackAssessment feedback = feedback(author);
-        feedback.manageReaction(reactor, ReactionType.LIKE);
+        feedback.react(reactor, ReactionType.LIKE);
         when(userGateway.findById(reactor.getId())).thenReturn(Optional.of(reactor));
         when(feedbackGateway.findFeedbackAssessmentById(feedback.getId())).thenReturn(Optional.of(feedback));
 
@@ -88,7 +88,7 @@ class ReactToAssessmentFeedbackUseCaseImplTest {
         UserProfessional author = professional(UUID.randomUUID(), "Author");
         UserProfessional reactor = professional(UUID.randomUUID(), "Reactor");
         FeedbackAssessment feedback = feedback(author);
-        feedback.manageReaction(reactor, ReactionType.LIKE);
+        feedback.react(reactor, ReactionType.LIKE);
         when(userGateway.findById(reactor.getId())).thenReturn(Optional.of(reactor));
         when(feedbackGateway.findFeedbackAssessmentById(feedback.getId())).thenReturn(Optional.of(feedback));
 

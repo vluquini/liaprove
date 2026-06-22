@@ -34,7 +34,7 @@ public class ReactToAssessmentFeedbackUseCaseImpl implements ReactToAssessmentFe
             throw new AuthorizationException("Users cannot react to their own feedback.");
         }
 
-        feedback.manageReaction(user, reactionType);
+        feedback.react(user, reactionType);
 
         feedbackGateway.saveAssessmentFeedback(feedback);
     }

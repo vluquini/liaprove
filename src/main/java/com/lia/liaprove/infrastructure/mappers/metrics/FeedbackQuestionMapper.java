@@ -27,7 +27,6 @@ public interface FeedbackQuestionMapper {
     @Mapping(target = "question", ignore = true)
     FeedbackQuestionEntity toEntity(FeedbackQuestion domain);
 
-    @Mapping(target = "reactionsByUser", ignore = true)
     @Mapping(target = "reactions", ignore = true)
     @Mapping(target = "question", ignore = true)
     FeedbackQuestion toDomain(FeedbackQuestionEntity entity);

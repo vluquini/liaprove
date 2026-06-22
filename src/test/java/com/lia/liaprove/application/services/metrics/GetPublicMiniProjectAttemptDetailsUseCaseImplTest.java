@@ -9,7 +9,7 @@ import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
 import com.lia.liaprove.core.domain.assessment.SystemAssessment;
 import com.lia.liaprove.core.domain.metrics.AssessmentAttemptVote;
 import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
-import com.lia.liaprove.core.domain.metrics.FeedbackAssessmentReaction;
+import com.lia.liaprove.core.domain.metrics.FeedbackReaction;
 import com.lia.liaprove.core.domain.metrics.ReactionType;
 import com.lia.liaprove.core.domain.metrics.VoteType;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
@@ -106,7 +106,7 @@ class GetPublicMiniProjectAttemptDetailsUseCaseImplTest {
         UserProfessional reviewer = professional(UUID.randomUUID(), "Reviewer");
         UserProfessional reactor = professional(UUID.randomUUID(), "Reactor");
         FeedbackAssessment feedback = feedback(reviewer, attempt, "Good implementation.");
-        feedback.manageReaction(reactor, ReactionType.LIKE);
+        feedback.react(reactor, ReactionType.LIKE);
 
         when(assessmentAttemptGateway.findPublicSystemProjectAttemptDetailsExcludingUser(attemptId, currentUserId))
                 .thenReturn(Optional.of(attempt));
@@ -135,7 +135,7 @@ class GetPublicMiniProjectAttemptDetailsUseCaseImplTest {
         assertThat(details.feedbacks()).containsExactly(feedback);
         assertThat(details.feedbacks().getFirst().getReactions()).hasSize(1);
         assertThat(details.feedbacks().getFirst().getReactions().getFirst())
-                .isInstanceOf(FeedbackAssessmentReaction.class);
+                .isInstanceOf(FeedbackReaction.class);
     }
 
     @Test

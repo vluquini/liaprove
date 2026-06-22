@@ -11,7 +11,7 @@ import com.lia.liaprove.core.usecases.metrics.SubmitFeedbackOnQuestionUseCase;
 import com.lia.liaprove.core.usecases.metrics.UpdateFeedbackCommentUseCase;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
-import com.lia.liaprove.core.domain.metrics.FeedbackAssessmentReaction;
+import com.lia.liaprove.core.domain.metrics.FeedbackReaction;
 import com.lia.liaprove.core.domain.question.ProjectQuestion;
 import com.lia.liaprove.application.services.metrics.PublicMiniProjectAttemptDetails;
 import com.lia.liaprove.infrastructure.dtos.metrics.CastVoteRequest;
@@ -230,7 +230,7 @@ public class MetricsController {
     }
 
     private FeedbackAssessmentReactionResponse toFeedbackAssessmentReactionResponse(
-            FeedbackAssessmentReaction reaction) {
+            FeedbackReaction reaction) {
         return new FeedbackAssessmentReactionResponse(
                 reaction.getId(),
                 reaction.getUser() != null ? reaction.getUser().getId() : null,

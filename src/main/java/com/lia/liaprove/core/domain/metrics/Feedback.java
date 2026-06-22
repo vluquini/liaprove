@@ -3,6 +3,9 @@ package com.lia.liaprove.core.domain.metrics;
 import com.lia.liaprove.core.domain.user.User;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -18,6 +21,7 @@ public abstract class Feedback {
     private LocalDateTime submissionDate;
     private LocalDateTime updatedAt;
     private boolean visible;
+    private Map<UUID, FeedbackReaction> reactionsByUser = new LinkedHashMap<>();
 
     public Feedback() {}
 
@@ -122,6 +126,45 @@ public abstract class Feedback {
             this.visible = true;
             touchUpdatedAt();
         }
+    }
+
+    public List<FeedbackReaction> getReactions() {
+        return List.copyOf(reactionsByUser.values());
+    }
+
+    public void setReactions(List<FeedbackReaction> reactions) {
+        if (!this.reactionsByUser.isEmpty() || reactions == null) {
+            return;
+        }
+        for (FeedbackReaction reaction : reactions) {
+            if (reaction != null && reaction.getUser() != null && reaction.getUser().getId() != null) {
+                reaction.setFeedback(this);
+                this.reactionsByUser.put(reaction.getUser().getId(), reaction);
+            }
+        }
+    }
+
+    public boolean react(User user, ReactionType type) {
+        Objects.requireNonNull(user, "user");
+        Objects.requireNonNull(type, "type");
+        UUID userId = Objects.requireNonNull(user.getId(), "user id");
+
+        FeedbackReaction existing = reactionsByUser.get(userId);
+        if (existing == null) {
+            FeedbackReaction reaction = new FeedbackReaction(user, this, type);
+            reactionsByUser.put(userId, reaction);
+            touchUpdatedAt();
+            return true;
+        }
+        if (existing.getType() == type) {
+            reactionsByUser.remove(userId);
+            touchUpdatedAt();
+            return true;
+        }
+
+        existing.setType(type);
+        touchUpdatedAt();
+        return true;
     }
 
     /**

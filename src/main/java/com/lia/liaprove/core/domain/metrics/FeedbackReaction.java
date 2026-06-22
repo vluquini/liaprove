@@ -13,6 +13,7 @@ import java.util.UUID;
 public class FeedbackReaction {
     private UUID id;
     private User user;
+    private Feedback feedback;
     private ReactionType type;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -24,6 +25,14 @@ public class FeedbackReaction {
 
     public FeedbackReaction(User user, ReactionType type) {
         this.user = Objects.requireNonNull(user, "user");
+        this.type = Objects.requireNonNull(type, "type");
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = this.createdAt;
+    }
+
+    public FeedbackReaction(User user, Feedback feedback, ReactionType type) {
+        this.user = Objects.requireNonNull(user, "user");
+        this.feedback = Objects.requireNonNull(feedback, "feedback");
         this.type = Objects.requireNonNull(type, "type");
         this.createdAt = LocalDateTime.now();
         this.updatedAt = this.createdAt;
@@ -47,6 +56,15 @@ public class FeedbackReaction {
         this.user = Objects.requireNonNull(user, "User cannot be null when setting reaction user.");
     }
 
+    public Feedback getFeedback() { return feedback; }
+
+    public void setFeedback(Feedback feedback) {
+        if (this.feedback != null && this.feedback != feedback) {
+            throw new IllegalStateException("Reaction feedback has already been set and cannot be changed.");
+        }
+        this.feedback = Objects.requireNonNull(feedback, "Feedback cannot be null when setting reaction feedback.");
+    }
+
     public ReactionType getType() { return type; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
@@ -61,10 +79,10 @@ public class FeedbackReaction {
     public LocalDateTime getUpdatedAt() { return updatedAt; }
 
     public void setType(ReactionType newType) {
-        if (newType == null) return;
+        Objects.requireNonNull(newType, "type");
         if (this.type != newType) {
             this.type = newType;
-        this.updatedAt = LocalDateTime.now();
+            this.updatedAt = LocalDateTime.now();
         }
     }
 
@@ -73,7 +91,7 @@ public class FeedbackReaction {
         if (this == o) return true;
         if (!(o instanceof FeedbackReaction)) return false;
         FeedbackReaction that = (FeedbackReaction) o;
-        return id.equals(that.id);
+        return Objects.equals(id, that.id);
     }
 
     @Override

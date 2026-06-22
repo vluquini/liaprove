@@ -1,7 +1,7 @@
 package com.lia.liaprove.infrastructure.mappers.metrics;
 
 import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
-import com.lia.liaprove.core.domain.metrics.FeedbackAssessmentReaction;
+import com.lia.liaprove.core.domain.metrics.FeedbackReaction;
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackAssessmentEntity;
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackAssessmentReactionEntity;
 import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
@@ -50,11 +50,11 @@ public interface FeedbackAssessmentMapper {
         }
     }
 
-    List<FeedbackAssessmentReaction> reactionEntityListToDomainList(List<FeedbackAssessmentReactionEntity> entities);
+    List<FeedbackReaction> reactionEntityListToDomainList(List<FeedbackAssessmentReactionEntity> entities);
 
     @Mapping(target = "feedbackAssessment", ignore = true)
-    FeedbackAssessmentReactionEntity reactionToEntity(FeedbackAssessmentReaction domain);
+    FeedbackAssessmentReactionEntity reactionToEntity(FeedbackReaction domain);
 
-    FeedbackAssessmentReaction reactionToDomain(FeedbackAssessmentReactionEntity entity);
+    FeedbackReaction reactionToDomain(FeedbackAssessmentReactionEntity entity);
 }
 
