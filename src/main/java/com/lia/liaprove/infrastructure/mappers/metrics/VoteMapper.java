@@ -1,6 +1,6 @@
 package com.lia.liaprove.infrastructure.mappers.metrics;
 
-import com.lia.liaprove.core.domain.metrics.Vote;
+import com.lia.liaprove.core.domain.metrics.QuestionVote;
 import com.lia.liaprove.infrastructure.dtos.metrics.VoteResponseDto;
 import com.lia.liaprove.infrastructure.entities.metrics.VoteEntity;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
@@ -13,12 +13,12 @@ public interface VoteMapper {
 
     @Mapping(source = "user", target = "user")
     @Mapping(source = "question", target = "question")
-    VoteEntity toEntity(Vote domain);
+    VoteEntity toEntity(QuestionVote domain);
 
     @Mapping(source = "user", target = "user")
     @Mapping(source = "question", target = "question")
-    Vote toDomain(VoteEntity entity);
+    QuestionVote toDomain(VoteEntity entity);
 
     @Mapping(source = "user", target = "user") // This will use UserMapper to convert User -> UserResponseDto
-    VoteResponseDto toResponseDto(Vote vote);
+    VoteResponseDto toResponseDto(QuestionVote questionVote);
 }

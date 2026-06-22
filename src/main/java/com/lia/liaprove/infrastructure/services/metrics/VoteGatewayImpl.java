@@ -1,7 +1,7 @@
 package com.lia.liaprove.infrastructure.services.metrics;
 
 import com.lia.liaprove.application.gateways.metrics.VoteGateway;
-import com.lia.liaprove.core.domain.metrics.Vote;
+import com.lia.liaprove.core.domain.metrics.QuestionVote;
 import com.lia.liaprove.infrastructure.entities.metrics.VoteEntity;
 import com.lia.liaprove.infrastructure.mappers.metrics.VoteMapper;
 import com.lia.liaprove.infrastructure.repositories.metrics.VoteJpaRepository;
@@ -23,27 +23,27 @@ public class VoteGatewayImpl implements VoteGateway {
     }
 
     @Override
-    public void save(Vote vote) {
-        VoteEntity entity = voteMapper.toEntity(vote);
+    public void save(QuestionVote questionVote) {
+        VoteEntity entity = voteMapper.toEntity(questionVote);
         voteJpaRepository.save(entity);
         // Update the domain object's ID with the generated ID from the entity
-        vote.setId(entity.getId());
+        questionVote.setId(entity.getId());
     }
 
     @Override
-    public List<Vote> findByUserIdAndQuestionId(UUID userId, UUID questionId) {
+    public List<QuestionVote> findByUserIdAndQuestionId(UUID userId, UUID questionId) {
         return voteJpaRepository.findByUserIdAndQuestionId(userId, questionId).stream()
                 .map(voteMapper::toDomain)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void delete(Vote vote) {
-        voteJpaRepository.deleteById(vote.getId());
+    public void delete(QuestionVote questionVote) {
+        voteJpaRepository.deleteById(questionVote.getId());
     }
 
     @Override
-    public List<Vote> findVotesByQuestionId(UUID questionId) {
+    public List<QuestionVote> findVotesByQuestionId(UUID questionId) {
         List<VoteEntity> voteEntities = voteJpaRepository.findWithDetailsByQuestionId(questionId);
         return voteEntities.stream()
                 .map(voteMapper::toDomain)

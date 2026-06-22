@@ -1,7 +1,7 @@
 package com.lia.liaprove.infrastructure.controllers.metrics;
 
 import com.lia.liaprove.core.domain.metrics.FeedbackQuestion;
-import com.lia.liaprove.core.domain.metrics.Vote;
+import com.lia.liaprove.core.domain.metrics.QuestionVote;
 import com.lia.liaprove.core.usecases.metrics.ListFeedbacksForQuestionUseCase;
 import com.lia.liaprove.core.usecases.metrics.ListVotesForQuestionUseCase;
 import com.lia.liaprove.infrastructure.dtos.metrics.FeedbackQuestionResponse;
@@ -33,8 +33,8 @@ public class AdminMetricsController {
     @GetMapping("/{questionId}/votes")
     public ResponseEntity<List<VoteResponseDto>> listVotesForQuestion(@PathVariable UUID questionId) {
         // The use case already handles validation for question existence
-        List<Vote> votes = listVotesForQuestionUseCase.listVotesForQuestion(questionId);
-        List<VoteResponseDto> response = votes.stream()
+        List<QuestionVote> questionVotes = listVotesForQuestionUseCase.listVotesForQuestion(questionId);
+        List<VoteResponseDto> response = questionVotes.stream()
                 .map(voteMapper::toResponseDto)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(response);

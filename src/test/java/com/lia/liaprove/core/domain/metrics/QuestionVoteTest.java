@@ -21,75 +21,75 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-class VoteTest {
+class QuestionVoteTest {
 
     @Test
     void shouldRequireConstructorArguments() {
         User user = user(UUID.randomUUID(), "voter@example.com");
         Question question = question(UUID.randomUUID());
 
-        assertThatThrownBy(() -> new Vote(null, question, VoteType.APPROVE))
+        assertThatThrownBy(() -> new QuestionVote(null, question, VoteType.APPROVE))
                 .isInstanceOf(NullPointerException.class);
-        assertThatThrownBy(() -> new Vote(user, null, VoteType.APPROVE))
+        assertThatThrownBy(() -> new QuestionVote(user, null, VoteType.APPROVE))
                 .isInstanceOf(NullPointerException.class);
-        assertThatThrownBy(() -> new Vote(user, question, null))
+        assertThatThrownBy(() -> new QuestionVote(user, question, null))
                 .isInstanceOf(NullPointerException.class);
     }
 
     @Test
     void shouldInitializeTimestampsOnCreation() {
-        Vote vote = vote();
+        QuestionVote questionVote = vote();
 
-        assertThat(vote.getCreatedAt()).isNotNull();
-        assertThat(vote.getUpdatedAt()).isEqualTo(vote.getCreatedAt());
+        assertThat(questionVote.getCreatedAt()).isNotNull();
+        assertThat(questionVote.getUpdatedAt()).isEqualTo(questionVote.getCreatedAt());
     }
 
     @Test
     void shouldPreventChangingIdentityFieldsAfterTheyAreDefined() {
-        Vote vote = vote();
-        vote.setId(UUID.randomUUID());
-        LocalDateTime createdAt = vote.getCreatedAt();
+        QuestionVote questionVote = vote();
+        questionVote.setId(UUID.randomUUID());
+        LocalDateTime createdAt = questionVote.getCreatedAt();
 
-        assertThatThrownBy(() -> vote.setId(UUID.randomUUID()))
+        assertThatThrownBy(() -> questionVote.setId(UUID.randomUUID()))
                 .isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> vote.setUser(user(UUID.randomUUID(), "other@example.com")))
+        assertThatThrownBy(() -> questionVote.setUser(user(UUID.randomUUID(), "other@example.com")))
                 .isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> vote.setQuestion(question(UUID.randomUUID())))
+        assertThatThrownBy(() -> questionVote.setQuestion(question(UUID.randomUUID())))
                 .isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> vote.setCreatedAt(createdAt.plusDays(1)))
+        assertThatThrownBy(() -> questionVote.setCreatedAt(createdAt.plusDays(1)))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void shouldRejectNullVoteType() {
-        Vote vote = vote();
+        QuestionVote questionVote = vote();
 
-        assertThatThrownBy(() -> vote.setVoteType(null))
+        assertThatThrownBy(() -> questionVote.setVoteType(null))
                 .isInstanceOf(NullPointerException.class);
     }
 
     @Test
     void shouldUpdateTimestampWhenVoteTypeChanges() {
-        Vote vote = vote();
+        QuestionVote questionVote = vote();
         LocalDateTime baseline = LocalDateTime.of(2026, 1, 1, 10, 0);
-        vote.setUpdatedAt(baseline);
+        questionVote.setUpdatedAt(baseline);
 
-        vote.setVoteType(VoteType.REJECT);
+        questionVote.setVoteType(VoteType.REJECT);
 
-        assertThat(vote.getVoteType()).isEqualTo(VoteType.REJECT);
-        assertThat(vote.getUpdatedAt()).isAfter(baseline);
+        assertThat(questionVote.getVoteType()).isEqualTo(VoteType.REJECT);
+        assertThat(questionVote.getUpdatedAt()).isAfter(baseline);
     }
 
     @Test
     void shouldCompareByIdSafelyWhenIdsAreNull() {
-        Vote first = new Vote();
-        Vote second = new Vote();
+        QuestionVote first = new QuestionVote();
+        QuestionVote second = new QuestionVote();
 
         assertThatCode(() -> first.equals(second)).doesNotThrowAnyException();
     }
 
-    private static Vote vote() {
-        return new Vote(
+    private static QuestionVote vote() {
+        return new QuestionVote(
                 user(UUID.randomUUID(), "voter@example.com"),
                 question(UUID.randomUUID()),
                 VoteType.APPROVE

@@ -2,7 +2,7 @@ package com.lia.liaprove.application.services.metrics;
 
 import com.lia.liaprove.application.gateways.metrics.VoteGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
-import com.lia.liaprove.core.domain.metrics.Vote;
+import com.lia.liaprove.core.domain.metrics.QuestionVote;
 import com.lia.liaprove.core.exceptions.question.QuestionNotFoundException;
 import com.lia.liaprove.core.usecases.metrics.ListVotesForQuestionUseCase;
 
@@ -20,7 +20,7 @@ public class ListVotesForQuestionUseCaseImpl implements ListVotesForQuestionUseC
     }
 
     @Override
-    public List<Vote> listVotesForQuestion(UUID questionId) {
+    public List<QuestionVote> listVotesForQuestion(UUID questionId) {
         // First, ensure the question exists.
         questionGateway.findById(questionId)
                 .orElseThrow(() -> new QuestionNotFoundException("Question not found with id: " + questionId));

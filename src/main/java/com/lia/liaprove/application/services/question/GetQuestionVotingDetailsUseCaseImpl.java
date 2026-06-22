@@ -5,7 +5,7 @@ import com.lia.liaprove.application.gateways.metrics.VoteGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.core.domain.metrics.FeedbackQuestion;
-import com.lia.liaprove.core.domain.metrics.Vote;
+import com.lia.liaprove.core.domain.metrics.QuestionVote;
 import com.lia.liaprove.core.domain.metrics.VoteType;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.user.User;
@@ -47,11 +47,11 @@ public class GetQuestionVotingDetailsUseCaseImpl implements GetQuestionVotingDet
                 .orElseThrow(() -> new IllegalStateException("Question with id " + question.getId() + " has an invalid authorId."));
 
 
-        List<Vote> votes = voteGateway.findVotesByQuestionId(questionId);
+        List<QuestionVote> questionVotes = voteGateway.findVotesByQuestionId(questionId);
         List<FeedbackQuestion> feedbacks = feedbackGateway.findFeedbacksByQuestionId(questionId);
 
-        long approveVotes = votes.stream().filter(vote -> vote.getVoteType() == VoteType.APPROVE).count();
-        long rejectVotes = votes.stream().filter(vote -> vote.getVoteType() == VoteType.REJECT).count();
+        long approveVotes = questionVotes.stream().filter(vote -> vote.getVoteType() == VoteType.APPROVE).count();
+        long rejectVotes = questionVotes.stream().filter(vote -> vote.getVoteType() == VoteType.REJECT).count();
 
         QuestionVotingDetails details = new QuestionVotingDetails(question, author, approveVotes, rejectVotes, feedbacks);
         return Optional.of(details);

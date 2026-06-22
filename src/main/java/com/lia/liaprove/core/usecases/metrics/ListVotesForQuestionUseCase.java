@@ -1,6 +1,6 @@
 package com.lia.liaprove.core.usecases.metrics;
 
-import com.lia.liaprove.core.domain.metrics.Vote;
+import com.lia.liaprove.core.domain.metrics.QuestionVote;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,5 +14,5 @@ public interface ListVotesForQuestionUseCase {
      * @param questionId O ID da questão para a qual os votos serão listados.
      * @return Uma lista de objetos Vote. Pode ser vazia se não houver votos.
      */
-    List<Vote> listVotesForQuestion(UUID questionId);
+    List<QuestionVote> listVotesForQuestion(UUID questionId);
 }

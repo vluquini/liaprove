@@ -13,7 +13,7 @@ import java.util.UUID;
  * a rede Bayesiana para determinar a aprovação de uma questão.
  * Um voto é distinto de um feedback textual.
  */
-public class Vote {
+public class QuestionVote {
     private UUID id;
     private User user;
     private Question question;
@@ -21,11 +21,11 @@ public class Vote {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public Vote() {
+    public QuestionVote() {
         // Required for frameworks like JPA and MapStruct
     }
 
-    public Vote(User user, Question question, VoteType voteType) {
+    public QuestionVote(User user, Question question, VoteType voteType) {
         this.user = Objects.requireNonNull(user, "user cannot be null");
         this.question = Objects.requireNonNull(question, "question cannot be null");
         this.voteType = Objects.requireNonNull(voteType, "voteType cannot be null");
@@ -105,8 +105,8 @@ public class Vote {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Vote vote = (Vote) o;
-        return Objects.equals(id, vote.id);
+        QuestionVote questionVote = (QuestionVote) o;
+        return Objects.equals(id, questionVote.id);
     }
 
     @Override

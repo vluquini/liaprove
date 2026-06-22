@@ -3,7 +3,7 @@ package com.lia.liaprove.application.services.metrics;
 import com.lia.liaprove.application.gateways.metrics.VoteGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
 import com.lia.liaprove.application.gateways.user.UserGateway;
-import com.lia.liaprove.core.domain.metrics.Vote;
+import com.lia.liaprove.core.domain.metrics.QuestionVote;
 import com.lia.liaprove.core.domain.metrics.VoteType;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.user.User;
@@ -35,28 +35,28 @@ public class CastVoteUseCaseImpl implements CastVoteUseCase {
         Question question = questionGateway.findById(questionId)
                 .orElseThrow(() -> new QuestionNotFoundException("Question not found with id: " + questionId));
 
-        List<Vote> existingVotes = voteGateway.findByUserIdAndQuestionId(userId, questionId);
-        if (existingVotes.isEmpty()) {
-            voteGateway.save(new Vote(user, question, voteType));
+        List<QuestionVote> existingQuestionVotes = voteGateway.findByUserIdAndQuestionId(userId, questionId);
+        if (existingQuestionVotes.isEmpty()) {
+            voteGateway.save(new QuestionVote(user, question, voteType));
             return;
         }
 
-        handleExistingVotes(existingVotes, user, question, voteType);
+        handleExistingVotes(existingQuestionVotes, user, question, voteType);
     }
 
-    private void handleExistingVotes(List<Vote> existingVotes, User user, Question question, VoteType requestedVoteType) {
-        Vote latestVote = existingVotes.stream()
-                .max(Comparator.comparing(Vote::getCreatedAt))
+    private void handleExistingVotes(List<QuestionVote> existingQuestionVotes, User user, Question question, VoteType requestedVoteType) {
+        QuestionVote latestQuestionVote = existingQuestionVotes.stream()
+                .max(Comparator.comparing(QuestionVote::getCreatedAt))
                 .orElseThrow();
 
-        for (Vote existingVote : existingVotes) {
-            voteGateway.delete(existingVote);
+        for (QuestionVote existingQuestionVote : existingQuestionVotes) {
+            voteGateway.delete(existingQuestionVote);
         }
 
-        if (latestVote.getVoteType() == requestedVoteType) {
+        if (latestQuestionVote.getVoteType() == requestedVoteType) {
             return;
         }
 
-        voteGateway.save(new Vote(user, question, requestedVoteType));
+        voteGateway.save(new QuestionVote(user, question, requestedVoteType));
     }
 }

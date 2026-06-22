@@ -259,13 +259,13 @@ onMounted(loadQuestion)
             <template #content>
               <p v-if="votes.length === 0" class="text-[var(--liaprove-muted)]">Nenhum voto registrado.</p>
               <div v-else class="space-y-3">
-                <div v-for="vote in votes" :key="vote.id" class="rounded border border-[var(--liaprove-line)] p-3">
+                <div v-for="questionVote in votes" :key="questionVote.id" class="rounded border border-[var(--liaprove-line)] p-3">
                   <div class="flex items-center justify-between gap-3">
                     <div>
-                      <p class="font-semibold text-[var(--liaprove-ink)]">{{ vote.user.name }}</p>
-                      <p class="text-sm text-[var(--liaprove-muted)]">{{ vote.user.email }}</p>
+                      <p class="font-semibold text-[var(--liaprove-ink)]">{{ questionVote.user.name }}</p>
+                      <p class="text-sm text-[var(--liaprove-muted)]">{{ questionVote.user.email }}</p>
                     </div>
-                    <span class="question-meta-tag">{{ vote.voteType }}</span>
+                    <span class="question-meta-tag">{{ questionVote.voteType }}</span>
                   </div>
                 </div>
               </div>
