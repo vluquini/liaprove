@@ -6,6 +6,8 @@ import lombok.Data;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -35,4 +37,13 @@ public abstract class FeedbackEntity {
 
     @Column(nullable = false)
     private boolean visible;
+
+    @OneToMany(mappedBy = "feedback", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OrderColumn(name = "ord_index")
+    private List<FeedbackReactionEntity> reactions = new ArrayList<>();
+
+    public void addReaction(FeedbackReactionEntity reaction) {
+        this.reactions.add(reaction);
+        reaction.setFeedback(this);
+    }
 }

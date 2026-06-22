@@ -5,13 +5,12 @@ import com.lia.liaprove.core.domain.metrics.ReactionType;
 import com.lia.liaprove.infrastructure.dtos.metrics.ReactToFeedbackRequest;
 import com.lia.liaprove.infrastructure.entities.assessment.AssessmentAttemptEntity;
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackAssessmentEntity;
-import com.lia.liaprove.infrastructure.entities.metrics.FeedbackAssessmentReactionEntity;
+import com.lia.liaprove.infrastructure.entities.metrics.FeedbackReactionEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentAttemptJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentAttemptVoteJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.assessment.AssessmentJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.metrics.FeedbackAssessmentJpaRepository;
-import com.lia.liaprove.infrastructure.repositories.metrics.FeedbackAssessmentReactionJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.metrics.FeedbackQuestionJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.metrics.VoteJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.question.QuestionJpaRepository;
@@ -72,14 +71,10 @@ class ReactToAssessmentFeedbackEndpointIntegrationTest {
     private FeedbackAssessmentJpaRepository feedbackAssessmentJpaRepository;
 
     @Autowired
-    private FeedbackAssessmentReactionJpaRepository feedbackAssessmentReactionJpaRepository;
-
-    @Autowired
     private FeedbackQuestionJpaRepository feedbackQuestionJpaRepository;
 
     @AfterEach
     void tearDown() {
-        feedbackAssessmentReactionJpaRepository.deleteAll();
         MetricsControllerIntegrationTestSupport.deleteMetricsData(
                 assessmentAttemptVoteJpaRepository,
                 assessmentAttemptJpaRepository,
@@ -108,8 +103,7 @@ class ReactToAssessmentFeedbackEndpointIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        List<FeedbackAssessmentReactionEntity> reactions =
-                feedbackAssessmentReactionJpaRepository.findByFeedbackAssessmentId(feedback.getId());
+        List<FeedbackReactionEntity> reactions = findReactionsByFeedbackId(feedback.getId());
         assertThat(reactions).hasSize(1);
         assertThat(reactions.getFirst().getUser().getId()).isEqualTo(reactor.getId());
         assertThat(reactions.getFirst().getType()).isEqualTo(ReactionType.LIKE);
@@ -137,7 +131,7 @@ class ReactToAssessmentFeedbackEndpointIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
-        assertThat(feedbackAssessmentReactionJpaRepository.findByFeedbackAssessmentId(feedback.getId())).isEmpty();
+        assertThat(findReactionsByFeedbackId(feedback.getId())).isEmpty();
     }
 
     @Test
@@ -191,6 +185,12 @@ class ReactToAssessmentFeedbackEndpointIntegrationTest {
         feedback.setSubmissionDate(LocalDateTime.now().minusMinutes(10));
         feedback.setVisible(true);
         return feedbackAssessmentJpaRepository.save(feedback);
+    }
+
+    private List<FeedbackReactionEntity> findReactionsByFeedbackId(UUID feedbackId) {
+        return feedbackAssessmentJpaRepository.findByIdWithDetails(feedbackId)
+                .map(FeedbackAssessmentEntity::getReactions)
+                .orElse(List.of());
     }
 
     private ReactToFeedbackRequest reactionRequest(ReactionType reactionType) {

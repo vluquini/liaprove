@@ -11,6 +11,6 @@ public record FeedbackAssessmentResponse(
         String comment,
         AuthorDto author,
         LocalDateTime submissionDate,
-        List<FeedbackAssessmentReactionResponse> reactions
+        List<FeedbackReactionResponse> reactions
 ) {
 }

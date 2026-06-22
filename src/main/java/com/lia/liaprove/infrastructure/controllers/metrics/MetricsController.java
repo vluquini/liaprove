@@ -15,8 +15,8 @@ import com.lia.liaprove.core.domain.metrics.FeedbackReaction;
 import com.lia.liaprove.core.domain.question.ProjectQuestion;
 import com.lia.liaprove.application.services.metrics.PublicMiniProjectAttemptDetails;
 import com.lia.liaprove.infrastructure.dtos.metrics.CastVoteRequest;
-import com.lia.liaprove.infrastructure.dtos.metrics.FeedbackAssessmentReactionResponse;
 import com.lia.liaprove.infrastructure.dtos.metrics.FeedbackAssessmentResponse;
+import com.lia.liaprove.infrastructure.dtos.metrics.FeedbackReactionResponse;
 import com.lia.liaprove.infrastructure.dtos.metrics.PublicMiniProjectAttemptDetailResponse;
 import com.lia.liaprove.infrastructure.dtos.metrics.PublicMiniProjectAttemptResponse;
 import com.lia.liaprove.infrastructure.dtos.metrics.PublicMiniProjectQuestionResponse;
@@ -224,14 +224,14 @@ public class MetricsController {
                 author,
                 feedback.getSubmissionDate(),
                 feedback.getReactions().stream()
-                        .map(this::toFeedbackAssessmentReactionResponse)
+                        .map(this::toFeedbackReactionResponse)
                         .toList()
         );
     }
 
-    private FeedbackAssessmentReactionResponse toFeedbackAssessmentReactionResponse(
+    private FeedbackReactionResponse toFeedbackReactionResponse(
             FeedbackReaction reaction) {
-        return new FeedbackAssessmentReactionResponse(
+        return new FeedbackReactionResponse(
                 reaction.getId(),
                 reaction.getUser() != null ? reaction.getUser().getId() : null,
                 reaction.getUser() != null ? reaction.getUser().getName() : null,

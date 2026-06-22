@@ -8,9 +8,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @DiscriminatorValue("QUESTION")
 @EqualsAndHashCode(callSuper = true)
@@ -32,19 +29,4 @@ public class FeedbackQuestionEntity extends FeedbackEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "relevance_level")
     private RelevanceLevel relevanceLevel;
-
-    @OneToMany(mappedBy = "feedbackQuestion", cascade = CascadeType.ALL,
-               orphanRemoval = true, fetch = FetchType.LAZY)
-    @OrderColumn(name = "ord_index")
-    private List<FeedbackReactionEntity> reactions = new ArrayList<>();
-
-    public void addReaction(FeedbackReactionEntity reaction) {
-        this.reactions.add(reaction);
-        reaction.setFeedbackQuestion(this);
-    }
-
-    public void removeReaction(FeedbackReactionEntity reaction) {
-        this.reactions.remove(reaction);
-        reaction.setFeedbackQuestion(null);
-    }
 }

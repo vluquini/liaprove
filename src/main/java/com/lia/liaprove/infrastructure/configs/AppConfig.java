@@ -36,6 +36,7 @@ import com.lia.liaprove.core.usecases.user.*;
 import com.lia.liaprove.infrastructure.mappers.metrics.AssessmentAttemptVoteMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackAssessmentMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
+import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackReactionMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.VoteMapper;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
@@ -212,9 +213,17 @@ public class AppConfig {
                                            FeedbackAssessmentJpaRepository feedbackAssessmentJpaRepository, // Added FeedbackAssessmentJpaRepository
                                            FeedbackQuestionMapper feedbackQuestionMapper,
                                            FeedbackAssessmentMapper feedbackAssessmentMapper, // Added FeedbackAssessmentMapper
+                                           FeedbackReactionMapper feedbackReactionMapper,
                                            QuestionMapper questionMapper) {
         // Updated constructor to include new dependencies
-        return new FeedbackGatewayImpl(feedbackQuestionJpaRepository, feedbackAssessmentJpaRepository, feedbackQuestionMapper, feedbackAssessmentMapper, questionMapper);
+        return new FeedbackGatewayImpl(
+                feedbackQuestionJpaRepository,
+                feedbackAssessmentJpaRepository,
+                feedbackQuestionMapper,
+                feedbackAssessmentMapper,
+                feedbackReactionMapper,
+                questionMapper
+        );
     }
 
     @Bean

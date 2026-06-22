@@ -34,6 +34,6 @@ public class FeedbackReactionEntity {
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "feedback_question_id", nullable = false)
-    private FeedbackQuestionEntity feedbackQuestion; // Back-reference to the parent feedback
+    @JoinColumn(name = "feedback_id", nullable = false)
+    private FeedbackEntity feedback;
 }

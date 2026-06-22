@@ -7,6 +7,7 @@ import com.lia.liaprove.infrastructure.entities.metrics.FeedbackAssessmentEntity
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackQuestionEntity;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackAssessmentMapper;
 import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackQuestionMapper;
+import com.lia.liaprove.infrastructure.mappers.metrics.FeedbackReactionMapper;
 import com.lia.liaprove.infrastructure.mappers.question.QuestionMapper;
 import com.lia.liaprove.infrastructure.repositories.metrics.FeedbackAssessmentJpaRepository;
 import com.lia.liaprove.infrastructure.repositories.metrics.FeedbackQuestionJpaRepository;
@@ -26,17 +27,20 @@ public class FeedbackGatewayImpl implements FeedbackGateway {
     private final FeedbackAssessmentJpaRepository feedbackAssessmentJpaRepository;
     private final FeedbackQuestionMapper feedbackQuestionMapper;
     private final FeedbackAssessmentMapper feedbackAssessmentMapper;
+    private final FeedbackReactionMapper feedbackReactionMapper;
     private final QuestionMapper questionMapper;
 
     public FeedbackGatewayImpl(FeedbackQuestionJpaRepository feedbackQuestionJpaRepository,
                                FeedbackAssessmentJpaRepository feedbackAssessmentJpaRepository,
                                FeedbackQuestionMapper feedbackQuestionMapper,
                                FeedbackAssessmentMapper feedbackAssessmentMapper,
+                               FeedbackReactionMapper feedbackReactionMapper,
                                QuestionMapper questionMapper) {
         this.feedbackQuestionJpaRepository = feedbackQuestionJpaRepository;
         this.feedbackAssessmentJpaRepository = feedbackAssessmentJpaRepository;
         this.feedbackQuestionMapper = feedbackQuestionMapper;
         this.feedbackAssessmentMapper = feedbackAssessmentMapper;
+        this.feedbackReactionMapper = feedbackReactionMapper;
         this.questionMapper = questionMapper;
     }
 
@@ -53,12 +57,12 @@ public class FeedbackGatewayImpl implements FeedbackGateway {
             managedEntity.setUpdatedAt(feedback.getUpdatedAt());
             managedEntity.getReactions().clear();
             feedback.getReactions().stream()
-                    .map(feedbackAssessmentMapper::reactionToEntity)
+                    .map(feedbackReactionMapper::toEntity)
                     .forEach(managedEntity::addReaction);
         } else {
             managedEntity = feedbackAssessmentMapper.toEntity(feedback);
             feedback.getReactions().stream()
-                    .map(feedbackAssessmentMapper::reactionToEntity)
+                    .map(feedbackReactionMapper::toEntity)
                     .forEach(managedEntity::addReaction);
         }
 
@@ -119,7 +123,7 @@ public class FeedbackGatewayImpl implements FeedbackGateway {
             // Clear existing reactions and add new ones derived from the domain object.
             managedEntity.getReactions().clear();
             feedback.getReactions().stream()
-                    .map(feedbackQuestionMapper::reactionToEntity) // Converts domain Reaction to ReactionEntity
+                    .map(feedbackReactionMapper::toEntity)
                     .forEach(managedEntity::addReaction);
 
         } else {
@@ -129,7 +133,7 @@ public class FeedbackGatewayImpl implements FeedbackGateway {
 
             // Map and add reactions for the new entity.
             feedback.getReactions().stream()
-                    .map(feedbackQuestionMapper::reactionToEntity)
+                    .map(feedbackReactionMapper::toEntity)
                     .forEach(managedEntity::addReaction);
         }
 

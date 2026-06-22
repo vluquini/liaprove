@@ -1,22 +1,16 @@
 package com.lia.liaprove.infrastructure.mappers.metrics;
 
 import com.lia.liaprove.core.domain.metrics.FeedbackAssessment;
-import com.lia.liaprove.core.domain.metrics.FeedbackReaction;
 import com.lia.liaprove.infrastructure.entities.metrics.FeedbackAssessmentEntity;
-import com.lia.liaprove.infrastructure.entities.metrics.FeedbackAssessmentReactionEntity;
 import com.lia.liaprove.infrastructure.mappers.user.UserMapper;
-import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
-
-import java.util.List;
 
 @Mapper(
         componentModel = "spring",
         unmappedTargetPolicy = ReportingPolicy.IGNORE,
-        uses = {UserMapper.class}
+        uses = {UserMapper.class, FeedbackReactionMapper.class}
 )
 public interface FeedbackAssessmentMapper {
 
@@ -40,21 +34,6 @@ public interface FeedbackAssessmentMapper {
      * @return O objeto FeedbackAssessment de domínio correspondente.
      */
     @Mapping(target = "assessmentAttempt", ignore = true)
-    @Mapping(target = "reactions", ignore = true)
     FeedbackAssessment toDomain(FeedbackAssessmentEntity entity);
-
-    @AfterMapping
-    default void populateReactions(FeedbackAssessmentEntity entity, @MappingTarget FeedbackAssessment domain) {
-        if (entity != null && entity.getReactions() != null) {
-            domain.setReactions(reactionEntityListToDomainList(entity.getReactions()));
-        }
-    }
-
-    List<FeedbackReaction> reactionEntityListToDomainList(List<FeedbackAssessmentReactionEntity> entities);
-
-    @Mapping(target = "feedbackAssessment", ignore = true)
-    FeedbackAssessmentReactionEntity reactionToEntity(FeedbackReaction domain);
-
-    FeedbackReaction reactionToDomain(FeedbackAssessmentReactionEntity entity);
 }
 
