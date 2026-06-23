@@ -63,7 +63,7 @@ public interface QuestionJpaRepository extends JpaRepository<QuestionEntity, UUI
               AND (
                   :requesterId IS NULL OR NOT EXISTS (
                       SELECT v.id
-                      FROM VoteEntity v
+                      FROM QuestionVoteEntity v
                       WHERE v.question = q
                         AND v.user.id = :requesterId
                   )

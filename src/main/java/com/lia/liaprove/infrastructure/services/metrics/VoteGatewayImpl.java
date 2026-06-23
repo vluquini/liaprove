@@ -2,7 +2,7 @@ package com.lia.liaprove.infrastructure.services.metrics;
 
 import com.lia.liaprove.application.gateways.metrics.VoteGateway;
 import com.lia.liaprove.core.domain.metrics.QuestionVote;
-import com.lia.liaprove.infrastructure.entities.metrics.VoteEntity;
+import com.lia.liaprove.infrastructure.entities.metrics.QuestionVoteEntity;
 import com.lia.liaprove.infrastructure.mappers.metrics.VoteMapper;
 import com.lia.liaprove.infrastructure.repositories.metrics.VoteJpaRepository;
 import org.springframework.stereotype.Service;
@@ -24,7 +24,7 @@ public class VoteGatewayImpl implements VoteGateway {
 
     @Override
     public void save(QuestionVote questionVote) {
-        VoteEntity entity = voteMapper.toEntity(questionVote);
+        QuestionVoteEntity entity = voteMapper.toEntity(questionVote);
         voteJpaRepository.save(entity);
         // Update the domain object's ID with the generated ID from the entity
         questionVote.setId(entity.getId());
@@ -44,7 +44,7 @@ public class VoteGatewayImpl implements VoteGateway {
 
     @Override
     public List<QuestionVote> findVotesByQuestionId(UUID questionId) {
-        List<VoteEntity> voteEntities = voteJpaRepository.findWithDetailsByQuestionId(questionId);
+        List<QuestionVoteEntity> voteEntities = voteJpaRepository.findWithDetailsByQuestionId(questionId);
         return voteEntities.stream()
                 .map(voteMapper::toDomain)
                 .collect(Collectors.toList());

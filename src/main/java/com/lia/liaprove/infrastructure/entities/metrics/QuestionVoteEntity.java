@@ -17,7 +17,7 @@ import java.util.UUID;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VoteEntity {
+public class QuestionVoteEntity {
 
     @Id
     @GeneratedValue

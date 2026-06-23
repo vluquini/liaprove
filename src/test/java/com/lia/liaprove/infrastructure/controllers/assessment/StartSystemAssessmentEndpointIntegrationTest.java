@@ -9,7 +9,7 @@ import com.lia.liaprove.core.domain.question.KnowledgeArea;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.infrastructure.dtos.assessment.StartSystemAssessmentRequest;
-import com.lia.liaprove.infrastructure.entities.metrics.VoteEntity;
+import com.lia.liaprove.infrastructure.entities.metrics.QuestionVoteEntity;
 import com.lia.liaprove.infrastructure.entities.question.AlternativeEntity;
 import com.lia.liaprove.infrastructure.entities.question.MultipleChoiceQuestionEntity;
 import com.lia.liaprove.infrastructure.entities.question.QuestionEntity;
@@ -209,7 +209,7 @@ class StartSystemAssessmentEndpointIntegrationTest {
     }
 
     private void createVote(UserEntity user, QuestionEntity question) {
-        VoteEntity vote = new VoteEntity();
+        QuestionVoteEntity vote = new QuestionVoteEntity();
         vote.setUser(user);
         vote.setQuestion(question);
         vote.setVoteType(VoteType.APPROVE);
