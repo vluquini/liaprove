@@ -18,60 +18,29 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AssessmentAttemptVoteTest {
 
     @Test
-    void shouldRequireConstructorArguments() {
+    void shouldRequireAssessmentAttempt() {
         User user = user(UUID.randomUUID(), "voter@example.com");
-        AssessmentAttempt attempt = assessmentAttempt(UUID.randomUUID(), user);
 
-        assertThatThrownBy(() -> new AssessmentAttemptVote(null, attempt, VoteType.APPROVE))
-                .isInstanceOf(NullPointerException.class);
         assertThatThrownBy(() -> new AssessmentAttemptVote(user, null, VoteType.APPROVE))
                 .isInstanceOf(NullPointerException.class);
-        assertThatThrownBy(() -> new AssessmentAttemptVote(user, attempt, null))
-                .isInstanceOf(NullPointerException.class);
     }
 
     @Test
-    void shouldInitializeTimestampsOnCreation() {
+    void shouldInitializeAssessmentAttemptAndInheritVoteBehavior() {
         AssessmentAttemptVote vote = vote();
 
-        assertThat(vote.getCreatedAt()).isNotNull();
-        assertThat(vote.getUpdatedAt()).isEqualTo(vote.getCreatedAt());
+        assertThat(vote).isInstanceOf(Vote.class);
+        assertThat(vote.getAssessmentAttempt()).isNotNull();
+        assertThat(vote.getUser()).isNotNull();
+        assertThat(vote.getVoteType()).isEqualTo(VoteType.APPROVE);
     }
 
     @Test
-    void shouldPreventChangingIdentityFieldsAfterTheyAreDefined() {
+    void shouldPreventChangingAssessmentAttemptAfterItIsDefined() {
         AssessmentAttemptVote vote = vote();
-        vote.setId(UUID.randomUUID());
-        LocalDateTime createdAt = vote.getCreatedAt();
 
-        assertThatThrownBy(() -> vote.setId(UUID.randomUUID()))
-                .isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> vote.setUser(user(UUID.randomUUID(), "other@example.com")))
-                .isInstanceOf(IllegalStateException.class);
         assertThatThrownBy(() -> vote.setAssessmentAttempt(assessmentAttempt(UUID.randomUUID(), vote.getUser())))
                 .isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> vote.setCreatedAt(createdAt.plusDays(1)))
-                .isInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
-    void shouldRejectNullVoteType() {
-        AssessmentAttemptVote vote = vote();
-
-        assertThatThrownBy(() -> vote.setVoteType(null))
-                .isInstanceOf(NullPointerException.class);
-    }
-
-    @Test
-    void shouldUpdateTimestampWhenVoteTypeChanges() {
-        AssessmentAttemptVote vote = vote();
-        LocalDateTime baseline = LocalDateTime.of(2026, 1, 1, 10, 0);
-        vote.setUpdatedAt(baseline);
-
-        vote.setVoteType(VoteType.REJECT);
-
-        assertThat(vote.getVoteType()).isEqualTo(VoteType.REJECT);
-        assertThat(vote.getUpdatedAt()).isAfter(baseline);
     }
 
     private static AssessmentAttemptVote vote() {

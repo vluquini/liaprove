@@ -18,74 +18,34 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class QuestionVoteTest {
 
     @Test
-    void shouldRequireConstructorArguments() {
+    void shouldRequireQuestion() {
         User user = user(UUID.randomUUID(), "voter@example.com");
-        Question question = question(UUID.randomUUID());
 
-        assertThatThrownBy(() -> new QuestionVote(null, question, VoteType.APPROVE))
-                .isInstanceOf(NullPointerException.class);
         assertThatThrownBy(() -> new QuestionVote(user, null, VoteType.APPROVE))
                 .isInstanceOf(NullPointerException.class);
-        assertThatThrownBy(() -> new QuestionVote(user, question, null))
-                .isInstanceOf(NullPointerException.class);
     }
 
     @Test
-    void shouldInitializeTimestampsOnCreation() {
+    void shouldInitializeQuestionAndInheritVoteBehavior() {
         QuestionVote questionVote = vote();
 
-        assertThat(questionVote.getCreatedAt()).isNotNull();
-        assertThat(questionVote.getUpdatedAt()).isEqualTo(questionVote.getCreatedAt());
+        assertThat(questionVote).isInstanceOf(Vote.class);
+        assertThat(questionVote.getQuestion()).isNotNull();
+        assertThat(questionVote.getUser()).isNotNull();
+        assertThat(questionVote.getVoteType()).isEqualTo(VoteType.APPROVE);
     }
 
     @Test
-    void shouldPreventChangingIdentityFieldsAfterTheyAreDefined() {
+    void shouldPreventChangingQuestionAfterItIsDefined() {
         QuestionVote questionVote = vote();
-        questionVote.setId(UUID.randomUUID());
-        LocalDateTime createdAt = questionVote.getCreatedAt();
 
-        assertThatThrownBy(() -> questionVote.setId(UUID.randomUUID()))
-                .isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> questionVote.setUser(user(UUID.randomUUID(), "other@example.com")))
-                .isInstanceOf(IllegalStateException.class);
         assertThatThrownBy(() -> questionVote.setQuestion(question(UUID.randomUUID())))
                 .isInstanceOf(IllegalStateException.class);
-        assertThatThrownBy(() -> questionVote.setCreatedAt(createdAt.plusDays(1)))
-                .isInstanceOf(IllegalStateException.class);
-    }
-
-    @Test
-    void shouldRejectNullVoteType() {
-        QuestionVote questionVote = vote();
-
-        assertThatThrownBy(() -> questionVote.setVoteType(null))
-                .isInstanceOf(NullPointerException.class);
-    }
-
-    @Test
-    void shouldUpdateTimestampWhenVoteTypeChanges() {
-        QuestionVote questionVote = vote();
-        LocalDateTime baseline = LocalDateTime.of(2026, 1, 1, 10, 0);
-        questionVote.setUpdatedAt(baseline);
-
-        questionVote.setVoteType(VoteType.REJECT);
-
-        assertThat(questionVote.getVoteType()).isEqualTo(VoteType.REJECT);
-        assertThat(questionVote.getUpdatedAt()).isAfter(baseline);
-    }
-
-    @Test
-    void shouldCompareByIdSafelyWhenIdsAreNull() {
-        QuestionVote first = new QuestionVote();
-        QuestionVote second = new QuestionVote();
-
-        assertThatCode(() -> first.equals(second)).doesNotThrowAnyException();
     }
 
     private static QuestionVote vote() {

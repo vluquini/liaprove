@@ -3,9 +3,7 @@ package com.lia.liaprove.core.domain.metrics;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.user.User;
 
-import java.time.LocalDateTime;
 import java.util.Objects;
-import java.util.UUID;
 
 /**
  * Representa o voto formal de um usuário em uma questão, indicando aprovação ou rejeição.
@@ -13,46 +11,16 @@ import java.util.UUID;
  * a rede Bayesiana para determinar a aprovação de uma questão.
  * Um voto é distinto de um feedback textual.
  */
-public class QuestionVote {
-    private UUID id;
-    private User user;
+public class QuestionVote extends Vote {
     private Question question;
-    private VoteType voteType;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
 
     public QuestionVote() {
         // Required for frameworks like JPA and MapStruct
     }
 
     public QuestionVote(User user, Question question, VoteType voteType) {
-        this.user = Objects.requireNonNull(user, "user cannot be null");
+        super(user, voteType);
         this.question = Objects.requireNonNull(question, "question cannot be null");
-        this.voteType = Objects.requireNonNull(voteType, "voteType cannot be null");
-        this.createdAt = LocalDateTime.now();
-        this.updatedAt = this.createdAt;
-    }
-    
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        if (this.id != null && !this.id.equals(id)) {
-            throw new IllegalStateException("ID has already been set and cannot be changed.");
-        }
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        if (this.user != null && !this.user.equals(user)) {
-            throw new IllegalStateException("User has already been set and cannot be changed.");
-        }
-        this.user = user;
     }
 
     public Question getQuestion() {
@@ -65,53 +33,4 @@ public class QuestionVote {
         }
         this.question = question;
     }
-
-    public VoteType getVoteType() {
-        return voteType;
-    }
-
-    public void setVoteType(VoteType voteType) {
-        Objects.requireNonNull(voteType, "voteType cannot be null");
-        if (this.voteType != voteType) {
-            this.voteType = voteType;
-            touchUpdatedAt();
-        }
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        if (this.createdAt != null && !this.createdAt.equals(createdAt)) {
-            throw new IllegalStateException("CreatedAt has already been set and cannot be changed.");
-        }
-        this.createdAt = createdAt;
-    }
-
-    public LocalDateTime getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(LocalDateTime updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    protected void touchUpdatedAt() {
-        this.updatedAt = LocalDateTime.now();
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        QuestionVote questionVote = (QuestionVote) o;
-        return Objects.equals(id, questionVote.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
-
 }
