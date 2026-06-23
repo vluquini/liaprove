@@ -3,7 +3,6 @@ package com.lia.liaprove.core.domain.user;
 import com.lia.liaprove.core.domain.assessment.Certificate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -193,29 +192,6 @@ public abstract class User {
 
 
     // ---------- Métodos de domínio ----------
-
-    /**
-     * Registra um novo certificado no histórico do usuário (evita duplicatas por id).
-     */
-    public void addCertificate(Certificate certificate) {
-        Objects.requireNonNull(certificate, "certificate must not be null");
-        if (this.certificates == null) {
-            this.certificates = new ArrayList<>();
-        }
-        boolean exists = this.certificates.stream()
-                .anyMatch(c -> Objects.equals(c.getCertificateNumber(), certificate.getCertificateNumber()));
-        if (!exists) {
-            this.certificates.add(certificate);
-        }
-    }
-
-    /**
-     * Remove um certificado pelo seu identificador (certificateNumber).
-     */
-    public boolean removeCertificate(String certificateNumber) {
-        if (this.certificates == null || certificateNumber == null) return false;
-        return this.certificates.removeIf(c -> certificateNumber.equals(c.getCertificateNumber()));
-    }
 
     /**
      * Atualiza métricas do usuário após a conclusão de uma avaliação:

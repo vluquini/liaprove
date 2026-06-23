@@ -47,17 +47,6 @@ public class UserProfessional extends User{
     // ---------- Métodos de domínio  ----------
 
     /**
-     * Aceita (anexa) um certificado ao usuário.
-     * package-private para forçar que apenas usecases/services do mesmo módulo chamem.
-     * A emissão/validação do certificado será feita no Use Case correspondente.
-     */
-    void acceptCertificate(Certificate certificate) {
-        // delega ao método do agregado (que garante invariantes)
-        // assumimos que User possui addCertificate(package-private/public)
-        this.addCertificate(certificate);
-    }
-
-    /**
      * Wrapper semântico para registrar resultado de avaliação.
      * Delegação direta para o comportamento genérico do agregado.
      */

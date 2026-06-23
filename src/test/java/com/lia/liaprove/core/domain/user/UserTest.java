@@ -3,7 +3,6 @@ package com.lia.liaprove.core.domain.user;
 import com.lia.liaprove.core.domain.assessment.Certificate;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -42,52 +41,6 @@ class UserTest {
         assertThatThrownBy(() -> user.setPasswordHash(" "))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("hashedPassword must not be null/blank");
-    }
-
-    @Test
-    void shouldAddCertificatesWithoutDuplicatingCertificateNumber() {
-        User user = new TestUser();
-        Certificate first = certificate("CERT-001");
-        Certificate duplicate = certificate("CERT-001");
-
-        user.addCertificate(first);
-        user.addCertificate(duplicate);
-
-        assertThat(user.getCertificates()).containsExactly(first);
-    }
-
-    @Test
-    void shouldRejectNullCertificate() {
-        User user = new TestUser();
-
-        assertThatThrownBy(() -> user.addCertificate(null))
-                .isInstanceOf(NullPointerException.class)
-                .hasMessage("certificate must not be null");
-    }
-
-    @Test
-    void shouldRemoveCertificateByCertificateNumber() {
-        User user = new TestUser();
-        Certificate certificate = certificate("CERT-002");
-        user.addCertificate(certificate);
-
-        boolean removed = user.removeCertificate("CERT-002");
-        boolean removedAgain = user.removeCertificate("CERT-002");
-
-        assertThat(removed).isTrue();
-        assertThat(removedAgain).isFalse();
-        assertThat(user.getCertificates()).isEmpty();
-    }
-
-    @Test
-    void shouldNotRemoveCertificateWhenCollectionOrNumberIsMissing() {
-        User user = new TestUser();
-
-        assertThat(user.removeCertificate("CERT-003")).isFalse();
-
-        user.addCertificate(certificate("CERT-003"));
-
-        assertThat(user.removeCertificate(null)).isFalse();
     }
 
     @Test
@@ -257,18 +210,6 @@ class UserTest {
         user.setRole(UserRole.PROFESSIONAL);
         assertThat(user.isRecruiter()).isFalse();
         assertThat(user.isProfessional()).isTrue();
-    }
-
-    private Certificate certificate(String certificateNumber) {
-        return new Certificate(
-                UUID.randomUUID(),
-                certificateNumber,
-                "Certificate",
-                "Description",
-                "https://example.com/certificates/" + certificateNumber,
-                LocalDate.now(),
-                90f
-        );
     }
 
     private static final class TestUser extends User {
