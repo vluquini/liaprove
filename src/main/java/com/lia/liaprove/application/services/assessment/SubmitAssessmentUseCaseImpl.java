@@ -1,6 +1,7 @@
 package com.lia.liaprove.application.services.assessment;
 
 import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
+import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.application.services.assessment.dto.SubmitAssessmentAnswersDto;
 import com.lia.liaprove.core.domain.assessment.Answer;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
@@ -25,10 +26,14 @@ public class SubmitAssessmentUseCaseImpl implements SubmitAssessmentUseCase {
 
     private final AssessmentAttemptGateway attemptGateway;
     private final IssueCertificateUseCase issueCertificateUseCase;
+    private final UserGateway userGateway;
 
-    public SubmitAssessmentUseCaseImpl(AssessmentAttemptGateway attemptGateway, IssueCertificateUseCase issueCertificateUseCase) {
+    public SubmitAssessmentUseCaseImpl(AssessmentAttemptGateway attemptGateway,
+                                       IssueCertificateUseCase issueCertificateUseCase,
+                                       UserGateway userGateway) {
         this.attemptGateway = attemptGateway;
         this.issueCertificateUseCase = issueCertificateUseCase;
+        this.userGateway = userGateway;
     }
 
     @Override
@@ -73,6 +78,7 @@ public class SubmitAssessmentUseCaseImpl implements SubmitAssessmentUseCase {
         
         // 7. Persistir tentativa finalizada
         AssessmentAttempt savedAttempt = attemptGateway.save(attempt);
+        recordUserMetricsForFinalAttempt(savedAttempt);
 
         // 8. Emitir Certificado (Se aprovado)
         if (savedAttempt.getStatus() == AssessmentAttemptStatus.APPROVED && shouldIssueCertificate(savedAttempt)) {
@@ -83,6 +89,20 @@ public class SubmitAssessmentUseCaseImpl implements SubmitAssessmentUseCase {
         }
 
         return savedAttempt;
+    }
+
+    private void recordUserMetricsForFinalAttempt(AssessmentAttempt attempt) {
+        if (attempt.getAccuracyRate() == null) {
+            return;
+        }
+
+        if (attempt.getStatus() != AssessmentAttemptStatus.APPROVED
+                && attempt.getStatus() != AssessmentAttemptStatus.FAILED) {
+            return;
+        }
+
+        attempt.getUser().recordAssessmentResult(attempt.getAccuracyRate());
+        userGateway.save(attempt.getUser());
     }
 
     private boolean shouldIssueCertificate(AssessmentAttempt attempt) {

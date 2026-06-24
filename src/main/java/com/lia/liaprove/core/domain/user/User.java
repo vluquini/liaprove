@@ -4,7 +4,6 @@ import com.lia.liaprove.core.domain.assessment.Certificate;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -114,6 +113,9 @@ public abstract class User {
     }
 
     public void setExperienceLevel(ExperienceLevel experienceLevel) {
+        if (experienceLevel == null) {
+            throw new IllegalArgumentException("experienceLevel must not be null");
+        }
         this.experienceLevel = experienceLevel;
     }
 
@@ -181,16 +183,6 @@ public abstract class User {
         this.status = status;
     }
 
-    // Métodos de conveniência - Possivelmente necessários
-    public boolean isRecruiter() {
-        return this.role == UserRole.RECRUITER || this.role == UserRole.ADMIN;
-    }
-
-    public boolean isProfessional() {
-        return this.role == UserRole.PROFESSIONAL;
-    }
-
-
     // ---------- Métodos de domínio ----------
 
     /**
@@ -208,35 +200,6 @@ public abstract class User {
         float newAvg = (oldAvg * n + newScore) / (n + 1);
         this.totalAssessmentsTaken = n + 1;
         this.averageScore = newAvg;
-    }
-
-    /**
-     * Incrementa apenas o contador de avaliações realizadas (util quando não há score, por ex. registro).
-     */
-    public void incrementAssessmentsTaken() {
-        int n = (this.totalAssessmentsTaken == null) ? 0 : this.totalAssessmentsTaken;
-        this.totalAssessmentsTaken = n + 1;
-    }
-
-    /**
-     * Atualiza lastLogin para o horário atual.
-     */
-    public void updateLastLogin() {
-        this.lastLogin = LocalDateTime.now();
-    }
-
-    /**
-     * Atualiza o nível de experiência do usuário.
-     * Mudança simples de estado — valida se nulo.
-     */
-    public void updateExperienceLevel(ExperienceLevel newLevel) {
-        if (newLevel == null) {
-            throw new IllegalArgumentException("newLevel must not be null");
-        }
-        // Só muda se diferente — evita gravações desnecessárias.
-        if (!Objects.equals(this.getExperienceLevel(), newLevel)) {
-            this.setExperienceLevel(newLevel);
-        }
     }
 
     /**
@@ -296,7 +259,7 @@ public abstract class User {
             this.setBio(bio.trim());
         }
         if (experienceLevel != null) {
-            this.updateExperienceLevel(experienceLevel);
+            this.setExperienceLevel(experienceLevel);
         }
     }
 }

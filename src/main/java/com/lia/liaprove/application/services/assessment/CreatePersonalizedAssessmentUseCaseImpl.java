@@ -104,6 +104,15 @@ public class CreatePersonalizedAssessmentUseCaseImpl implements CreatePersonaliz
         );
 
         // 5. Persistir
-        return (PersonalizedAssessment) assessmentGateway.save(assessment);
+        PersonalizedAssessment savedAssessment = (PersonalizedAssessment) assessmentGateway.save(assessment);
+        increaseCreatedAssessments(recruiter);
+
+        return savedAssessment;
+    }
+
+    private void increaseCreatedAssessments(UserRecruiter recruiter) {
+        int currentTotal = recruiter.getTotalAssessmentsCreated() == null ? 0 : recruiter.getTotalAssessmentsCreated();
+        recruiter.setTotalAssessmentsCreated(currentTotal + 1);
+        userGateway.save(recruiter);
     }
 }

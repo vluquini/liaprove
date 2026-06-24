@@ -14,7 +14,7 @@ import java.util.UUID;
 public class UserRecruiter extends User {
     private String companyName;
     private String companyEmail;
-    private Integer totalAssessmentsCreated;
+    private Integer totalAssessmentsCreated = 0;
     // Pode ser usado pela comunidade para avaliar os Recruiters: questões publicadas, feedbacks, etc.
     private Float recruiterRating = 0.0f;
     // Contador para cálculo incremental da média do recruiterRating
@@ -70,19 +70,7 @@ public class UserRecruiter extends User {
         this.recruiterRatingCount = recruiterRatingCount;
     }
 
-    // ---------- Métodos de domínio  ----------
-
-    /**
-     * Incrementa o contador de avaliações criadas por este recruiter.
-     * Deve ser chamado pelo Use Case que cria a avaliação após persistir com sucesso.
-     */
-    public void incrementAssessmentsCreated() {
-        if (this.totalAssessmentsCreated == null) {
-            this.totalAssessmentsCreated = 1;
-        } else {
-            this.totalAssessmentsCreated = this.totalAssessmentsCreated + 1;
-        }
-    }
+    // ---------- Métodos de domínio ----------
 
     /**
      * Atualiza a média da avaliação do recrutador de forma incremental.

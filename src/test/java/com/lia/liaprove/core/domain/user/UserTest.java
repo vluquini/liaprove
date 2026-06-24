@@ -65,36 +65,16 @@ class UserTest {
     }
 
     @Test
-    void shouldIncrementAssessmentsTakenFromNull() {
-        User user = new TestUser();
-
-        user.incrementAssessmentsTaken();
-
-        assertThat(user.getTotalAssessmentsTaken()).isEqualTo(1);
-    }
-
-    @Test
-    void shouldUpdateLastLoginToCurrentTimeWindow() {
-        User user = new TestUser();
-        LocalDateTime before = LocalDateTime.now();
-
-        user.updateLastLogin();
-
-        LocalDateTime after = LocalDateTime.now();
-        assertThat(user.getLastLogin()).isBetween(before, after);
-    }
-
-    @Test
-    void shouldUpdateExperienceLevelAndRejectNull() {
+    void shouldUpdateExperienceLevelUsingSetterAndRejectNull() {
         User user = new TestUser();
         user.setExperienceLevel(ExperienceLevel.JUNIOR);
 
-        user.updateExperienceLevel(ExperienceLevel.SENIOR);
+        user.setExperienceLevel(ExperienceLevel.SENIOR);
 
         assertThat(user.getExperienceLevel()).isEqualTo(ExperienceLevel.SENIOR);
-        assertThatThrownBy(() -> user.updateExperienceLevel(null))
+        assertThatThrownBy(() -> user.setExperienceLevel(null))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("newLevel must not be null");
+                .hasMessage("experienceLevel must not be null");
     }
 
     @Test
@@ -193,23 +173,6 @@ class UserTest {
         assertThat(user.getOccupation()).isEqualTo("Developer");
         assertThat(user.getBio()).isEqualTo("Original bio");
         assertThat(user.getExperienceLevel()).isEqualTo(ExperienceLevel.JUNIOR);
-    }
-
-    @Test
-    void shouldExposeRoleConvenienceMethods() {
-        User user = new TestUser();
-
-        user.setRole(UserRole.RECRUITER);
-        assertThat(user.isRecruiter()).isTrue();
-        assertThat(user.isProfessional()).isFalse();
-
-        user.setRole(UserRole.ADMIN);
-        assertThat(user.isRecruiter()).isTrue();
-        assertThat(user.isProfessional()).isFalse();
-
-        user.setRole(UserRole.PROFESSIONAL);
-        assertThat(user.isRecruiter()).isFalse();
-        assertThat(user.isProfessional()).isTrue();
     }
 
     private static final class TestUser extends User {

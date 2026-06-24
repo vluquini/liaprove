@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
+
 @Profile("!dev")
 @RestController
 @RequestMapping("/api/auth")
@@ -71,8 +73,9 @@ public class AuthController {
         // Reativação automática se o usuário estiver INACTIVE
         if (UserStatus.INACTIVE.equals(user.getStatus())) {
             user.setStatus(UserStatus.ACTIVE);
-            userGateway.save(user);
         }
+        user.setLastLogin(LocalDateTime.now());
+        userGateway.save(user);
 
         JwtService.GeneratedToken generatedToken = jwtService.generateToken(userDetails);
         return ResponseEntity.ok(buildAuthenticationResponse(generatedToken, user));

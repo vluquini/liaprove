@@ -1,6 +1,7 @@
 package com.lia.liaprove.application.services.assessment;
 
 import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
+import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.application.services.assessment.dto.SubmitAssessmentAnswersDto;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
 import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
@@ -51,6 +52,9 @@ class SubmitAssessmentUseCaseImplTest {
     @Mock
     private IssueCertificateUseCase issueCertificateUseCase;
 
+    @Mock
+    private UserGateway userGateway;
+
     @InjectMocks
     private SubmitAssessmentUseCaseImpl useCase;
 
@@ -85,6 +89,7 @@ class SubmitAssessmentUseCaseImplTest {
         ArgumentCaptor<AssessmentAttempt> attemptCaptor = ArgumentCaptor.forClass(AssessmentAttempt.class);
         verify(attemptGateway).save(attemptCaptor.capture());
         verifyNoInteractions(issueCertificateUseCase);
+        verifyNoInteractions(userGateway);
 
         assertThat(result.getAnswers()).hasSize(1);
         assertThat(attemptCaptor.getValue().getAnswers()).hasSize(1);
@@ -123,6 +128,7 @@ class SubmitAssessmentUseCaseImplTest {
 
         ArgumentCaptor<AssessmentAttempt> attemptCaptor = ArgumentCaptor.forClass(AssessmentAttempt.class);
         verify(attemptGateway).save(attemptCaptor.capture());
+        verifyNoInteractions(userGateway);
 
         assertThat(result.getStatus()).isEqualTo(AssessmentAttemptStatus.COMPLETED);
         assertThat(attemptCaptor.getValue().getAnswers()).hasSize(1);
@@ -171,6 +177,8 @@ class SubmitAssessmentUseCaseImplTest {
         assertThat(result.getStatus()).isEqualTo(AssessmentAttemptStatus.APPROVED);
         assertThat(result.getAccuracyRate()).isEqualTo(100);
         assertThat(result.getCertificate()).isNull();
+        verify(user).recordAssessmentResult(100f);
+        verify(userGateway).save(user);
         verify(issueCertificateUseCase, never()).execute(any());
         verify(attemptGateway, times(1)).save(any());
     }
@@ -225,8 +233,46 @@ class SubmitAssessmentUseCaseImplTest {
 
         assertThat(result.getStatus()).isEqualTo(AssessmentAttemptStatus.APPROVED);
         assertThat(result.getCertificate()).isEqualTo(newCertificate);
+        verify(user).recordAssessmentResult(100f);
+        verify(userGateway).save(user);
         verify(issueCertificateUseCase).execute(any());
         verify(attemptGateway, times(2)).save(any());
+    }
+
+    @Test
+    void shouldRecordUserAssessmentMetricsWhenSystemAssessmentFails() {
+        UUID userId = UUID.randomUUID();
+        UUID attemptId = UUID.randomUUID();
+        User user = mock(User.class);
+        when(user.getId()).thenReturn(userId);
+
+        QuestionAnswerPair question = questionAnswerPair();
+        AssessmentAttempt attempt = systemAttempt(
+                attemptId,
+                user,
+                List.of(question.question())
+        );
+
+        when(attemptGateway.findById(attemptId)).thenReturn(Optional.of(attempt));
+        when(attemptGateway.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        SubmitAssessmentAnswersDto submissionDto = new SubmitAssessmentAnswersDto(
+                attemptId,
+                List.of(new SubmitAssessmentAnswersDto.QuestionAnswerDto(
+                        question.question().getId(),
+                        UUID.randomUUID(),
+                        null,
+                        null
+                ))
+        );
+
+        AssessmentAttempt result = useCase.execute(submissionDto, userId);
+
+        assertThat(result.getStatus()).isEqualTo(AssessmentAttemptStatus.FAILED);
+        assertThat(result.getAccuracyRate()).isZero();
+        verify(user).recordAssessmentResult(0f);
+        verify(userGateway).save(user);
+        verifyNoInteractions(issueCertificateUseCase);
     }
 
     private AssessmentAttempt personalizedAttempt(UUID attemptId, User user, List<Question> questions) {

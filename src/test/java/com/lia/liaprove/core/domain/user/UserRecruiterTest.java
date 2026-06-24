@@ -8,13 +8,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class UserRecruiterTest {
 
     @Test
-    void shouldIncrementCreatedAssessmentsFromNullAndExistingValue() {
+    void shouldInitializeCreatedAssessmentsWithZero() {
         UserRecruiter recruiter = new UserRecruiter();
 
-        recruiter.incrementAssessmentsCreated();
-        recruiter.incrementAssessmentsCreated();
-
-        assertThat(recruiter.getTotalAssessmentsCreated()).isEqualTo(2);
+        assertThat(recruiter.getTotalAssessmentsCreated()).isZero();
     }
 
     @Test

@@ -394,8 +394,9 @@ public class AppConfig {
 
     @Bean
     public SubmitAssessmentUseCase submitAssessmentUseCase(AssessmentAttemptGateway assessmentAttemptGateway,
-                                                           IssueCertificateUseCase issueCertificateUseCase) {
-        return new SubmitAssessmentUseCaseImpl(assessmentAttemptGateway, issueCertificateUseCase);
+                                                           IssueCertificateUseCase issueCertificateUseCase,
+                                                           UserGateway userGateway) {
+        return new SubmitAssessmentUseCaseImpl(assessmentAttemptGateway, issueCertificateUseCase, userGateway);
     }
 
     @Bean

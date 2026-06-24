@@ -31,6 +31,6 @@ class DefaultUserFactoryTest {
 
         assertThat(user).isInstanceOf(UserRecruiter.class);
         assertThat(user.getRole()).isEqualTo(UserRole.ADMIN);
-        assertThat(user.isRecruiter()).isTrue();
+        assertThat(user.getRole().isRecruiter()).isTrue();
     }
 }

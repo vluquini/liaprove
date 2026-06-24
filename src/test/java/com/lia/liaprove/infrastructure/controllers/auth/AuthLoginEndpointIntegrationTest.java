@@ -16,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -47,8 +49,10 @@ public class AuthLoginEndpointIntegrationTest {
 
         UserEntity beforeLogin = userJpaRepository.findByEmail("test.login@example.com").orElseThrow();
         assertThat(beforeLogin.getStatus()).isEqualTo(UserStatus.ACTIVE);
+        assertThat(beforeLogin.getLastLogin()).isNull();
 
         AuthenticationRequest request = new AuthenticationRequest("test.login@example.com", "password123");
+        LocalDateTime loginStartedAt = LocalDateTime.now();
 
         mockMvc.perform(post("/api/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -58,6 +62,7 @@ public class AuthLoginEndpointIntegrationTest {
 
         UserEntity afterLogin = userJpaRepository.findByEmail("test.login@example.com").orElseThrow();
         assertThat(afterLogin.getStatus()).isEqualTo(UserStatus.ACTIVE);
+        assertThat(afterLogin.getLastLogin()).isBetween(loginStartedAt, LocalDateTime.now());
     }
 
     @Test

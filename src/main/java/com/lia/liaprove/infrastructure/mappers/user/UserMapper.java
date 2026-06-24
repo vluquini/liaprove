@@ -7,8 +7,11 @@ import com.lia.liaprove.infrastructure.dtos.user.UserResponseDto;
 import com.lia.liaprove.infrastructure.entities.user.UserEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserProfessionalEntity;
 import com.lia.liaprove.infrastructure.entities.user.UserRecruiterEntity;
+import org.mapstruct.AfterMapping;
 import org.hibernate.Hibernate;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 import org.mapstruct.ReportingPolicy;
 
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
@@ -94,7 +97,23 @@ public interface UserMapper {
         }
     }
 
+    @Mapping(target = "experienceLevel", ignore = true)
     UserRecruiter toDomain(UserRecruiterEntity entity);
 
+    @Mapping(target = "experienceLevel", ignore = true)
     UserProfessional toDomain(UserProfessionalEntity entity);
+
+    @AfterMapping
+    default void setExperienceLevelIfPresent(UserRecruiterEntity entity, @MappingTarget UserRecruiter domain) {
+        if (entity.getExperienceLevel() != null) {
+            domain.setExperienceLevel(entity.getExperienceLevel());
+        }
+    }
+
+    @AfterMapping
+    default void setExperienceLevelIfPresent(UserProfessionalEntity entity, @MappingTarget UserProfessional domain) {
+        if (entity.getExperienceLevel() != null) {
+            domain.setExperienceLevel(entity.getExperienceLevel());
+        }
+    }
 }

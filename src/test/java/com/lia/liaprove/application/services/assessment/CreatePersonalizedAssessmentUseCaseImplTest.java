@@ -8,6 +8,7 @@ import com.lia.liaprove.core.domain.assessment.JobDescriptionAnalysis;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
 import com.lia.liaprove.core.domain.question.MultipleChoiceQuestion;
 import com.lia.liaprove.core.domain.question.Question;
+import com.lia.liaprove.core.domain.user.User;
 import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
 import com.lia.liaprove.core.domain.user.UserRole;
@@ -117,6 +118,38 @@ class CreatePersonalizedAssessmentUseCaseImplTest {
         PersonalizedAssessment persisted = captor.getValue();
         assertThat(created.getJobDescriptionAnalysis()).isSameAs(analysis);
         assertThat(persisted.getJobDescriptionAnalysis()).isSameAs(analysis);
+    }
+
+    @Test
+    void shouldIncreaseRecruiterCreatedAssessmentsWhenAssessmentIsCreated() {
+        UUID recruiterId = UUID.randomUUID();
+        UUID questionId = UUID.randomUUID();
+
+        UserRecruiter recruiter = recruiter(recruiterId);
+        recruiter.setTotalAssessmentsCreated(4);
+        Question question = new MultipleChoiceQuestion();
+        question.setId(questionId);
+
+        when(userGateway.findById(recruiterId)).thenReturn(Optional.of(recruiter));
+        when(questionGateway.findById(questionId)).thenReturn(Optional.of(question));
+        when(assessmentGateway.save(any(PersonalizedAssessment.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        useCase.execute(
+                recruiterId,
+                "Java assessment",
+                "Assessment with explicit weights",
+                List.of(questionId),
+                LocalDateTime.now().plusDays(5),
+                3,
+                60,
+                AssessmentCriteriaWeights.defaultWeights()
+        );
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userGateway).save(userCaptor.capture());
+
+        assertThat(userCaptor.getValue()).isSameAs(recruiter);
+        assertThat(recruiter.getTotalAssessmentsCreated()).isEqualTo(5);
     }
 
     private UserRecruiter recruiter(UUID recruiterId) {
