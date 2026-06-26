@@ -1,12 +1,11 @@
 package com.lia.liaprove.core.domain.assessment;
 
 import com.lia.liaprove.core.domain.question.Question;
-import com.lia.liaprove.core.domain.user.User;
-import com.lia.liaprove.core.domain.user.UserStatus;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -27,11 +26,11 @@ public abstract class Assessment {
     public Assessment(UUID id, String title, String description, LocalDateTime creationDate, List<Question> questions,
                       Duration evaluationTimer) {
         this.id = id;
-        this.title = title;
-        this.description = description;
-        this.creationDate = creationDate;
-        this.questions = questions;
-        this.evaluationTimer = evaluationTimer;
+        setTitle(title);
+        setDescription(description);
+        setCreationDate(creationDate);
+        setQuestions(questions);
+        setEvaluationTimer(evaluationTimer);
     }
 
     public UUID getId() {
@@ -47,6 +46,9 @@ public abstract class Assessment {
     }
 
     public void setTitle(String title) {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("title must not be blank");
+        }
         this.title = title;
     }
 
@@ -55,6 +57,9 @@ public abstract class Assessment {
     }
 
     public void setDescription(String description) {
+        if (description == null || description.isBlank()) {
+            throw new IllegalArgumentException("description must not be blank");
+        }
         this.description = description;
     }
 
@@ -63,7 +68,7 @@ public abstract class Assessment {
     }
 
     public void setCreationDate(LocalDateTime creationDate) {
-        this.creationDate = creationDate;
+        this.creationDate = Objects.requireNonNull(creationDate, "creationDate must not be null");
     }
 
     public List<Question> getQuestions() {
@@ -71,7 +76,7 @@ public abstract class Assessment {
     }
 
     public void setQuestions(List<Question> questions) {
-        this.questions = questions;
+        this.questions = Objects.requireNonNull(questions, "questions must not be null");
     }
 
     public Duration getEvaluationTimer() {
@@ -79,19 +84,6 @@ public abstract class Assessment {
     }
 
     public void setEvaluationTimer(Duration evaluationTimer) {
-        this.evaluationTimer = evaluationTimer;
-    }
-
-    public boolean canBeAttemptedBy(User user) {
-        if (user == null || user.getStatus() != UserStatus.ACTIVE) {
-            return false;
-        }
-
-        LocalDateTime registrationDate = user.getRegistrationDate();
-        if (registrationDate == null) {
-            return true;
-        }
-
-        return registrationDate.isBefore(LocalDateTime.now().minusMinutes(1));
+        this.evaluationTimer = Objects.requireNonNull(evaluationTimer, "evaluationTimer must not be null");
     }
 }

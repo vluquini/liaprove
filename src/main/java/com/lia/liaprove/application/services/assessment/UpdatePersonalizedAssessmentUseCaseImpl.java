@@ -49,7 +49,7 @@ public class UpdatePersonalizedAssessmentUseCaseImpl implements UpdatePersonaliz
         // 3. Aplicar atualizações
         expirationDate.ifPresent(personalizedAssessment::setExpirationDate);
         maxAttempts.ifPresent(personalizedAssessment::setMaxAttempts);
-        status.ifPresent(personalizedAssessment::setStatus);
+        status.ifPresent(newStatus -> applyStatus(personalizedAssessment, newStatus));
         criteriaWeights.ifPresent(personalizedAssessment::setCriteriaWeights);
 
         // 4. Persistir e retornar
@@ -66,6 +66,15 @@ public class UpdatePersonalizedAssessmentUseCaseImpl implements UpdatePersonaliz
 
         if (assessment.getCreatedBy() == null || !assessment.getCreatedBy().getId().equals(requesterId)) {
             throw new AuthorizationException("You do not have permission to update this assessment.");
+        }
+    }
+
+    private void applyStatus(PersonalizedAssessment assessment, PersonalizedAssessmentStatus status) {
+        switch (status) {
+            case ACTIVE -> assessment.activate();
+            case DEACTIVATED -> assessment.deactivate();
+            case REVOKED -> assessment.revoke();
+            case CLOSED -> assessment.close();
         }
     }
 }

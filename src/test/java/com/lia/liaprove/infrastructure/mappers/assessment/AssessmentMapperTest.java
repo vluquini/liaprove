@@ -38,22 +38,22 @@ class AssessmentMapperTest {
                 "Backend assessment",
                 "Assessment with analysis snapshot",
                 LocalDateTime.of(2026, 4, 15, 10, 30),
-                null,
+                List.of(),
                 Duration.ofMinutes(45),
                 null,
                 LocalDateTime.of(2026, 4, 20, 10, 30),
-                1,
                 3,
                 "shareable-token",
                 PersonalizedAssessmentStatus.ACTIVE,
                 new AssessmentCriteriaWeights(40, 35, 25),
                 analysis
         );
+        assessment.setTotalAttempts(1);
 
-        PersonalizedAssessmentEntity entity = (PersonalizedAssessmentEntity) mapper.toEntity(assessment);
+        PersonalizedAssessmentEntity entity = mapper.toEntity(assessment);
 
         assertThat(readField(entity, "originalJobDescription")).isEqualTo("Senior Java developer role");
-        assertThat(readSetField(entity, "suggestedKnowledgeAreas")).containsExactlyInAnyOrder(
+        assertThat(readSetField(entity)).containsExactlyInAnyOrder(
                 KnowledgeArea.SOFTWARE_DEVELOPMENT,
                 KnowledgeArea.AI
         );
@@ -63,7 +63,7 @@ class AssessmentMapperTest {
         assertThat(readField(entity, "suggestedSoftSkillsWeight")).isEqualTo(30);
         assertThat(readField(entity, "suggestedExperienceWeight")).isEqualTo(20);
 
-        PersonalizedAssessment mappedBack = (PersonalizedAssessment) mapper.toDomain(entity);
+        PersonalizedAssessment mappedBack = mapper.toDomain(entity);
         JobDescriptionAnalysis mappedAnalysis = mappedBack.getJobDescriptionAnalysis();
 
         assertThat(mappedBack.getCriteriaWeights()).isEqualTo(new AssessmentCriteriaWeights(40, 35, 25));
@@ -101,8 +101,8 @@ class AssessmentMapperTest {
     }
 
     @SuppressWarnings("unchecked")
-    private static Set<KnowledgeArea> readSetField(Object target, String fieldName) throws Exception {
-        return (Set<KnowledgeArea>) readField(target, fieldName);
+    private static Set<KnowledgeArea> readSetField(Object target) throws Exception {
+        return (Set<KnowledgeArea>) readField(target, "suggestedKnowledgeAreas");
     }
 
     @SuppressWarnings("unchecked")

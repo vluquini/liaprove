@@ -95,7 +95,6 @@ public class CreatePersonalizedAssessmentUseCaseImpl implements CreatePersonaliz
                 Duration.ofMinutes(evaluationTimerMinutes),
                 recruiter,
                 expirationDate,
-                0, // totalAttempts inicial
                 maxAttempts,
                 shareableToken,
                 PersonalizedAssessmentStatus.ACTIVE,

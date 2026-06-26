@@ -23,7 +23,6 @@ import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
 import com.lia.liaprove.core.domain.user.UserRole;
 import com.lia.liaprove.core.domain.user.UserProfessional;
-import com.lia.liaprove.core.domain.user.UserStatus;
 import com.lia.liaprove.core.exceptions.assessment.AttemptPreAnalysisInProgressException;
 import com.lia.liaprove.core.exceptions.assessment.AttemptPreAnalysisNotAvailableException;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
@@ -107,8 +106,6 @@ class GenerateAttemptPreAnalysisUseCaseImplTest {
                 candidate,
                 List.of(multipleChoiceQuestion, openQuestion, projectQuestion),
                 List.of(mcqAnswer, openAnswer),
-                AssessmentAttemptStatus.COMPLETED,
-                83,
                 criteriaWeights,
                 jobDescriptionAnalysis
         );
@@ -135,9 +132,9 @@ class GenerateAttemptPreAnalysisUseCaseImplTest {
         assertThat(contextCaptor.getValue().candidate().hardSkills()).containsExactly("java", "spring boot");
         assertThat(contextCaptor.getValue().candidate().softSkills()).containsExactly("communication", "ownership");
         assertThat(contextCaptor.getValue().supportedQuestions()).hasSize(2);
-        assertThat(contextCaptor.getValue().supportedQuestions().get(0).questionType()).isEqualTo(QuestionType.MULTIPLE_CHOICE);
-        assertThat(contextCaptor.getValue().supportedQuestions().get(0).selectedAlternativeId()).isEqualTo(correctAlternative.id());
-        assertThat(contextCaptor.getValue().supportedQuestions().get(0).selectedAlternativeText()).isEqualTo("Clear root cause analysis");
+        assertThat(contextCaptor.getValue().supportedQuestions().getFirst().questionType()).isEqualTo(QuestionType.MULTIPLE_CHOICE);
+        assertThat(contextCaptor.getValue().supportedQuestions().getFirst().selectedAlternativeId()).isEqualTo(correctAlternative.id());
+        assertThat(contextCaptor.getValue().supportedQuestions().getFirst().selectedAlternativeText()).isEqualTo("Clear root cause analysis");
         assertThat(contextCaptor.getValue().supportedQuestions().get(0).textResponse()).isNull();
         assertThat(contextCaptor.getValue().supportedQuestions().get(0).alternatives()).hasSize(2);
         assertThat(contextCaptor.getValue().supportedQuestions().get(1).questionType()).isEqualTo(QuestionType.OPEN);
@@ -353,8 +350,6 @@ class GenerateAttemptPreAnalysisUseCaseImplTest {
             UserProfessional candidate,
             List<Question> questions,
             List<Answer> answers,
-            AssessmentAttemptStatus status,
-            Integer accuracyRate,
             AssessmentCriteriaWeights criteriaWeights,
             JobDescriptionAnalysis jobDescriptionAnalysis) {
         PersonalizedAssessment assessment = new PersonalizedAssessment(
@@ -366,7 +361,6 @@ class GenerateAttemptPreAnalysisUseCaseImplTest {
                 Duration.ofMinutes(30),
                 requester,
                 LocalDateTime.now().plusDays(1),
-                0,
                 1,
                 "token",
                 PersonalizedAssessmentStatus.ACTIVE,
@@ -383,9 +377,9 @@ class GenerateAttemptPreAnalysisUseCaseImplTest {
                 List.of(),
                 LocalDateTime.now(),
                 null,
-                accuracyRate,
+                83,
                 null,
-                status
+                AssessmentAttemptStatus.COMPLETED
         );
     }
 
@@ -400,7 +394,6 @@ class GenerateAttemptPreAnalysisUseCaseImplTest {
                 Duration.ofMinutes(30),
                 recruiter,
                 LocalDateTime.now().plusDays(1),
-                0,
                 1,
                 "token",
                 PersonalizedAssessmentStatus.ACTIVE,

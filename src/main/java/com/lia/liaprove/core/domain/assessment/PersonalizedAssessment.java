@@ -6,6 +6,7 @@ import com.lia.liaprove.core.domain.user.UserRecruiter;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -25,34 +26,26 @@ public class PersonalizedAssessment extends Assessment {
 
     public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate,
                                   List<Question> questions, Duration evaluationTimer, UserRecruiter createdBy,
-                                  LocalDateTime expirationDate, int totalAttempts, int maxAttempts, String shareableToken,
+                                  LocalDateTime expirationDate, int maxAttempts, String shareableToken,
                                   PersonalizedAssessmentStatus status, AssessmentCriteriaWeights criteriaWeights) {
-        this(id, title, description, creationDate, questions, evaluationTimer, createdBy, expirationDate, totalAttempts,
+        this(id, title, description, creationDate, questions, evaluationTimer, createdBy, expirationDate,
                 maxAttempts, shareableToken, status, criteriaWeights, null);
     }
 
     public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate,
                                   List<Question> questions, Duration evaluationTimer, UserRecruiter createdBy,
-                                  LocalDateTime expirationDate, int totalAttempts, int maxAttempts, String shareableToken,
+                                  LocalDateTime expirationDate, int maxAttempts, String shareableToken,
                                   PersonalizedAssessmentStatus status, AssessmentCriteriaWeights criteriaWeights,
                                   JobDescriptionAnalysis jobDescriptionAnalysis) {
         super(id, title, description, creationDate, questions, evaluationTimer);
         this.createdBy = createdBy;
         this.expirationDate = expirationDate;
-        this.totalAttempts = totalAttempts;
-        this.maxAttempts = maxAttempts;
+        this.totalAttempts = 0;
+        setMaxAttempts(maxAttempts);
         this.shareableToken = shareableToken;
-        this.status = status;
-        this.criteriaWeights = criteriaWeights == null ? AssessmentCriteriaWeights.defaultWeights() : criteriaWeights;
+        this.status = Objects.requireNonNull(status, "status must not be null");
+        setCriteriaWeights(criteriaWeights);
         this.jobDescriptionAnalysis = jobDescriptionAnalysis;
-    }
-
-    public PersonalizedAssessment(UUID id, String title, String description, LocalDateTime creationDate,
-                                  List<Question> questions, Duration evaluationTimer, UserRecruiter createdBy,
-                                  LocalDateTime expirationDate, int totalAttempts, int maxAttempts, String shareableToken,
-                                  PersonalizedAssessmentStatus status) {
-        this(id, title, description, creationDate, questions, evaluationTimer, createdBy, expirationDate,
-                totalAttempts, maxAttempts, shareableToken, status, AssessmentCriteriaWeights.defaultWeights());
     }
 
     public UserRecruiter getCreatedBy() {
@@ -76,6 +69,9 @@ public class PersonalizedAssessment extends Assessment {
     }
 
     public void setTotalAttempts(int totalAttempts) {
+        if (totalAttempts < 0) {
+            throw new IllegalArgumentException("totalAttempts must not be negative");
+        }
         this.totalAttempts = totalAttempts;
     }
 
@@ -84,6 +80,9 @@ public class PersonalizedAssessment extends Assessment {
     }
 
     public void setMaxAttempts(int maxAttempts) {
+        if (maxAttempts <= 0) {
+            throw new IllegalArgumentException("maxAttempts must be greater than zero");
+        }
         this.maxAttempts = maxAttempts;
     }
 
@@ -99,8 +98,20 @@ public class PersonalizedAssessment extends Assessment {
         return status;
     }
 
-    public void setStatus(PersonalizedAssessmentStatus status) {
-        this.status = status;
+    public void activate() {
+        this.status = PersonalizedAssessmentStatus.ACTIVE;
+    }
+
+    public void deactivate() {
+        this.status = PersonalizedAssessmentStatus.DEACTIVATED;
+    }
+
+    public void revoke() {
+        this.status = PersonalizedAssessmentStatus.REVOKED;
+    }
+
+    public void close() {
+        this.status = PersonalizedAssessmentStatus.CLOSED;
     }
 
     public AssessmentCriteriaWeights getCriteriaWeights() {
@@ -117,5 +128,13 @@ public class PersonalizedAssessment extends Assessment {
 
     public void setJobDescriptionAnalysis(JobDescriptionAnalysis jobDescriptionAnalysis) {
         this.jobDescriptionAnalysis = jobDescriptionAnalysis;
+    }
+
+    public boolean isExpired(LocalDateTime referenceDate) {
+        return expirationDate != null && referenceDate != null && referenceDate.isAfter(expirationDate);
+    }
+
+    public boolean hasReachedMaxAttempts(long currentAttempts) {
+        return currentAttempts >= maxAttempts;
     }
 }

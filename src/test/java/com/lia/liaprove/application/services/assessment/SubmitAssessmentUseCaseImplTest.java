@@ -3,11 +3,7 @@ package com.lia.liaprove.application.services.assessment;
 import com.lia.liaprove.application.gateways.assessment.AssessmentAttemptGateway;
 import com.lia.liaprove.application.gateways.user.UserGateway;
 import com.lia.liaprove.application.services.assessment.dto.SubmitAssessmentAnswersDto;
-import com.lia.liaprove.core.domain.assessment.AssessmentAttempt;
-import com.lia.liaprove.core.domain.assessment.AssessmentAttemptStatus;
-import com.lia.liaprove.core.domain.assessment.Certificate;
-import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
-import com.lia.liaprove.core.domain.assessment.SystemAssessment;
+import com.lia.liaprove.core.domain.assessment.*;
 import com.lia.liaprove.core.domain.question.Alternative;
 import com.lia.liaprove.core.domain.question.DifficultyLevel;
 import com.lia.liaprove.core.domain.question.KnowledgeArea;
@@ -285,10 +281,10 @@ class SubmitAssessmentUseCaseImplTest {
                 Duration.ofHours(1),
                 null,
                 LocalDateTime.now().plusDays(1),
-                0,
                 3,
                 "share-token",
-                com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus.ACTIVE
+                PersonalizedAssessmentStatus.ACTIVE,
+                AssessmentCriteriaWeights.defaultWeights()
         );
 
         return new AssessmentAttempt(
@@ -346,7 +342,8 @@ class SubmitAssessmentUseCaseImplTest {
                 user,
                 List.of()
         );
-        attempt.setStatus(AssessmentAttemptStatus.APPROVED);
+        attempt.complete();
+        attempt.approve();
         attempt.setAccuracyRate(score);
         attempt.setCertificate(new Certificate(
                 UUID.randomUUID(),

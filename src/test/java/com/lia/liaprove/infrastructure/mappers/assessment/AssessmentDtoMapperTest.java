@@ -11,7 +11,6 @@ import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
 import com.lia.liaprove.core.domain.user.UserRole;
-import com.lia.liaprove.core.domain.user.UserStatus;
 import com.lia.liaprove.infrastructure.dtos.assessment.PersonalizedAssessmentDetailsResponse;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
@@ -56,13 +55,13 @@ class AssessmentDtoMapperTest {
                 Duration.ofMinutes(45),
                 recruiter,
                 expirationDate,
-                2,
                 5,
                 "token-123",
                 PersonalizedAssessmentStatus.ACTIVE,
                 weights,
                 analysis
         );
+        assessment.setTotalAttempts(2);
 
         PersonalizedAssessmentDetailsResponse response = mapper.toPersonalizedDetailsResponse(assessment);
 
@@ -84,17 +83,16 @@ class AssessmentDtoMapperTest {
     }
 
     @Test
-    void shouldReturnEmptyQuestionListWhenAssessmentQuestionsAreNull() {
+    void shouldReturnEmptyQuestionListWhenAssessmentQuestionsAreEmpty() {
         PersonalizedAssessment assessment = new PersonalizedAssessment(
                 UUID.randomUUID(),
                 "Assessment",
                 "Description",
                 LocalDateTime.now(),
-                null,
-                null,
+                List.of(),
+                Duration.ofMinutes(30),
                 recruiter(UUID.randomUUID()),
                 LocalDateTime.now().plusDays(7),
-                0,
                 1,
                 "token",
                 PersonalizedAssessmentStatus.ACTIVE,
@@ -104,7 +102,7 @@ class AssessmentDtoMapperTest {
         PersonalizedAssessmentDetailsResponse response = mapper.toPersonalizedDetailsResponse(assessment);
 
         assertThat(response.questions()).isEmpty();
-        assertThat(response.evaluationTimerMinutes()).isNull();
+        assertThat(response.evaluationTimerMinutes()).isEqualTo(30);
     }
 
     private Question question(UUID id, LocalDateTime submissionDate) {

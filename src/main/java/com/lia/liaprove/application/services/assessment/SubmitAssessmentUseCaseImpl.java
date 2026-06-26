@@ -52,11 +52,7 @@ public class SubmitAssessmentUseCaseImpl implements SubmitAssessmentUseCase {
             throw new AssessmentAttemptFinishedException("This assessment has already been completed.");
         }
 
-        // 4. Validar Tempo Limite
-        // Se o tempo expirou, permitimos a finalização com as respostas enviadas até o momento.
-        // A lógica de pontuação na entidade tratará questões não respondidas como erradas.
-
-        // 5. Converter DTO de respostas para Entidade de Domínio
+        // 4. Converter DTO de respostas para Entidade de Domínio
         List<Answer> domainAnswers = new ArrayList<>();
         if (submissionDto.answers() != null) {
             domainAnswers = submissionDto.answers().stream()
@@ -70,17 +66,14 @@ public class SubmitAssessmentUseCaseImpl implements SubmitAssessmentUseCase {
                     .collect(Collectors.toList());
         }
 
-        // 6. Finalizar a tentativa (cálculo de nota e status)
+        // 5. Finalizar a tentativa (cálculo de nota e status)
         attempt.finish(domainAnswers);
 
-        // Se o tempo expirou e o usuário tentou enviar depois, a lógica de finish processa normalmente.
-        // O cálculo de nota já penaliza o que não foi respondido.
-        
-        // 7. Persistir tentativa finalizada
+        // 6. Persistir tentativa finalizada
         AssessmentAttempt savedAttempt = attemptGateway.save(attempt);
         recordUserMetricsForFinalAttempt(savedAttempt);
 
-        // 8. Emitir Certificado (Se aprovado)
+        // 7. Emitir Certificado (Se aprovado)
         if (savedAttempt.getStatus() == AssessmentAttemptStatus.APPROVED && shouldIssueCertificate(savedAttempt)) {
             Certificate certificate = issueCertificateUseCase.execute(savedAttempt);
             savedAttempt.setCertificate(certificate);

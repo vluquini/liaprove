@@ -41,7 +41,6 @@ class AssessmentGatewayImplIntegrationTest {
         PersonalizedAssessment savedAssessment = (PersonalizedAssessment) assessmentGateway.save(personalizedAssessment(
                 "Assessment with saved analysis",
                 LocalDateTime.now().plusDays(5),
-                PersonalizedAssessmentStatus.ACTIVE,
                 "token-persist-and-reload"
         ));
 
@@ -56,7 +55,6 @@ class AssessmentGatewayImplIntegrationTest {
         assessmentGateway.save(personalizedAssessment(
                 "Expired assessment with analysis",
                 LocalDateTime.now().minusHours(2),
-                PersonalizedAssessmentStatus.ACTIVE,
                 "token-expired-analysis"
         ));
 
@@ -69,7 +67,6 @@ class AssessmentGatewayImplIntegrationTest {
     private PersonalizedAssessment personalizedAssessment(
             String title,
             LocalDateTime expirationDate,
-            PersonalizedAssessmentStatus status,
             String shareableToken
     ) {
         return new PersonalizedAssessment(
@@ -81,10 +78,9 @@ class AssessmentGatewayImplIntegrationTest {
                 Duration.ofMinutes(45),
                 null,
                 expirationDate,
-                0,
                 3,
                 shareableToken,
-                status,
+                PersonalizedAssessmentStatus.ACTIVE,
                 new AssessmentCriteriaWeights(40, 35, 25),
                 new JobDescriptionAnalysis(
                         "Senior backend engineer focused on Java and distributed systems.",

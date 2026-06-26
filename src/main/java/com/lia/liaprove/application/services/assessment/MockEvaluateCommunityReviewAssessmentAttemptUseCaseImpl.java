@@ -36,7 +36,11 @@ public class MockEvaluateCommunityReviewAssessmentAttemptUseCaseImpl implements 
 
         validateEligibility(attempt);
 
-        attempt.setStatus(random.nextBoolean() ? AssessmentAttemptStatus.APPROVED : AssessmentAttemptStatus.FAILED);
+        if (random.nextBoolean()) {
+            attempt.approve();
+        } else {
+            attempt.fail();
+        }
         return assessmentAttemptGateway.save(attempt);
     }
 

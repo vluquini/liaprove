@@ -77,7 +77,7 @@ public interface AssessmentMapper {
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getCreationDate(),
-                null,
+                List.of(),
                 map(entity.getEvaluationTimerSeconds()),
                 entity.getKnowledgeArea(),
                 entity.getDifficultyLevel()
@@ -95,11 +95,10 @@ public interface AssessmentMapper {
                 entity.getTitle(),
                 entity.getDescription(),
                 entity.getCreationDate(),
-                null,
+                List.of(),
                 map(entity.getEvaluationTimerSeconds()),
                 null,
                 entity.getExpirationDate(),
-                entity.getTotalAttempts(),
                 entity.getMaxAttempts(),
                 entity.getShareableToken(),
                 entity.getStatus(),
@@ -140,6 +139,18 @@ public interface AssessmentMapper {
             return null;
         }
 
+        AssessmentCriteriaWeights suggestedCriteriaWeights = getAssessmentCriteriaWeights(entity);
+
+        return new JobDescriptionAnalysis(
+                entity.getOriginalJobDescription(),
+                entity.getSuggestedKnowledgeAreas(),
+                entity.getSuggestedHardSkills(),
+                entity.getSuggestedSoftSkills(),
+                suggestedCriteriaWeights
+        );
+    }
+
+    private static AssessmentCriteriaWeights getAssessmentCriteriaWeights(PersonalizedAssessmentEntity entity) {
         AssessmentCriteriaWeights suggestedCriteriaWeights = null;
         if (entity.getSuggestedHardSkillsWeight() != null
                 && entity.getSuggestedSoftSkillsWeight() != null
@@ -150,14 +161,7 @@ public interface AssessmentMapper {
                     entity.getSuggestedExperienceWeight()
             );
         }
-
-        return new JobDescriptionAnalysis(
-                entity.getOriginalJobDescription(),
-                entity.getSuggestedKnowledgeAreas(),
-                entity.getSuggestedHardSkills(),
-                entity.getSuggestedSoftSkills(),
-                suggestedCriteriaWeights
-        );
+        return suggestedCriteriaWeights;
     }
 
     default void mapJobDescriptionAnalysis(JobDescriptionAnalysis analysis, PersonalizedAssessmentEntity entity) {
@@ -197,6 +201,7 @@ public interface AssessmentMapper {
 
     @AfterMapping
     default void afterToDomain(PersonalizedAssessmentEntity entity, @MappingTarget PersonalizedAssessment domain) {
+        domain.setTotalAttempts(entity.getTotalAttempts());
         domain.setCriteriaWeights(mapCriteriaWeights(entity));
         domain.setJobDescriptionAnalysis(mapJobDescriptionAnalysis(entity));
     }

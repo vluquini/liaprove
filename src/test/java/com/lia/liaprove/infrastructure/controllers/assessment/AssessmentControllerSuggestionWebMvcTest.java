@@ -208,7 +208,6 @@ class AssessmentControllerSuggestionWebMvcTest {
                 Duration.ofMinutes(60),
                 null,
                 LocalDateTime.now().plusDays(7),
-                0,
                 3,
                 "token-1",
                 PersonalizedAssessmentStatus.ACTIVE,

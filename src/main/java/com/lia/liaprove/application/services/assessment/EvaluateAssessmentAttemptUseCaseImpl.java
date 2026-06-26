@@ -17,7 +17,7 @@ import com.lia.liaprove.core.usecases.assessments.EvaluateAssessmentAttemptUseCa
 import java.util.UUID;
 
 /**
- * Implementação do caso de uso para avaliar manualmente um tentativa de avaliação.
+ * Implementação do caso de uso para avaliar manualmente uma tentativa de avaliação.
  */
 public class EvaluateAssessmentAttemptUseCaseImpl implements EvaluateAssessmentAttemptUseCase {
 
@@ -49,7 +49,11 @@ public class EvaluateAssessmentAttemptUseCaseImpl implements EvaluateAssessmentA
         }
 
         // 5. Atualizar o status
-        attempt.setStatus(finalStatus);
+        if (finalStatus == AssessmentAttemptStatus.APPROVED) {
+            attempt.approve();
+        } else {
+            attempt.fail();
+        }
 
         // 6. Persistir e retornar
         return attemptGateway.save(attempt);

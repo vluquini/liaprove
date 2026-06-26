@@ -1,5 +1,6 @@
 package com.lia.liaprove.core.domain.assessment;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -12,7 +13,33 @@ public class Answer {
     private String textResponse;        // Para questões abertas
 
     public Answer(UUID questionId) {
-        this.questionId = questionId;
+        this.questionId = Objects.requireNonNull(questionId, "questionId must not be null");
+    }
+
+    public static Answer multipleChoice(UUID questionId, UUID selectedAlternativeId) {
+        Answer answer = new Answer(questionId);
+        answer.setSelectedAlternativeId(selectedAlternativeId);
+        return answer;
+    }
+
+    public static Answer project(UUID questionId, String projectUrl) {
+        Answer answer = new Answer(questionId);
+        answer.setProjectUrl(projectUrl);
+        return answer;
+    }
+
+    public static Answer openText(UUID questionId, String textResponse) {
+        Answer answer = new Answer(questionId);
+        answer.setTextResponse(textResponse);
+        return answer;
+    }
+
+    public boolean hasSelectedAlternative() {
+        return selectedAlternativeId != null;
+    }
+
+    public boolean hasManualPayload() {
+        return hasText(projectUrl) || hasText(textResponse);
     }
 
     public UUID getQuestionId() {
@@ -41,5 +68,9 @@ public class Answer {
 
     public void setTextResponse(String textResponse) {
         this.textResponse = textResponse;
+    }
+
+    private boolean hasText(String value) {
+        return value != null && !value.isBlank();
     }
 }

@@ -9,7 +9,6 @@ import com.lia.liaprove.core.domain.user.ExperienceLevel;
 import com.lia.liaprove.core.domain.user.UserProfessional;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
 import com.lia.liaprove.core.domain.user.UserRole;
-import com.lia.liaprove.core.domain.user.UserStatus;
 import com.lia.liaprove.core.exceptions.user.AuthorizationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -102,7 +101,6 @@ class ListPersonalizedAssessmentsUseCaseImplTest {
                 Duration.ofMinutes(60),
                 recruiter,
                 LocalDateTime.now().plusDays(7),
-                0,
                 3,
                 UUID.randomUUID().toString(),
                 PersonalizedAssessmentStatus.ACTIVE,

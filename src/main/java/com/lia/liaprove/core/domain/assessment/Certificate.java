@@ -1,6 +1,7 @@
 package com.lia.liaprove.core.domain.assessment;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -20,11 +21,17 @@ public class Certificate {
     public Certificate(UUID id, String certificateNumber, String title, String description,
                        String certificateUrl, LocalDate issueDate, Float score) {
         this.id = id;
+        validateText(certificateNumber, "certificateNumber");
+        validateText(title, "title");
+        validateText(certificateUrl, "certificateUrl");
+        if (score == null || score < 0 || score > 100) {
+            throw new IllegalArgumentException("score must be between 0 and 100");
+        }
         this.certificateNumber = certificateNumber;
         this.title = title;
         this.description = description;
         this.certificateUrl = certificateUrl;
-        this.issueDate = issueDate;
+        this.issueDate = Objects.requireNonNull(issueDate, "issueDate must not be null");
         this.score = score;
     }
 
@@ -54,5 +61,11 @@ public class Certificate {
 
     public Float getScore() {
         return score;
+    }
+
+    private void validateText(String value, String fieldName) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException(fieldName + " must not be blank");
+        }
     }
 }

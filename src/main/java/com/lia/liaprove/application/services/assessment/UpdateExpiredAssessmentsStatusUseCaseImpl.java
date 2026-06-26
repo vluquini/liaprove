@@ -2,7 +2,6 @@ package com.lia.liaprove.application.services.assessment;
 
 import com.lia.liaprove.application.gateways.assessment.AssessmentGateway;
 import com.lia.liaprove.core.domain.assessment.PersonalizedAssessment;
-import com.lia.liaprove.core.domain.assessment.PersonalizedAssessmentStatus;
 import com.lia.liaprove.core.usecases.assessments.UpdateExpiredAssessmentsStatusUseCase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +36,7 @@ public class UpdateExpiredAssessmentsStatusUseCaseImpl implements UpdateExpiredA
 
         // 2. Iterar e Atualizar o status
         for (PersonalizedAssessment assessment : expiredAssessments) {
-            assessment.setStatus(PersonalizedAssessmentStatus.DEACTIVATED);
+            assessment.deactivate();
         }
 
         // 3. Persistir em Lote

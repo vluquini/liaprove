@@ -9,6 +9,8 @@ import com.lia.liaprove.core.domain.user.User;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -29,10 +31,13 @@ public class AssessmentAttempt {
     private Certificate certificate;
     private AssessmentAttemptStatus status;
 
-    public AssessmentAttempt(UUID id, Assessment assessment, User user, List<Question> questions, List<Answer> answers, List<FeedbackAssessment> feedbacks, LocalDateTime startedAt, LocalDateTime finishedAt, Integer accuracyRate, Certificate certificate, AssessmentAttemptStatus status) {
+    public AssessmentAttempt(UUID id, Assessment assessment, User user, List<Question> questions, List<Answer> answers,
+                             List<FeedbackAssessment> feedbacks, LocalDateTime startedAt, LocalDateTime finishedAt,
+                             Integer accuracyRate, Certificate certificate, AssessmentAttemptStatus status) {
         this.id = id;
         this.assessment = assessment;
         this.user = user;
+        validateQuestionIds(questions);
         this.questions = questions;
         this.answers = answers;
         this.feedbacks = feedbacks;
@@ -41,124 +46,6 @@ public class AssessmentAttempt {
         this.accuracyRate = accuracyRate;
         this.certificate = certificate;
         this.status = status;
-    }
-
-    /**
-     * Finaliza a tentativa de avaliação, calculando a nota e definindo o status.
-     *
-     * @param submittedAnswers Lista de respostas enviadas pelo usuário.
-     */
-    public void finish(List<Answer> submittedAnswers) {
-        this.finishedAt = LocalDateTime.now();
-        this.answers = submittedAnswers;
-
-        if (this.assessment instanceof SystemAssessment) {
-            calculateSystemAssessmentResult(submittedAnswers);
-        } else if (this.assessment instanceof PersonalizedAssessment) {
-            // Para avaliações personalizadas, o status é COMPLETED (aguardando revisão do Recruiter)
-            // Mas ainda calculamos a nota das questões de múltipla escolha para referência
-            calculatePartialScore();
-            this.status = AssessmentAttemptStatus.COMPLETED;
-        }
-    }
-
-    private void calculateSystemAssessmentResult(List<Answer> submittedAnswers) {
-        if (hasManualSubmission(submittedAnswers)) {
-            calculatePartialScore();
-            this.status = AssessmentAttemptStatus.COMPLETED;
-            return;
-        }
-
-        int correctAnswers = countCorrectAnswers();
-        int totalQuestions = questions.size();
-
-        if (totalQuestions > 0) {
-            this.accuracyRate = (int) (((double) correctAnswers / totalQuestions) * 100);
-        } else {
-            this.accuracyRate = 0;
-        }
-
-        // Regra de aprovação: >= 70%
-        if (this.accuracyRate >= 70) {
-            this.status = AssessmentAttemptStatus.APPROVED;
-        } else {
-            this.status = AssessmentAttemptStatus.FAILED;
-        }
-    }
-
-    private boolean hasManualSubmission(List<Answer> submittedAnswers) {
-        return submittedAnswers != null && submittedAnswers.stream()
-                .anyMatch(answer -> hasManualPayload(answer));
-    }
-
-    private void calculatePartialScore() {
-        // Apenas calcula a taxa de acerto para questões de múltipla escolha, sem mudar status para APPROVED/FAILED
-        int correctAnswers = countCorrectAnswers();
-        int totalQuestions = questions.size(); // Considera todas as questões no denominador
-        // Assumindo todas para manter consistência percentual global, mesmo que projetos não tenham "acerto automático"
-        
-        if (totalQuestions > 0) {
-            this.accuracyRate = (int) (((double) correctAnswers / totalQuestions) * 100);
-        } else {
-            this.accuracyRate = 0;
-        }
-    }
-
-    private int countCorrectAnswers() {
-        if (questions == null || questions.isEmpty() || answers == null || answers.isEmpty()) {
-            return 0;
-        }
-
-        // Cria um mapa das respostas para acesso rápido por ID da questão
-        Map<UUID, Answer> answersMap = answers.stream()
-                .collect(Collectors.toMap(Answer::getQuestionId, a -> a));
-
-        int correctCount = 0;
-
-        for (Question question : questions) {
-            Answer answer = answersMap.get(question.getId());
-
-            if (question instanceof MultipleChoiceQuestion) {
-                if (isAnswerCorrect((MultipleChoiceQuestion) question, answer)) {
-                    correctCount++;
-                }
-            }
-            // Questões de projeto (ProjectQuestion) requerem correção manual, então não contam como "acerto automático" aqui.
-        }
-
-        return correctCount;
-    }
-
-    private boolean hasManualPayload(Answer answer) {
-        if (answer == null) {
-            return false;
-        }
-
-        return hasText(answer.getProjectUrl()) || hasText(answer.getTextResponse());
-    }
-
-    private boolean hasText(String value) {
-        return value != null && !value.isBlank();
-    }
-
-    private boolean isAnswerCorrect(MultipleChoiceQuestion question, Answer answer) {
-        if (answer == null || answer.getSelectedAlternativeId() == null) {
-            return false; // Não respondida ou nula conta como errada
-        }
-
-        return question.getAlternatives().stream()
-                .filter(Alternative::correct)
-                .findFirst()
-                .map(correctAlt -> correctAlt.id().equals(answer.getSelectedAlternativeId()))
-                .orElse(false);
-    }
-
-    public boolean isTimeExpired() {
-        if (startedAt == null || assessment.getEvaluationTimer() == null) {
-            return false;
-        }
-        // Dá uma tolerância de 1 minuto para latência de rede
-        return LocalDateTime.now().isAfter(startedAt.plus(assessment.getEvaluationTimer()).plusMinutes(1));
     }
 
     public UUID getId() {
@@ -186,6 +73,7 @@ public class AssessmentAttempt {
     }
 
     public void setQuestions(List<Question> questions) {
+        validateQuestionIds(questions);
         this.questions = questions;
     }
 
@@ -241,7 +129,178 @@ public class AssessmentAttempt {
         return status;
     }
 
-    public void setStatus(AssessmentAttemptStatus status) {
-        this.status = status;
+    /**
+     * Finaliza a tentativa de avaliação, calculando a nota e definindo o status.
+     *
+     * @param submittedAnswers Lista de respostas enviadas pelo usuário.
+     */
+    public void finish(List<Answer> submittedAnswers) {
+        this.finishedAt = LocalDateTime.now();
+        validateSubmittedAnswers(submittedAnswers);
+        this.answers = submittedAnswers;
+
+        if (this.assessment instanceof SystemAssessment) {
+            calculateSystemAssessmentResult(submittedAnswers);
+        } else if (this.assessment instanceof PersonalizedAssessment) {
+            // Para avaliações personalizadas, o status é COMPLETED (aguardando revisão do Recruiter)
+            // Mas ainda calculamos a nota das questões de múltipla escolha para referência
+            calculatePartialScore();
+            this.status = AssessmentAttemptStatus.COMPLETED;
+        }
     }
+
+    private void calculateSystemAssessmentResult(List<Answer> submittedAnswers) {
+        if (hasManualSubmission(submittedAnswers)) {
+            calculatePartialScore();
+            markCompleted();
+            return;
+        }
+
+        int correctAnswers = countCorrectAnswers();
+        int totalQuestions = questions.size();
+
+        if (totalQuestions > 0) {
+            this.accuracyRate = (int) (((double) correctAnswers / totalQuestions) * 100);
+        } else {
+            this.accuracyRate = 0;
+        }
+
+        // Regra de aprovação: >= 70%
+        if (this.accuracyRate >= 70) {
+            this.status = AssessmentAttemptStatus.APPROVED;
+        } else {
+            this.status = AssessmentAttemptStatus.FAILED;
+        }
+    }
+
+    private boolean hasManualSubmission(List<Answer> submittedAnswers) {
+        return submittedAnswers != null && submittedAnswers.stream()
+                .filter(Objects::nonNull)
+                .anyMatch(Answer::hasManualPayload);
+    }
+
+    private void calculatePartialScore() {
+        // Apenas calcula a taxa de acerto para questões de múltipla escolha, sem mudar status para APPROVED/FAILED
+        int correctAnswers = countCorrectAnswers();
+        int totalQuestions = questions.size(); // Considera todas as questões no denominador
+        // Assumindo todas para manter consistência percentual global, mesmo que projetos não tenham "acerto automático"
+
+        if (totalQuestions > 0) {
+            this.accuracyRate = (int) (((double) correctAnswers / totalQuestions) * 100);
+        } else {
+            this.accuracyRate = 0;
+        }
+    }
+
+    private int countCorrectAnswers() {
+        if (questions == null || questions.isEmpty() || answers == null || answers.isEmpty()) {
+            return 0;
+        }
+
+        // Cria um mapa das respostas para acesso rápido por ID da questão
+        Map<UUID, Answer> answersMap = answers.stream()
+                .collect(Collectors.toMap(Answer::getQuestionId, a -> a));
+
+        int correctCount = 0;
+
+        for (Question question : questions) {
+            Answer answer = answersMap.get(question.getId());
+
+            if (question instanceof MultipleChoiceQuestion) {
+                if (isAnswerCorrect((MultipleChoiceQuestion) question, answer)) {
+                    correctCount++;
+                }
+            }
+            // Questões de projeto (ProjectQuestion) requerem correção manual, então não contam como "acerto automático" aqui.
+        }
+
+        return correctCount;
+    }
+
+    private boolean isAnswerCorrect(MultipleChoiceQuestion question, Answer answer) {
+        if (answer == null || answer.getSelectedAlternativeId() == null) {
+            return false; // Não respondida ou nula conta como errada
+        }
+
+        return question.getAlternatives().stream()
+                .filter(Alternative::correct)
+                .findFirst()
+                .map(correctAlt -> correctAlt.id().equals(answer.getSelectedAlternativeId()))
+                .orElse(false);
+    }
+
+    public void complete() {
+        requireStatus(AssessmentAttemptStatus.IN_PROGRESS, "Only in-progress attempts can be completed");
+        markCompleted();
+    }
+
+    public void approve() {
+        requireStatus(AssessmentAttemptStatus.COMPLETED, "Only completed attempts can be approved");
+        this.status = AssessmentAttemptStatus.APPROVED;
+    }
+
+    public void fail() {
+        requireStatus(AssessmentAttemptStatus.COMPLETED, "Only completed attempts can be failed");
+        this.status = AssessmentAttemptStatus.FAILED;
+    }
+
+    private void markCompleted() {
+        this.status = AssessmentAttemptStatus.COMPLETED;
+    }
+
+    private void requireStatus(AssessmentAttemptStatus expectedStatus, String message) {
+        if (status != expectedStatus) {
+            throw new IllegalStateException(message);
+        }
+    }
+
+    private void validateQuestionIds(List<Question> questions) {
+        if (questions == null || questions.isEmpty()) {
+            return;
+        }
+
+        Set<UUID> uniqueIds = questions.stream()
+                .filter(Objects::nonNull)
+                .map(Question::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        long questionIdsCount = questions.stream()
+                .filter(Objects::nonNull)
+                .map(Question::getId)
+                .filter(Objects::nonNull)
+                .count();
+
+        if (uniqueIds.size() != questionIdsCount) {
+            throw new IllegalArgumentException("questions must not contain duplicated ids");
+        }
+    }
+
+    private void validateSubmittedAnswers(List<Answer> submittedAnswers) {
+        if (submittedAnswers == null || submittedAnswers.isEmpty()) {
+            return;
+        }
+
+        Set<UUID> questionIds = questions == null
+                ? Set.of()
+                : questions.stream()
+                  .filter(Objects::nonNull)
+                  .map(Question::getId)
+                  .filter(Objects::nonNull)
+                  .collect(Collectors.toSet());
+
+        Set<UUID> answerIds = submittedAnswers.stream()
+                .filter(Objects::nonNull)
+                .map(Answer::getQuestionId)
+                .collect(Collectors.toSet());
+
+        if (answerIds.size() != submittedAnswers.stream().filter(Objects::nonNull).count()) {
+            throw new IllegalArgumentException("submittedAnswers must not contain duplicated question ids");
+        }
+
+        if (!questionIds.containsAll(answerIds)) {
+            throw new IllegalArgumentException("submittedAnswers contains answer for question outside this attempt");
+        }
+    }
+
 }

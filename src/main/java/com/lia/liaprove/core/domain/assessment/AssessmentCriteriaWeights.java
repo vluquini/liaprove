@@ -32,27 +32,12 @@ public class AssessmentCriteriaWeights {
         return hardSkillsWeight;
     }
 
-    public void setHardSkillsWeight(int hardSkillsWeight) {
-        validate(hardSkillsWeight, this.softSkillsWeight, this.experienceWeight);
-        this.hardSkillsWeight = hardSkillsWeight;
-    }
-
     public int getSoftSkillsWeight() {
         return softSkillsWeight;
     }
 
-    public void setSoftSkillsWeight(int softSkillsWeight) {
-        validate(this.hardSkillsWeight, softSkillsWeight, this.experienceWeight);
-        this.softSkillsWeight = softSkillsWeight;
-    }
-
     public int getExperienceWeight() {
         return experienceWeight;
-    }
-
-    public void setExperienceWeight(int experienceWeight) {
-        validate(this.hardSkillsWeight, this.softSkillsWeight, experienceWeight);
-        this.experienceWeight = experienceWeight;
     }
 
     private static void validate(int hardSkillsWeight, int softSkillsWeight, int experienceWeight) {
