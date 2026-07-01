@@ -73,8 +73,8 @@ class CommunityReviewAssessmentAttemptSchedulerTest {
     }
 
     @Test
-    @DisplayName("Should keep recent completed system project attempt untouched")
-    void shouldKeepRecentCompletedSystemProjectAttemptUntouched() {
+    @DisplayName("Should update recent completed system project attempt to a final status")
+    void shouldUpdateRecentCompletedSystemProjectAttemptToFinalStatus() {
         UserEntity owner = getSeededUserEntity("carlos.silva@example.com");
         AssessmentAttemptEntity recentAttempt = createSystemProjectAttempt(
                 owner,
@@ -85,8 +85,40 @@ class CommunityReviewAssessmentAttemptSchedulerTest {
 
         scheduler.evaluateExpiredCommunityReviewAttempts();
 
-        AssessmentAttemptEntity unprocessedAttempt = assessmentAttemptJpaRepository.findById(recentAttempt.getId()).orElseThrow();
-        assertThat(unprocessedAttempt.getStatus()).isEqualTo(AssessmentAttemptStatus.COMPLETED);
+        AssessmentAttemptEntity processedAttempt = assessmentAttemptJpaRepository.findById(recentAttempt.getId()).orElseThrow();
+        assertThat(processedAttempt.getStatus()).isIn(AssessmentAttemptStatus.APPROVED, AssessmentAttemptStatus.FAILED);
+    }
+
+    @Test
+    @DisplayName("Should update only one completed system project attempt per scheduler run")
+    void shouldUpdateOnlyOneCompletedSystemProjectAttemptPerSchedulerRun() {
+        UserEntity owner = getSeededUserEntity("carlos.silva@example.com");
+        AssessmentAttemptEntity firstAttempt = createSystemProjectAttempt(
+                owner,
+                AssessmentAttemptStatus.COMPLETED,
+                LocalDateTime.now().minusDays(2),
+                "https://github.com/acme/project-first"
+        );
+        AssessmentAttemptEntity secondAttempt = createSystemProjectAttempt(
+                owner,
+                AssessmentAttemptStatus.COMPLETED,
+                LocalDateTime.now().minusDays(2),
+                "https://github.com/acme/project-second"
+        );
+
+        scheduler.evaluateExpiredCommunityReviewAttempts();
+
+        List<AssessmentAttemptStatus> statuses = List.of(
+                assessmentAttemptJpaRepository.findById(firstAttempt.getId()).orElseThrow().getStatus(),
+                assessmentAttemptJpaRepository.findById(secondAttempt.getId()).orElseThrow().getStatus()
+        );
+
+        assertThat(statuses)
+                .filteredOn(status -> status == AssessmentAttemptStatus.APPROVED || status == AssessmentAttemptStatus.FAILED)
+                .hasSize(1);
+        assertThat(statuses)
+                .filteredOn(status -> status == AssessmentAttemptStatus.COMPLETED)
+                .hasSize(1);
     }
 
     @Test

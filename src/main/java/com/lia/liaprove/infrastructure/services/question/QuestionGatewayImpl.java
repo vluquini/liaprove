@@ -88,6 +88,14 @@ public class QuestionGatewayImpl implements QuestionGateway {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<Question> findByStatus(QuestionStatus status) {
+        return questionJpaRepository.findByStatus(status).stream()
+                .map(questionMapper::toDomain)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public List<Question> findRandomEligibleByCriteria(Set<KnowledgeArea> knowledgeAreas, DifficultyLevel difficultyLevel,
                                                        QuestionStatus status, int limit, QuestionType questionType,
                                                        UUID requesterId) {

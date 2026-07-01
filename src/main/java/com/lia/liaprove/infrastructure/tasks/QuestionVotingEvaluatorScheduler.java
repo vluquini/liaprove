@@ -7,7 +7,6 @@ import com.lia.liaprove.core.usecases.question.EvaluateVotingResultUseCase;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -28,17 +27,13 @@ public class QuestionVotingEvaluatorScheduler {
         this.evaluateVotingResultUseCase = evaluateVotingResultUseCase;
     }
 
-    // Runs every 5 minutes
-    @Scheduled(fixedRate = 300000)
+    // Runs every 1 minute by default. This demo flow ignores votingEndDate and evaluates one VOTING question per run.
+    @Scheduled(fixedRateString = "${question.voting.evaluator.scheduler.fixed-rate-ms:60000}")
     public void evaluateExpiredQuestionVotes() {
-        // Find questions that are in VOTING status and their votingEndDate has passed
-        List<Question> expiredVotingQuestions = questionGateway.findByStatusAndVotingEndDateBefore(
-                QuestionStatus.VOTING,
-                LocalDateTime.now()
-        );
+        List<Question> votingQuestions = questionGateway.findByStatus(QuestionStatus.VOTING);
 
-        for (Question question : expiredVotingQuestions) {
-            evaluateVotingResultUseCase.evaluate(question.getId());
+        if (!votingQuestions.isEmpty()) {
+            evaluateVotingResultUseCase.evaluate(votingQuestions.get(0).getId());
         }
     }
 }
