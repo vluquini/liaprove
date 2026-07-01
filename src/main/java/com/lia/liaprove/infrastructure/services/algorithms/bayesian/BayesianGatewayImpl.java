@@ -2,14 +2,13 @@ package com.lia.liaprove.infrastructure.services.algorithms.bayesian;
 
 import com.lia.liaprove.application.gateways.algorithms.bayesian.BayesianGateway;
 import com.lia.liaprove.application.gateways.question.QuestionGateway;
-import com.lia.liaprove.core.algorithms.bayesian.QuestionFeedbackSummary;
+import com.lia.liaprove.core.algorithms.bayesian.QuestionVoteSummary;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,16 +27,14 @@ public class BayesianGatewayImpl implements BayesianGateway {
     }
 
     @Override
-    public QuestionFeedbackSummary getFeedbackSummaryForQuestion(UUID questionId) {
+    public QuestionVoteSummary getVoteSummaryForQuestion(UUID questionId) {
         // Mock: Retorna dados neutros para não enviesar negativamente
-        return new QuestionFeedbackSummary(
+        return new QuestionVoteSummary(
                 questionId,
                 0,
                 0,
                 0.0,
-                0.0,
-                new HashMap<>(),
-                new HashMap<>());
+                0.0);
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.lia.liaprove.application.gateways.algorithms.bayesian;
 
-import com.lia.liaprove.core.algorithms.bayesian.QuestionFeedbackSummary;
-import com.lia.liaprove.core.domain.metrics.FeedbackQuestion;
+import com.lia.liaprove.core.algorithms.bayesian.QuestionVoteSummary;
 import com.lia.liaprove.core.domain.question.Question;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
 
@@ -10,23 +9,22 @@ import java.util.UUID;
 
 /**
  * Porta que a camada infrastructure deve implementar.
- * Preferencialmente as agregações como getFeedbackSummaryForQuestion devem ser calculadas
+ * Preferencialmente as agregações como getVoteSummaryForQuestion devem ser calculadas
  * no banco (consulta agregada) para performance.
  *
  * Campos / dados que um provider deve expor:
- *  - List<UserRecruiter> getAllRecruiters()                          -> recruiter.voteWeight, recruiterUsageCount, recruiterRating
- *  - List<Question> getAllQuestions()                                -> question.recruiterUsageCount, relevanceByLLM, upVote/downVote, knowledgeAreas
- *  - List<FeedbackQuestion> getFeedbacksForQuestion(UUID questionId) -> votes per user, difficulty, relevanceLevel,...
+ *  - List<UserRecruiter> getAllRecruiters() -> recruiter.voteWeight, recruiterUsageCount, recruiterRating
+ *  - List<Question> getAllQuestions()       -> question.recruiterUsageCount, relevanceByLLM, upVote/downVote, knowledgeAreas
  *
- * Observação: as entidades retornadas são do domínio core (Question, FeedbackQuestion, UserRecruiter).
+ * Observação: as entidades retornadas são do domínio core (Question, UserRecruiter).
  */
 public interface BayesianGateway {
 
     /**
-     * Retorna resumo (up/down/distro) dos feedbacks para a questão solicitada.
+     * Retorna resumo agregado dos votos da questão solicitada.
      * Implementação ideal: consulta agregada no BD.
      */
-    QuestionFeedbackSummary getFeedbackSummaryForQuestion(UUID questionId);
+    QuestionVoteSummary getVoteSummaryForQuestion(UUID questionId);
 
     /**
      * Retorna todos os recruiters (ou um subconjunto relevante).
@@ -40,11 +38,4 @@ public interface BayesianGateway {
      */
     List<Question> getAllQuestions();
 
-    /**
-     * (Opcional) Retornar feedbacks brutos quando for necessário (por analítica).
-     * Não é obrigatório para o algoritmo principal.
-     */
-    default List<FeedbackQuestion> getFeedbacksForQuestion(UUID questionId) {
-        return List.of();
-    }
 }
