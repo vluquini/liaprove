@@ -22,17 +22,17 @@ public final class RecruiterMetrics {
     public RecruiterMetrics(UUID recruiterId, Integer currentVoteWeight, int totalAssessmentsCreated, int recentAssessmentsCount,
                             double avgAssessmentRating, int questionsApprovedCount, int feedbackLikes, int feedbackDislikes,
                             double commentLikeRatio, double recruiterRating) {
-        this.recruiterId = Objects.requireNonNull(recruiterId);
+        this.recruiterId = Objects.requireNonNull(recruiterId, "recruiterId");
         this.currentVoteWeight = currentVoteWeight;
         this.totalAssessmentsCreated = Math.max(0, totalAssessmentsCreated);
         this.recentAssessmentsCount = Math.max(0, recentAssessmentsCount);
-        this.avgAssessmentRating = Double.isFinite(avgAssessmentRating) ? avgAssessmentRating : 0.0;
+        this.avgAssessmentRating = clampRating(avgAssessmentRating);
         this.questionsApprovedCount = Math.max(0, questionsApprovedCount);
         this.feedbackLikes = Math.max(0, feedbackLikes);
         this.feedbackDislikes = Math.max(0, feedbackDislikes);
-        this.commentLikeRatio = (Double.isFinite(commentLikeRatio) && commentLikeRatio >= 0.0 && commentLikeRatio <= 1.0)
-                                ? commentLikeRatio : computeLikeRatioSafe(feedbackLikes, feedbackDislikes);
-        this.recruiterRating = Double.isFinite(recruiterRating) ? recruiterRating : 0.0;
+        this.commentLikeRatio = isValidRatio(commentLikeRatio)
+                                ? commentLikeRatio : computeLikeRatioSafe(this.feedbackLikes, this.feedbackDislikes);
+        this.recruiterRating = clampRating(recruiterRating);
     }
 
     public UUID getRecruiterId() { return recruiterId; }
@@ -48,7 +48,18 @@ public final class RecruiterMetrics {
 
     private static double computeLikeRatioSafe(int likes, int dislikes) {
         int total = likes + dislikes;
-        if (total == 0) return 0.0;
+        if (total == 0) return 0.5;
         return (double) likes / (double) total;
+    }
+
+    private static boolean isValidRatio(double value) {
+        return Double.isFinite(value) && value >= 0.0 && value <= 1.0;
+    }
+
+    private static double clampRating(double value) {
+        if (!Double.isFinite(value)) {
+            return 0.0;
+        }
+        return Math.clamp(value, 0.0, 5.0);
     }
 }

@@ -11,8 +11,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
- * Implementação do usecase de GA usando RecruiterGateway como fonte de dados e destino.
- * - runAdjustVoteWeights(): obtém métricas, executa GA e persiste resultados via RecruiterGateway.
+ * Implementação do usecase de GA usando GeneticGateway como fonte de métricas.
+ * - runAdjustVoteWeights(): obtém métricas e executa GA.
  * - runAdjustVoteWeights(List<RecruiterMetrics>): versão para testes / dry-run (não persiste por si só).
  *
  * Nota: esta implementação é propositalmente simples (tournament selection, average crossover).
@@ -33,18 +33,23 @@ public class GeneticAlgorithmUseCaseImpl implements GeneticAlgorithmUseCase {
     @Override
     public Map<UUID, Integer> runAdjustVoteWeights() {
         List<RecruiterMetrics> metrics = geneticGateway.fetchAllRecruiterMetrics();
-        Map<UUID, Integer> results = runAdjustVoteWeights(metrics);
-        // persistência é feito em AdjustVoteWeightUseCaseImpl
-        // geneticGateway.updateVoteWeightBulk(results);
-        return results;
+        return runAdjustVoteWeights(metrics);
     }
 
     @Override
     public Map<UUID, Integer> runAdjustVoteWeights(List<RecruiterMetrics> seedMetrics) {
         if (seedMetrics == null || seedMetrics.isEmpty()) return Collections.emptyMap();
 
+        Map<UUID, RecruiterMetrics> metricsById = seedMetrics.stream()
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(RecruiterMetrics::getRecruiterId, m -> m, (first, ignored) -> first, LinkedHashMap::new));
+
+        if (metricsById.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
         // 1) create initial population (one individual per recruiter)
-        List<Individual> population = seedMetrics.stream()
+        List<Individual> population = metricsById.values().stream()
                 .map(m -> {
                     int current = m.getCurrentVoteWeight() == null ? config.getMinWeight() : m.getCurrentVoteWeight();
                     double normalized = normalize(current, config.getMinWeight(), config.getMaxWeight());
@@ -53,39 +58,45 @@ public class GeneticAlgorithmUseCaseImpl implements GeneticAlgorithmUseCase {
                 .collect(Collectors.toList());
 
         // ensure population size (pad/trim)
-        if (population.size() < config.getPopulationSize()) {
-            while (population.size() < config.getPopulationSize()) {
+        int effectivePopulationSize = Math.max(config.getPopulationSize(), metricsById.size());
+        if (population.size() < effectivePopulationSize) {
+            while (population.size() < effectivePopulationSize) {
                 Individual base = population.get(this.random.nextInt(population.size()));
                 population.add(new Individual(base.getRecruiterId(), clamp(base.getGene() + noise())));
             }
-        } else if (population.size() > config.getPopulationSize()) {
-            population = new ArrayList<>(population.subList(0, config.getPopulationSize()));
         }
-
-        // create map for metrics lookup
-        Map<UUID, RecruiterMetrics> metricsById = seedMetrics.stream()
-                .collect(Collectors.toMap(RecruiterMetrics::getRecruiterId, m -> m));
 
         // evaluate initial
         evaluatePopulation(population, metricsById);
 
         // evolve
         for (int gen = 0; gen < config.getGenerations(); gen++) {
-            population = nextGeneration(population, metricsById);
+            population = nextGeneration(population);
             evaluatePopulation(population, metricsById);
         }
 
-        // collect best gene per recruiter (map by recruiterId)
-        Map<UUID, Integer> newWeights = new HashMap<>();
+        Map<UUID, Individual> bestByRecruiter = new HashMap<>();
         for (Individual ind : population) {
             if (metricsById.containsKey(ind.getRecruiterId())) {
-                int weight = denormalizeAndClamp(ind.getGene(), config.getMinWeight(), config.getMaxWeight());
-                newWeights.put(ind.getRecruiterId(), weight);
+                bestByRecruiter.merge(
+                        ind.getRecruiterId(),
+                        ind,
+                        (current, candidate) -> candidate.getFitness() > current.getFitness() ? candidate : current
+                );
             }
         }
 
+        Map<UUID, Integer> newWeights = new HashMap<>();
+        for (Map.Entry<UUID, Individual> entry : bestByRecruiter.entrySet()) {
+            int weight = denormalizeAndClamp(entry.getValue().getGene(), config.getMinWeight(), config.getMaxWeight());
+            newWeights.put(entry.getKey(), weight);
+        }
+
         // fallback: keep original when missing
-        seedMetrics.forEach(m -> newWeights.putIfAbsent(m.getRecruiterId(), m.getCurrentVoteWeight() == null ? config.getMinWeight() : m.getCurrentVoteWeight()));
+        metricsById.values().forEach(m -> newWeights.putIfAbsent(
+                m.getRecruiterId(),
+                Math.clamp(m.getCurrentVoteWeight() == null ? config.getMinWeight() : m.getCurrentVoteWeight(), config.getMinWeight(), config.getMaxWeight())
+        ));
 
         return newWeights;
     }
@@ -100,7 +111,7 @@ public class GeneticAlgorithmUseCaseImpl implements GeneticAlgorithmUseCase {
         }
     }
 
-    private List<Individual> nextGeneration(List<Individual> pop, Map<UUID, RecruiterMetrics> metricsById) {
+    private List<Individual> nextGeneration(List<Individual> pop) {
         List<Individual> next = new ArrayList<>();
         while (next.size() < pop.size()) {
             Individual a = tournament(pop, 3);
@@ -140,15 +151,16 @@ public class GeneticAlgorithmUseCaseImpl implements GeneticAlgorithmUseCase {
         return (this.random.nextGaussian() * 0.03);
     }
 
-    private double clamp(double v) { return Math.max(0.0, Math.min(1.0, v)); }
+    private double clamp(double v) { return Math.clamp(v, 0.0, 1.0); }
 
     private double normalize(double val, int min, int max) {
         if (max == min) return 0.0;
-        return (val - min) / (double)(max - min);
+        double bounded = Math.clamp(val, min, max);
+        return (bounded - min) / (double)(max - min);
     }
 
     private int denormalizeAndClamp(double normalized, int min, int max) {
         int w = (int) Math.round(min + normalized * (max - min));
-        return Math.max(min, Math.min(max, w));
+        return Math.clamp(w, min, max);
     }
 }

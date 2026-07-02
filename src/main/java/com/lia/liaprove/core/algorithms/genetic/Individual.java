@@ -1,5 +1,6 @@
 package com.lia.liaprove.core.algorithms.genetic;
 
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -11,13 +12,23 @@ public class Individual {
     private double fitness;
 
     public Individual(UUID recruiterId, double gene) {
-        this.recruiterId = recruiterId;
-        this.gene = gene;
+        this.recruiterId = Objects.requireNonNull(recruiterId, "recruiterId");
+        setGene(gene);
     }
 
     public UUID getRecruiterId() { return recruiterId; }
     public double getGene() { return gene; }
-    public void setGene(double gene) { this.gene = gene; }
+    public void setGene(double gene) {
+        if (!Double.isFinite(gene) || gene < 0.0 || gene > 1.0) {
+            throw new IllegalArgumentException("gene must be finite and in [0,1]");
+        }
+        this.gene = gene;
+    }
     public double getFitness() { return fitness; }
-    public void setFitness(double fitness) { this.fitness = fitness; }
+    public void setFitness(double fitness) {
+        if (!Double.isFinite(fitness) || fitness < 0.0 || fitness > 1.0) {
+            throw new IllegalArgumentException("fitness must be finite and in [0,1]");
+        }
+        this.fitness = fitness;
+    }
 }

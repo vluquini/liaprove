@@ -18,28 +18,25 @@ public interface ManageVoteWeightUseCase {
      * geralmente por um algoritmo (e.g., Genético).
      *
      * @param dryRun Indica se a execução deve ser apenas uma simulação, sem persistir os resultados.
-     * @param triggeredByAdminId ID do administrador que disparou a ação.
      * @return Um mapa contendo o ID do recrutador e seu novo peso de voto ajustado.
      */
-    Map<UUID, Integer> adjustAllRecruiterWeights(boolean dryRun, UUID triggeredByAdminId);
+    Map<UUID, Integer> adjustAllRecruiterWeights(boolean dryRun);
 
     /**
      * Aplica manualmente um mapa de pesos de voto para recrutadores específicos.
      * Isso pode sobrescrever os pesos calculados por algoritmos.
      *
      * @param weights Um mapa onde a chave é o ID do recrutador e o valor é o peso de voto.
-     * @param adminId ID do administrador que realizou a alteração.
      */
-    void applyManualWeights(Map<UUID, Integer> weights, UUID adminId);
+    void applyManualWeights(Map<UUID, Integer> weights);
 
     /**
      * Define um peso de voto específico para um recrutador.
      *
      * @param recruiterId O ID do recrutador alvo.
      * @param newWeight O novo peso de voto a ser atribuído.
-     * @param adminId ID do administrador que realizou a alteração.
      */
-    void setRecruiterVoteWeight(UUID recruiterId, int newWeight, UUID adminId);
+    void setRecruiterVoteWeight(UUID recruiterId, int newWeight);
 
     /**
      * Define o multiplicador associado a um {@link UserRole}.
@@ -47,9 +44,8 @@ public interface ManageVoteWeightUseCase {
      *
      * @param role A role cujo multiplicador será alterado.
      * @param multiplier O novo valor do multiplicador (e.g., 1.0, 3.0).
-     * @param adminId ID do administrador que realizou a alteração.
      */
-    void setRoleMultiplier(UserRole role, double multiplier, UUID adminId);
+    void setRoleMultiplier(UserRole role, double multiplier);
 
     /**
      * Recupera o multiplicador atual associado a um {@link UserRole}.
@@ -65,9 +61,8 @@ public interface ManageVoteWeightUseCase {
      *
      * @param recruiterId O ID do recrutador alvo.
      * @param multiplier O novo multiplicador para este recrutador.
-     * @param adminId ID do administrador que realizou a alteração.
      */
-    void setRecruiterMultiplier(UUID recruiterId, double multiplier, UUID adminId);
+    void setRecruiterMultiplier(UUID recruiterId, double multiplier);
 
     /**
      * Recupera o multiplicador específico de um recrutador, se houver um override.

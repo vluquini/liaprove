@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -94,9 +93,8 @@ public class GeneticGatewayImpl implements GeneticGateway {
 
             int likes = reactionCounts.likes;
             int dislikes = reactionCounts.dislikes;
-            double likeRatio = (likes + dislikes == 0) ? 0.0 : (double) likes / (double) (likes + dislikes);
-
-            double recruiterRating = recruiter.getRecruiterRating() == null ? 0.0 : recruiter.getRecruiterRating();
+            double likeRatio = toSmoothedLikeRatio(likes, dislikes);
+            double recruiterRating = toSmoothedRecruiterRating(likes, dislikes);
 
             RecruiterMetrics metrics = new RecruiterMetrics(
                     recruiterId,
@@ -115,33 +113,6 @@ public class GeneticGatewayImpl implements GeneticGateway {
         }
 
         return result;
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public RecruiterMetrics fetchRecruiterMetrics(UUID recruiterId) {
-        if (recruiterId == null) {
-            return null;
-        }
-        return fetchAllRecruiterMetrics().stream()
-                .filter(m -> Objects.equals(m.getRecruiterId(), recruiterId))
-                .findFirst()
-                .orElse(null);
-    }
-
-    @Override
-    @Transactional
-    public void updateVoteWeight(UUID recruiterId, int newWeight) {
-        if (recruiterId == null) {
-            return;
-        }
-        int bounded = Math.max(1, Math.min(10, newWeight));
-        userJpaRepository.findById(recruiterId).ifPresent(entity -> {
-            if (entity instanceof UserRecruiterEntity recruiter) {
-                recruiter.setVoteWeight(bounded);
-                userJpaRepository.save(recruiter);
-            }
-        });
     }
 
     private Map<UUID, Integer> toCountMap(List<Object[]> rows) {
@@ -202,8 +173,19 @@ public class GeneticGatewayImpl implements GeneticGateway {
         return result;
     }
 
+    static double toSmoothedRecruiterRating(int likes, int dislikes) {
+        return Math.clamp(toSmoothedLikeRatio(likes, dislikes) * 5.0, 0.0, 5.0);
+    }
+
+    private static double toSmoothedLikeRatio(int likes, int dislikes) {
+        int safeLikes = Math.max(0, likes);
+        int safeDislikes = Math.max(0, dislikes);
+        double alpha = 1.0;
+        return (safeLikes + alpha) / (safeLikes + safeDislikes + 2.0 * alpha);
+    }
+
     private double clamp(double value, double min, double max) {
-        return Math.max(min, Math.min(max, value));
+        return Math.clamp(value, min, max);
     }
 
     // Converte media de accuracyRate (0..100) para escala 0..5 dividindo por 20.0.

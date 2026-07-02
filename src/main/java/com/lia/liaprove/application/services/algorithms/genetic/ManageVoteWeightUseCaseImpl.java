@@ -34,7 +34,7 @@ public class ManageVoteWeightUseCaseImpl implements ManageVoteWeightUseCase {
     }
 
     @Override
-    public Map<UUID, Integer> adjustAllRecruiterWeights(boolean dryRun, UUID triggeredByAdminId) {
+    public Map<UUID, Integer> adjustAllRecruiterWeights(boolean dryRun) {
         Map<UUID, Integer> newWeights = geneticUseCase.runAdjustVoteWeights();
 
         if (newWeights == null || newWeights.isEmpty()) {
@@ -50,18 +50,19 @@ public class ManageVoteWeightUseCaseImpl implements ManageVoteWeightUseCase {
     }
 
     @Override
-    public void applyManualWeights(Map<UUID, Integer> weights, UUID adminId) {
+    public void applyManualWeights(Map<UUID, Integer> weights) {
         if (weights == null || weights.isEmpty()) return;
         applyAndPersistWeights(weights);
     }
 
     @Override
-    public void setRecruiterVoteWeight(UUID recruiterId, int newWeight, UUID adminId) {
+    public void setRecruiterVoteWeight(UUID recruiterId, int newWeight) {
         applyAndPersistWeights(Map.of(recruiterId, newWeight));
     }
 
     @Override
-    public void setRoleMultiplier(UserRole role, double multiplier, UUID adminId) {
+    public void setRoleMultiplier(UserRole role, double multiplier) {
+        validateMultiplier(multiplier);
         voteMultiplierGateway.setRoleMultiplier(role, multiplier);
     }
 
@@ -72,7 +73,8 @@ public class ManageVoteWeightUseCaseImpl implements ManageVoteWeightUseCase {
     }
 
     @Override
-    public void setRecruiterMultiplier(UUID recruiterId, double multiplier, UUID adminId) {
+    public void setRecruiterMultiplier(UUID recruiterId, double multiplier) {
+        validateMultiplier(multiplier);
         voteMultiplierGateway.setRecruiterMultiplier(recruiterId, multiplier);
     }
 
@@ -82,21 +84,16 @@ public class ManageVoteWeightUseCaseImpl implements ManageVoteWeightUseCase {
         return voteMultiplierGateway.getRecruiterMultiplier(recruiterId).orElse(null);
     }
 
-    private List<UserRecruiter> applyAndPersistWeights(Map<UUID, Integer> weights) {
-        if (weights == null || weights.isEmpty()) return List.of();
+    private void applyAndPersistWeights(Map<UUID, Integer> weights) {
+        if (weights == null || weights.isEmpty()) return;
 
         Map<UUID, User> usersMap = userGateway.findByIdsAsMap(weights.keySet());
-        if (usersMap == null || usersMap.isEmpty()) return List.of();
+        if (usersMap == null || usersMap.isEmpty()) return;
 
         List<UserRecruiter> toSave = applyWeightsAndCollect(weights, usersMap);
-        if (toSave.isEmpty()) return List.of();
+        if (toSave.isEmpty()) return;
 
-        List<User> saved = userGateway.saveAll(new ArrayList<>(toSave));
-
-        return saved.stream()
-                .filter(u -> u instanceof UserRecruiter)
-                .map(u -> (UserRecruiter) u)
-                .toList();
+        userGateway.saveAll(new ArrayList<>(toSave));
     }
 
     private List<UserRecruiter> applyWeightsAndCollect(Map<UUID, Integer> weights, Map<UUID, User> usersMap) {
@@ -115,16 +112,21 @@ public class ManageVoteWeightUseCaseImpl implements ManageVoteWeightUseCase {
             if (targetWeight == null) continue;
 
             User u = usersMap.get(id);
-            if (!(u instanceof UserRecruiter)) {
+            if (!(u instanceof UserRecruiter recruiter)) {
                 continue;
             }
 
-            UserRecruiter recruiter = (UserRecruiter) u;
-            int bounded = Math.max(min, Math.min(max, targetWeight));
+            int bounded = Math.clamp(targetWeight, min, max);
             recruiter.setVoteWeightSafely(bounded, min, max);
             result.add(recruiter);
         }
 
         return result;
+    }
+
+    private void validateMultiplier(double multiplier) {
+        if (!Double.isFinite(multiplier) || multiplier < 0.0) {
+            throw new IllegalArgumentException("multiplier must be finite and >= 0.0");
+        }
     }
 }

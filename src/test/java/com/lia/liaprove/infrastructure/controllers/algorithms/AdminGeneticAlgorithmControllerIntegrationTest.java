@@ -90,6 +90,29 @@ class AdminGeneticAlgorithmControllerIntegrationTest {
     }
 
     @Test
+    @DisplayName("Should update recruiter vote weights in batch")
+    void shouldUpdateRecruiterVoteWeightsInBatch() throws Exception {
+        UserEntity admin = getSeededUser("admin@liaprove.com");
+        UserEntity recruiter = getSeededUser("roberto.l@hiredev.com");
+
+        mockMvc.perform(patch("/api/v1/admin/algorithms/genetic/recruiters/vote-weights")
+                        .header("X-Dev-User-Email", admin.getEmail())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"weights":[{"recruiterId":"%s","weight":9}]}
+                                """.formatted(recruiter.getId())))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/v1/admin/algorithms/genetic/recruiters/weights")
+                        .header("X-Dev-User-Email", admin.getEmail())
+                        .param("name", "Roberto")
+                        .param("page", "0")
+                        .param("size", "20"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].voteWeight").value(9));
+    }
+
+    @Test
     @DisplayName("Should return forbidden when non-admin lists recruiter vote weights")
     void shouldReturnForbiddenWhenNonAdminListsRecruiterVoteWeights() throws Exception {
         UserEntity professional = getSeededUser("carlos.silva@example.com");

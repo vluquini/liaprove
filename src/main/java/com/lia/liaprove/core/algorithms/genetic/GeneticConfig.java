@@ -8,23 +8,26 @@ public final class GeneticConfig {
     private final int generations;
     private final double mutationRate;    // ex.: 0.05
     private final double crossoverRate;   // ex.: 0.7
-    private final int minWeight;          // ex.: 0
-    private final int maxWeight;          // ex.: 100
+    private final int minWeight;          // ex.: 1
+    private final int maxWeight;          // ex.: 10
 
     // normalizadores / limites para features usadas no fitness
     private final int maxRecentAssessments;   // ex: 10 (para janela semanal/mensal)
+    private final int maxTotalAssessmentsCreated; // ex: 100 (histórico)
     private final int maxQuestionsApproved;   // ex: 20
 
     public GeneticConfig(int populationSize, int generations, double mutationRate, double crossoverRate, int minWeight,
-                         int maxWeight, int maxRecentAssessments, int maxQuestionsApproved) {
+                         int maxWeight, int maxRecentAssessments, int maxTotalAssessmentsCreated,
+                         int maxQuestionsApproved) {
         if (populationSize <= 0) throw new IllegalArgumentException("populationSize must be > 0");
         if (generations <= 0) throw new IllegalArgumentException("generations must be > 0");
-        if (!(mutationRate >= 0.0 && mutationRate <= 1.0)) throw new IllegalArgumentException("mutationRate must be in [0,1]");
-        if (!(crossoverRate >= 0.0 && crossoverRate <= 1.0)) throw new IllegalArgumentException("crossoverRate must be in [0,1]");
+        if (!Double.isFinite(mutationRate) || mutationRate < 0.0 || mutationRate > 1.0) throw new IllegalArgumentException("mutationRate must be finite and in [0,1]");
+        if (!Double.isFinite(crossoverRate) || crossoverRate < 0.0 || crossoverRate > 1.0) throw new IllegalArgumentException("crossoverRate must be finite and in [0,1]");
         if (minWeight < 1) throw new IllegalArgumentException("minWeight must be >= 1");
         if (maxWeight < minWeight) throw new IllegalArgumentException("maxWeight must be >= minWeight");
         if (maxWeight > 10) throw new IllegalArgumentException("maxWeight must be <= 10");
         if (maxRecentAssessments < 1) throw new IllegalArgumentException("maxRecentAssessments must be >= 1");
+        if (maxTotalAssessmentsCreated < 1) throw new IllegalArgumentException("maxTotalAssessmentsCreated must be >= 1");
         if (maxQuestionsApproved < 1) throw new IllegalArgumentException("maxQuestionsApproved must be >= 1");
 
         this.populationSize = populationSize;
@@ -34,6 +37,7 @@ public final class GeneticConfig {
         this.minWeight = minWeight;
         this.maxWeight = maxWeight;
         this.maxRecentAssessments = maxRecentAssessments;
+        this.maxTotalAssessmentsCreated = maxTotalAssessmentsCreated;
         this.maxQuestionsApproved = maxQuestionsApproved;
     }
 
@@ -44,6 +48,7 @@ public final class GeneticConfig {
     public int getMinWeight() { return minWeight; }
     public int getMaxWeight() { return maxWeight; }
     public int getMaxRecentAssessments() { return maxRecentAssessments; }
+    public int getMaxTotalAssessmentsCreated() { return maxTotalAssessmentsCreated; }
     public int getMaxQuestionsApproved() { return maxQuestionsApproved; }
 
     /**
@@ -58,7 +63,7 @@ public final class GeneticConfig {
     public static GeneticConfig defaults() {
         return new GeneticConfig(
                 50, 30, 0.05, 0.7,
-                1, 10, 10, 20
+                1, 10, 10, 100, 20
         );
     }
 

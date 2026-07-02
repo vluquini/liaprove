@@ -24,7 +24,7 @@ public class GeneticVoteWeightScheduler {
     @Scheduled(cron = "${ga.scheduler.cron:0 */5 * * * *}")
     public void adjustRecruiterVoteWeights() {
         logger.info("Starting scheduled genetic vote weight adjustment");
-        manageVoteWeightUseCase.adjustAllRecruiterWeights(false, null);
+        manageVoteWeightUseCase.adjustAllRecruiterWeights(false);
         logger.info("Finished scheduled genetic vote weight adjustment");
     }
 }
