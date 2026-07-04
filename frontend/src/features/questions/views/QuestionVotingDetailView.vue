@@ -148,7 +148,7 @@ onMounted(loadDetails)
             {{ question?.title || 'Detalhe da questão' }}
           </h1>
           <p class="mt-2 max-w-3xl text-[var(--liaprove-muted)]">
-            Analise o enunciado, questionVote e deixe um feedback para melhorar a curadoria comunitária.
+            Analise o enunciado, vote e deixe um feedback para melhorar a curadoria comunitária.
           </p>
         </div>
       </section>
