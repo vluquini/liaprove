@@ -13,7 +13,7 @@ Plataforma colaborativa onde usuários profissionais de TI e recrutadores podem 
 
 A plataforma permite que profissionais de TI e recrutadores criem e submetam questões e mini projetos para validar conhecimentos técnicos em áreas relevantes para o mercado de trabalho. As submissões passam por pré-análise feita por uma LLM e, depois, por votação da comunidade; cada usuário pode atribuir notas a cada questão.
 
-Após a submissão e a votação, uma **Rede Bayesiana** apura os votos e decide se a questão será incorporada às avaliações da plataforma. **Algoritmos Genéticos** monitoram e ajustam periodicamente o peso dos votos dos recrutadores, aumentando ou diminuindo conforme sinais de uso e qualidade. Hoje, o ajuste considera: uso recente (avaliações criadas/usadas no período), média das avaliações (rating médio das assessments), quantidade de questões aprovadas, razão de likes em comentários (likes/(likes+dislikes)) e o peso atual para estabilidade. A Rede Bayesiana também auxilia recrutadores ao sugerir questões frequentemente escolhidas por outros recrutadores no momento da criação de avaliações personalizadas.
+Após a submissão e a votação, uma **Rede Bayesiana** apura os votos e decide se a questão será incorporada às avaliações da plataforma. Até a camada de aplicação, o motor bayesiano já contempla duas funções: decidir aprovação/reprovação de questões em votação e sugerir questões para recrutadores durante a criação de avaliações personalizadas. A integração demonstrativa da infraestrutura ainda mantém a aprovação/reprovação conectada a uma implementação mockada, preservando a lógica real pronta para futura ativação em produção. **Algoritmos Genéticos** monitoram e ajustam periodicamente o peso dos votos dos recrutadores, aumentando ou diminuindo conforme sinais de uso e qualidade. Hoje, o ajuste considera: uso recente (avaliações criadas/usadas no período), média das avaliações (rating médio das assessments), quantidade de questões aprovadas, razão de likes em comentários (likes/(likes+dislikes)) e o peso atual para estabilidade.
 
 No contexto de recrutadores, a plataforma atua como ferramenta de apoio à avaliação técnica. Ela ajuda a estruturar critérios a partir de descrições de vaga, sugerir pesos entre hard skills, soft skills e experiência, selecionar questões e interpretar tentativas com apoio de IA. A decisão final de aprovar ou reprovar um candidato em um processo seletivo permanece humana e externa à regra automática da plataforma.
 
@@ -95,7 +95,7 @@ Os usuários terão uma área para visualizar todas as questões submetidas, ava
     
 - O peso dos votos dos recrutadores é atualizado por Algoritmos Genéticos periodicamente, com base em um conjunto de sinais: uso recente (avaliações criadas/usadas), média de avaliações, quantidade de questões aprovadas, razão de likes em comentários e o peso atual para estabilidade. Esses sinais ajudam a medir eficiência, qualidade e aderência à plataforma.
 
-> **Observação:** para fins demonstrativos, a decisão bayesiana de aprovação ou reprovação de questões é simulada pela classe `MockEvaluateVotingResultUseCaseImpl`, acionada periodicamente pelo scheduler `QuestionVotingEvaluatorScheduler`.
+> **Observação:** a lógica real de decisão bayesiana de aprovação/reprovação está implementada até a camada `application`, mas, para fins demonstrativos, a infraestrutura ainda utiliza `MockEvaluateVotingResultUseCaseImpl`, acionada periodicamente pelo scheduler `QuestionVotingEvaluatorScheduler`.
     
 
 ### 2.1.6 - Certificação

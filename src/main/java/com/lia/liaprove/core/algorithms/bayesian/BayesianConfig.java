@@ -11,13 +11,24 @@ public final class BayesianConfig {
     private final double weightRecruiter;
     private final int maxUsageForNormalization;
     private final double laplaceAlpha;
+    private final double approvalThreshold;
+    private final double minimumVotingEvidenceWeight;
 
     public BayesianConfig(double weightUsage, double weightRelevanceLLM, double weightUpvoteRatio,
                           double weightRecruiter, int maxUsageForNormalization, double laplaceAlpha) {
+        this(weightUsage, weightRelevanceLLM, weightUpvoteRatio, weightRecruiter, maxUsageForNormalization,
+                laplaceAlpha, 0.60, 3.0);
+    }
+
+    public BayesianConfig(double weightUsage, double weightRelevanceLLM, double weightUpvoteRatio,
+                          double weightRecruiter, int maxUsageForNormalization, double laplaceAlpha,
+                          double approvalThreshold, double minimumVotingEvidenceWeight) {
         validateWeight(weightUsage);
         validateWeight(weightRelevanceLLM);
         validateWeight(weightUpvoteRatio);
         validateWeight(weightRecruiter);
+        validateApprovalThreshold(approvalThreshold);
+        validateMinimumVotingEvidenceWeight(minimumVotingEvidenceWeight);
 
         double sum = weightUsage + weightRelevanceLLM + weightUpvoteRatio + weightRecruiter;
 
@@ -31,11 +42,25 @@ public final class BayesianConfig {
         this.weightRecruiter = weightRecruiter;
         this.maxUsageForNormalization = maxUsageForNormalization;
         this.laplaceAlpha = laplaceAlpha;
+        this.approvalThreshold = approvalThreshold;
+        this.minimumVotingEvidenceWeight = minimumVotingEvidenceWeight;
     }
 
     private static void validateWeight(double weight) {
         if (!Double.isFinite(weight) || weight < 0.0) {
             throw new IllegalArgumentException("Bayesian weights must be finite and >= 0");
+        }
+    }
+
+    private static void validateApprovalThreshold(double approvalThreshold) {
+        if (!Double.isFinite(approvalThreshold) || approvalThreshold < 0.0 || approvalThreshold > 1.0) {
+            throw new IllegalArgumentException("approvalThreshold must be finite and between 0.0 and 1.0");
+        }
+    }
+
+    private static void validateMinimumVotingEvidenceWeight(double minimumVotingEvidenceWeight) {
+        if (!Double.isFinite(minimumVotingEvidenceWeight) || minimumVotingEvidenceWeight < 0.0) {
+            throw new IllegalArgumentException("minimumVotingEvidenceWeight must be finite and >= 0");
         }
     }
 
@@ -63,8 +88,16 @@ public final class BayesianConfig {
         return laplaceAlpha;
     }
 
+    public double getApprovalThreshold() {
+        return approvalThreshold;
+    }
+
+    public double getMinimumVotingEvidenceWeight() {
+        return minimumVotingEvidenceWeight;
+    }
+
     public static BayesianConfig defaults() {
-        return new BayesianConfig(0.35, 0.30, 0.25, 0.10, 100, 1.0);
+        return new BayesianConfig(0.35, 0.30, 0.25, 0.10, 100, 1.0, 0.60, 3.0);
     }
 
 }

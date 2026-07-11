@@ -2,9 +2,11 @@ package com.lia.liaprove.application.services.algorithms.bayesian;
 
 import com.lia.liaprove.core.algorithms.bayesian.BayesianConfig;
 import com.lia.liaprove.application.gateways.algorithms.bayesian.BayesianGateway;
+import com.lia.liaprove.core.algorithms.bayesian.BayesianVotingDecision;
 import com.lia.liaprove.core.algorithms.bayesian.QuestionVoteSummary;
 import com.lia.liaprove.core.algorithms.bayesian.ScoredQuestion;
 import com.lia.liaprove.core.domain.question.Question;
+import com.lia.liaprove.core.domain.question.QuestionStatus;
 import com.lia.liaprove.core.domain.question.RelevanceLevel;
 import com.lia.liaprove.core.domain.user.UserRecruiter;
 import com.lia.liaprove.core.usecases.algorithms.bayesian.BayesianNetworkUseCase;
@@ -20,6 +22,7 @@ import java.util.stream.Collectors;
  * - Agregar sinais (feedbacks, uso da questão, relevância fornecida pela LLM, métricas do recruiter)
  *   e calcular uma pontuação normalizada [0..1] para recomendar uma questão a um recruiter.
  * - Sugerir questões ordenadas por essa pontuação para um recruiter.
+ * - Avaliar o resultado de votação de uma questão a partir dos votos ponderados.
  *
  * Fórmula de exemplo (heurística):
  * score = w1 * normalized_recruiterUsageCount
@@ -111,21 +114,44 @@ public class BayesianNetworkUseCaseImpl implements BayesianNetworkUseCase {
      * @return upRatio no intervalo [0.0, 1.0]
      */
     private double computeUpVoteRatio(QuestionVoteSummary summary) {
-        double weightedUp = summary == null ? 0.0 : summary.getWeightedUp();
-        double weightedDown = summary == null ? 0.0 : summary.getWeightedDown();
-
-        // Se infra não fornecer pesos (ambos zero), usamos contagens simples como fallback
-        if (weightedUp == 0.0 && weightedDown == 0.0 && summary != null) {
-            weightedUp = summary.getUpCount();
-            weightedDown = summary.getDownCount();
-        }
+        VoteTotals totals = resolveVoteTotals(summary);
 
         // 2) Fórmula simples de proporção amostral + Laplace smoothing (alpha configurável); fallback neutro
         double alpha = Math.max(0.0, config.getLaplaceAlpha());
-        double denom = weightedUp + weightedDown + 2.0 * alpha;
+        double denom = totals.up() + totals.down() + 2.0 * alpha;
 
         if (denom <= 0.0) return 0.5; // fallback neutro (nao deve ocorrer se alpha > 0)
-        return (weightedUp + alpha) / denom;
+        return (totals.up() + alpha) / denom;
+    }
+
+    /**
+     * Calcula a decisão bayesiana para uma questão em votação.
+     *
+     * A decisão aprova somente quando:
+     * - a probabilidade suavizada de aprovação atinge o limiar configurado;
+     * - existe evidência mínima suficiente em votos simples ou ponderados.
+     */
+    @Override
+    public BayesianVotingDecision evaluateVotingResult(UUID questionId) {
+        Objects.requireNonNull(questionId, "questionId must not be null");
+
+        QuestionVoteSummary summary = provider.getVoteSummaryForQuestion(questionId);
+        double approvalProbability = computeUpVoteRatio(summary);
+        double evidenceWeight = computeEvidenceWeight(summary);
+        double approvalThreshold = config.getApprovalThreshold();
+
+        QuestionStatus resultStatus = approvalProbability >= approvalThreshold
+                && evidenceWeight >= config.getMinimumVotingEvidenceWeight()
+                ? QuestionStatus.APPROVED
+                : QuestionStatus.REJECTED;
+
+        return new BayesianVotingDecision(
+                questionId,
+                approvalProbability,
+                resultStatus,
+                evidenceWeight,
+                approvalThreshold
+        );
     }
 
     /**
@@ -190,5 +216,29 @@ public class BayesianNetworkUseCaseImpl implements BayesianNetworkUseCase {
     private static double safeClamp(double v, double min, double max) {
         if (Double.isNaN(v) || Double.isInfinite(v)) return min;
         return Math.clamp(v, min, max);
+    }
+
+    private static double computeEvidenceWeight(QuestionVoteSummary summary) {
+        VoteTotals totals = resolveVoteTotals(summary);
+        return totals.up() + totals.down();
+    }
+
+    private static VoteTotals resolveVoteTotals(QuestionVoteSummary summary) {
+        if (summary == null) {
+            return new VoteTotals(0.0, 0.0);
+        }
+
+        double up = summary.getWeightedUp();
+        double down = summary.getWeightedDown();
+
+        if (up == 0.0 && down == 0.0) {
+            up = summary.getUpCount();
+            down = summary.getDownCount();
+        }
+
+        return new VoteTotals(up, down);
+    }
+
+    private record VoteTotals(double up, double down) {
     }
 }
