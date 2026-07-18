@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:professional": "vite --mode dev-professional",
-    "dev:recruiter": "vite --mode dev-recruiter",
-    "dev:admin": "vite --mode dev-admin",
+    "dev:professional": "vite --mode dev-professional --port 5173",
+    "dev:recruiter": "vite --mode dev-recruiter --port 5174",
+    "dev:admin": "vite --mode dev-admin --port 5175",
     "build": "vue-tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
