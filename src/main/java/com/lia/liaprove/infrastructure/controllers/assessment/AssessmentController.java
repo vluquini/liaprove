@@ -42,6 +42,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/assessments")
+@PreAuthorize("isAuthenticated()")
 public class AssessmentController {
 
     private final StartNewAssessmentUseCase startNewAssessmentUseCase;
