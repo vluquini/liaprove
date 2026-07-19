@@ -37,15 +37,14 @@ export async function getUserProfile(id: string): Promise<UserProfileResponse> {
 }
 
 export async function updateUserProfile(
-  id: string,
   request: UpdateUserProfileRequest,
 ): Promise<UserProfileResponse> {
-  const response = await http.put<UserProfileResponse>(`/v1/users/${id}`, request)
+  const response = await http.put<UserProfileResponse>('/v1/users/me', request)
   return response.data
 }
 
-export async function changePassword(id: string, request: ChangePasswordRequest): Promise<void> {
-  await http.patch(`/v1/users/${id}/password`, request)
+export async function changePassword(request: ChangePasswordRequest): Promise<void> {
+  await http.patch('/v1/users/me/password', request)
 }
 
 export async function deactivateOwnAccount(): Promise<void> {

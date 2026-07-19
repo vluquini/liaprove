@@ -56,7 +56,7 @@ class ChangeUserPasswordEndpointIntegrationTest {
         request.setOldPassword("password");
         request.setNewPassword("newSecret456");
 
-        mockMvc.perform(patch("/api/v1/users/{id}/password", user.getId())
+        mockMvc.perform(patch("/api/v1/users/me/password")
                         .header(DEV_USER_HEADER, user.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -76,7 +76,7 @@ class ChangeUserPasswordEndpointIntegrationTest {
         request.setOldPassword("wrong-password");
         request.setNewPassword("newSecret456");
 
-        mockMvc.perform(patch("/api/v1/users/{id}/password", user.getId())
+        mockMvc.perform(patch("/api/v1/users/me/password")
                         .header(DEV_USER_HEADER, user.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -94,7 +94,7 @@ class ChangeUserPasswordEndpointIntegrationTest {
         request.setOldPassword("password");
         request.setNewPassword("123");
 
-        mockMvc.perform(patch("/api/v1/users/{id}/password", user.getId())
+        mockMvc.perform(patch("/api/v1/users/me/password")
                         .header(DEV_USER_HEADER, user.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
@@ -112,7 +112,7 @@ class ChangeUserPasswordEndpointIntegrationTest {
         request.setOldPassword("password");
         request.setNewPassword("newSecret456");
 
-        mockMvc.perform(patch("/api/v1/users/{id}/password", user.getId())
+        mockMvc.perform(patch("/api/v1/users/me/password")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())

@@ -152,7 +152,7 @@ async function saveProfile(): Promise<void> {
   errorMessage.value = ''
 
   try {
-    const updated = await updateUserProfile(auth.user.id, {
+    const updated = await updateUserProfile({
       name: form.name,
       email: form.email,
       occupation: form.occupation,
@@ -182,7 +182,7 @@ async function submitPasswordChange(): Promise<void> {
   errorMessage.value = ''
 
   try {
-    await changePassword(auth.user.id, {
+    await changePassword({
       oldPassword: passwordForm.oldPassword,
       newPassword: passwordForm.newPassword,
     })

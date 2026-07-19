@@ -26,8 +26,8 @@ describe('userService', () => {
           softSkills: [],
         })
       }),
-      http.put('*/api/v1/users/user-1', async ({ request }) => {
-        expect(new URL(request.url).pathname).toBe('/api/v1/users/user-1')
+      http.put('*/api/v1/users/me', async ({ request }) => {
+        expect(new URL(request.url).pathname).toBe('/api/v1/users/me')
         updateBody = await request.json()
         return HttpResponse.json({
           id: 'user-1',
@@ -41,7 +41,7 @@ describe('userService', () => {
     )
 
     const profile = await getUserProfile('user-1')
-    const updated = await updateUserProfile('user-1', {
+    const updated = await updateUserProfile({
       name: 'Ana Souza',
       hardSkills: ['Java', 'Vue'],
     })
@@ -59,8 +59,8 @@ describe('userService', () => {
     let deactivateCalled = false
 
     server.use(
-      http.patch('*/api/v1/users/user-1/password', async ({ request }) => {
-        expect(new URL(request.url).pathname).toBe('/api/v1/users/user-1/password')
+      http.patch('*/api/v1/users/me/password', async ({ request }) => {
+        expect(new URL(request.url).pathname).toBe('/api/v1/users/me/password')
         passwordBody = await request.json()
         return new HttpResponse(null, { status: 204 })
       }),
@@ -70,7 +70,7 @@ describe('userService', () => {
       }),
     )
 
-    await changePassword('user-1', {
+    await changePassword({
       oldPassword: 'old-secret',
       newPassword: 'new-secret',
     })

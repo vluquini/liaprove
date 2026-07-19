@@ -60,7 +60,7 @@ class UpdateUserProfileEndpointIntegrationTest {
         updateRequest.setHardSkills(List.of("Java", "Spring Boot", "PostgreSQL"));
         updateRequest.setSoftSkills(List.of("Leadership", "Communication"));
 
-        mockMvc.perform(put("/api/v1/users/{id}", user.getId())
+        mockMvc.perform(put("/api/v1/users/me")
                         .header(DEV_USER_HEADER, user.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
@@ -90,7 +90,7 @@ class UpdateUserProfileEndpointIntegrationTest {
     void shouldRejectUpdateWhenNoFieldIsProvided() throws Exception {
         UserEntity user = getSeededUser("carlos.silva@example.com");
 
-        mockMvc.perform(put("/api/v1/users/{id}", user.getId())
+        mockMvc.perform(put("/api/v1/users/me")
                         .header(DEV_USER_HEADER, user.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new UpdateUserRequest())))
@@ -107,7 +107,7 @@ class UpdateUserProfileEndpointIntegrationTest {
         UpdateUserRequest updateRequest = new UpdateUserRequest();
         updateRequest.setEmail("mariana.costa@example.com");
 
-        mockMvc.perform(put("/api/v1/users/{id}", user.getId())
+        mockMvc.perform(put("/api/v1/users/me")
                         .header(DEV_USER_HEADER, user.getEmail())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
@@ -124,7 +124,7 @@ class UpdateUserProfileEndpointIntegrationTest {
         UpdateUserRequest updateRequest = new UpdateUserRequest();
         updateRequest.setOccupation("Senior Developer");
 
-        mockMvc.perform(put("/api/v1/users/{id}", user.getId())
+        mockMvc.perform(put("/api/v1/users/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updateRequest)))
                 .andExpect(status().isUnauthorized())

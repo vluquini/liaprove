@@ -41,10 +41,11 @@ public class UserController {
         return ResponseEntity.ok(userMapper.toResponseDto(user));
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<UserResponseDto> updateUserProfile(@PathVariable UUID id, @Valid @RequestBody UpdateUserRequest request) {
+    @PutMapping("/me")
+    public ResponseEntity<UserResponseDto> updateOwnProfile(@Valid @RequestBody UpdateUserRequest request) {
+        UUID userId = securityContextService.getCurrentUserId();
         User updatedUser = updateUserProfileUseCase.updateProfile(
-                id,
+                userId,
                 request.getName(),
                 request.getEmail(),
                 request.getOccupation(),
@@ -66,9 +67,10 @@ public class UserController {
         return ResponseEntity.ok(certificates);
     }
 
-    @PatchMapping("/{id}/password")
-    public ResponseEntity<Void> changePassword(@PathVariable UUID id, @Valid @RequestBody ChangePasswordRequest request) {
-        changePasswordUseCase.changePassword(id, request.getOldPassword(), request.getNewPassword());
+    @PatchMapping("/me/password")
+    public ResponseEntity<Void> changeOwnPassword(@Valid @RequestBody ChangePasswordRequest request) {
+        UUID userId = securityContextService.getCurrentUserId();
+        changePasswordUseCase.changePassword(userId, request.getOldPassword(), request.getNewPassword());
         return ResponseEntity.noContent().build();
     }
 
