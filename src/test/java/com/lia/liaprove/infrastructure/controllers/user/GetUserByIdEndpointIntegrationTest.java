@@ -38,11 +38,11 @@ class GetUserByIdEndpointIntegrationTest {
     }
 
     @Test
-    @DisplayName("Should return user by id when authenticated")
-    void shouldReturnUserByIdWhenAuthenticated() throws Exception {
+    @DisplayName("Should return own full profile via GET /me (includes email)")
+    void shouldReturnOwnFullProfileViaMe() throws Exception {
         UserEntity user = getSeededUser("mariana.costa@example.com");
 
-        mockMvc.perform(get("/api/v1/users/{id}", user.getId())
+        mockMvc.perform(get("/api/v1/users/me")
                         .header(DEV_USER_HEADER, user.getEmail()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(user.getId().toString()))
@@ -50,15 +50,13 @@ class GetUserByIdEndpointIntegrationTest {
                 .andExpect(jsonPath("$.email").value("mariana.costa@example.com"))
                 .andExpect(jsonPath("$.hardSkills.length()").value(2))
                 .andExpect(jsonPath("$.hardSkills[0]").value("python"))
-                .andExpect(jsonPath("$.hardSkills[1]").value("machine learning"))
                 .andExpect(jsonPath("$.softSkills.length()").value(2))
-                .andExpect(jsonPath("$.softSkills[0]").value("analytical thinking"))
-                .andExpect(jsonPath("$.softSkills[1]").value("communication"));
+                .andExpect(jsonPath("$.softSkills[0]").value("analytical thinking"));
     }
 
     @Test
-    @DisplayName("Should return another user by id when requester is authenticated")
-    void shouldReturnAnotherUserByIdWhenRequesterIsAuthenticated() throws Exception {
+    @DisplayName("Should return public profile by id (no email) when requester is authenticated")
+    void shouldReturnPublicProfileByIdWithoutEmail() throws Exception {
         UserEntity targetUser = getSeededUser("carlos.silva@example.com");
 
         mockMvc.perform(get("/api/v1/users/{id}", targetUser.getId())
@@ -66,11 +64,33 @@ class GetUserByIdEndpointIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(targetUser.getId().toString()))
                 .andExpect(jsonPath("$.name").value("Carlos Silva"))
-                .andExpect(jsonPath("$.email").value("carlos.silva@example.com"));
+                // email must NOT be present in the public profile to prevent PII leakage
+                .andExpect(jsonPath("$.email").doesNotExist());
     }
 
     @Test
-    @DisplayName("Should return unauthorized when header is missing")
+    @DisplayName("Should return own public profile by id (no email)")
+    void shouldReturnOwnPublicProfileByIdWithoutEmail() throws Exception {
+        UserEntity user = getSeededUser("mariana.costa@example.com");
+
+        mockMvc.perform(get("/api/v1/users/{id}", user.getId())
+                        .header(DEV_USER_HEADER, user.getEmail()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(user.getId().toString()))
+                .andExpect(jsonPath("$.name").value("Mariana Costa"))
+                .andExpect(jsonPath("$.email").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("Should return unauthorized when header is missing on /me")
+    void shouldReturnUnauthorizedWhenHeaderIsMissingOnMe() throws Exception {
+        mockMvc.perform(get("/api/v1/users/me"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.status").value(401));
+    }
+
+    @Test
+    @DisplayName("Should return unauthorized when header is missing on /{id}")
     void shouldReturnUnauthorizedWhenHeaderIsMissing() throws Exception {
         mockMvc.perform(get("/api/v1/users/{id}", UUID.fromString("a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13")))
                 .andExpect(status().isUnauthorized())

@@ -31,8 +31,8 @@ export interface UserCertificateResponse {
   score: number
 }
 
-export async function getUserProfile(id: string): Promise<UserProfileResponse> {
-  const response = await http.get<UserProfileResponse>(`/v1/users/${id}`)
+export async function getUserProfile(): Promise<UserProfileResponse> {
+  const response = await http.get<UserProfileResponse>('/v1/users/me')
   return response.data
 }
 

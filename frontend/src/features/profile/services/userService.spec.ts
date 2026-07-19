@@ -14,8 +14,8 @@ describe('userService', () => {
     let updateBody: unknown
 
     server.use(
-      http.get('*/api/v1/users/user-1', ({ request }) => {
-        expect(new URL(request.url).pathname).toBe('/api/v1/users/user-1')
+      http.get('*/api/v1/users/me', ({ request }) => {
+        expect(new URL(request.url).pathname).toBe('/api/v1/users/me')
 
         return HttpResponse.json({
           id: 'user-1',
@@ -40,7 +40,7 @@ describe('userService', () => {
       }),
     )
 
-    const profile = await getUserProfile('user-1')
+    const profile = await getUserProfile()
     const updated = await updateUserProfile({
       name: 'Ana Souza',
       hardSkills: ['Java', 'Vue'],

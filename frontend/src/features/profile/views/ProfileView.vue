@@ -115,7 +115,7 @@ async function loadProfile(): Promise<void> {
   errorMessage.value = ''
 
   try {
-    fillForm(await getUserProfile(auth.user.id))
+    fillForm(await getUserProfile())
   } catch (error) {
     errorMessage.value = normalizeApiError(error).message
   } finally {

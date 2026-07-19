@@ -8,6 +8,7 @@ import com.lia.liaprove.core.usecases.user.ListMyCertificatesUseCase;
 import com.lia.liaprove.core.usecases.user.UpdateUserProfileUseCase;
 import com.lia.liaprove.core.usecases.user.UserModerationUseCase;
 import com.lia.liaprove.infrastructure.dtos.user.ChangePasswordRequest;
+import com.lia.liaprove.infrastructure.dtos.user.PublicUserResponseDto;
 import com.lia.liaprove.infrastructure.dtos.user.UpdateUserRequest;
 import com.lia.liaprove.infrastructure.dtos.user.UserCertificateResponse;
 import com.lia.liaprove.infrastructure.dtos.user.UserResponseDto;
@@ -35,10 +36,17 @@ public class UserController {
     private final UserMapper userMapper;
     private final SecurityContextService securityContextService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDto> getUserById(@PathVariable UUID id) {
-        User user = getUserByIdUseCase.findById(id);
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> getOwnProfile() {
+        UUID userId = securityContextService.getCurrentUserId();
+        User user = getUserByIdUseCase.findById(userId);
         return ResponseEntity.ok(userMapper.toResponseDto(user));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PublicUserResponseDto> getUserById(@PathVariable UUID id) {
+        User user = getUserByIdUseCase.findById(id);
+        return ResponseEntity.ok(userMapper.toPublicResponseDto(user));
     }
 
     @PutMapping("/me")
