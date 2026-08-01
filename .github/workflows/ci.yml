@@ -14,6 +14,27 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      DB_USERNAME: liaprove
+      DB_PASSWORD: liaprove
+      JWT_SECRET: liaprove-ci-jwt-secret-key-change-me-in-prod
+      JWT_EXPIRATION: 3600000
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_DB: liaprove_db
+          POSTGRES_USER: liaprove
+          POSTGRES_PASSWORD: liaprove
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
