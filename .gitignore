@@ -48,3 +48,6 @@ frontend/playwright-report/
 
 ### LLM API Configs ###
 src/main/resources/ai.properties
+
+### AI sandbox ###
+.ai-jail
