@@ -1,3 +1,9 @@
+# OptMem
+
+Before doing anything else in this project, you must read `OPTMEM.md` in the project root and follow its instructions.
+
+---
+
 # Code Assistant Context
 
 # 1 - Project Overview
