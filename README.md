@@ -1,15 +1,115 @@
 
 # Plataforma Colaborativa de Avaliação Técnica orientada ao Mercado de Trabalho com uso de Inteligência Artificial
 
-> **Nota:** Este é um projeto de TCC que ainda está em sua fase inicial de desenvolvimento.
+> **Nota:** Este projeto foi desenvolvido como Trabalho de Conclusão de Curso (TCC) e sua versão MVP foi finalizada.
 
-## 1 - Descrição Geral
+## Sumário
+
+- [Tecnologias e pré-requisitos](#1---tecnologias-e-pré-requisitos)
+- [Execução local](#2---execução-local)
+- [Profiles de execução](#3---profiles-de-execução)
+- [Principais endpoints](#4---principais-endpoints)
+- [Descrição geral](#5---descrição-geral)
+- [Detalhamento da proposta](#6---detalhamento-da-proposta)
+
+## 1 - Tecnologias e pré-requisitos
+
+| Tecnologia | Versão / uso |
+| --- | --- |
+| Java | 21 |
+| Spring Boot | 3.4.13 |
+| Maven Wrapper | Maven 3.9.9 (já incluído no repositório) |
+| PostgreSQL | 18, via Docker Compose, para o profile padrão |
+| Docker e Docker Compose | Necessários para subir o PostgreSQL local |
+| Node.js | 20 ou superior, para o frontend |
+| Vue | 3.5.32 |
+| Vite | 8.0.10 |
+
+Também são utilizadas as bibliotecas MapStruct 1.6.3, Spring Data JPA, Spring Security, H2 e JWT.
+
+## 2 - Execução local
+
+### Backend com o profile `dev` (recomendado)
+
+O profile `dev` usa uma base H2 local em arquivo e carrega dados de exemplo; portanto, não requer Docker nem variáveis de ambiente.
+
+```bash
+./mvnw clean install
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+A API ficará disponível em `http://localhost:8080`. Para executar somente os testes do backend:
+
+```bash
+./mvnw test -Dspring.profiles.active=dev
+```
+
+### Backend com PostgreSQL e Docker
+
+Defina credenciais locais e inicie o banco:
+
+```bash
+export DB_USERNAME=liaprove
+export DB_PASSWORD=liaprove
+export JWT_SECRET='substitua-por-um-segredo-local-seguro'
+export JWT_EXPIRATION=3600000
+docker compose up -d
+./mvnw spring-boot:run
+```
+
+Para encerrar o banco, execute `docker compose down`.
+
+### Frontend
+
+Em outro terminal, instale as dependências e inicie a interface correspondente ao tipo de usuário desejado:
+
+```bash
+cd frontend
+npm install
+npm run dev:professional
+```
+
+Há ainda os comandos `npm run dev:recruiter` e `npm run dev:admin`. Os testes e a compilação do frontend podem ser executados com:
+
+```bash
+npm test
+npm run build
+```
+
+## 3 - Profiles de execução
+
+| Profile | Banco de dados | Autenticação | Finalidade |
+| --- | --- | --- | --- |
+| Padrão (sem profile) | PostgreSQL local | JWT | Execução local com Docker e dados iniciais. |
+| `dev` | H2 em arquivo | Sem login ou validação JWT | Desenvolvimento e testes manuais rápidos. |
+| `e2e` | H2 em memória | JWT | Execução de testes ponta a ponta em ambiente efêmero. |
+| `prod` | Banco externo configurado | JWT | Configuração base para produção, sem carga automática de dados. |
+
+No profile `dev`, as requisições não exigem login nem token JWT. Para acessar endpoints protegidos, informe a identidade de um usuário carregado na base pelo cabeçalho `X-Dev-User-Email`; por exemplo: `X-Dev-User-Email: carlos.silva@example.com`. Esse mecanismo é exclusivo de desenvolvimento e não deve ser usado em produção. O console H2 também fica disponível em `http://localhost:8080/h2-console`.
+
+## 4 - Principais endpoints
+
+Com a aplicação em execução, os endpoints mais usados estão sob `http://localhost:8080`:
+
+| Área | Endpoints principais |
+| --- | --- |
+| Autenticação | `POST /api/auth/register`, `POST /api/auth/login` |
+| Usuários | `GET/PUT /api/v1/users/me`, `GET /api/v1/users/{id}`, `GET /api/v1/users/me/certificates` |
+| Questões | `POST /api/v1/questions`, `POST /api/v1/questions/open`, `POST /api/v1/questions/pre-analysis`, `GET /api/v1/questions/voting` |
+| Votos e feedbacks | `POST /api/v1/questions/{questionId}/vote`, `POST /api/v1/questions/{questionId}/feedback` |
+| Avaliações | `POST /api/v1/assessments/start-system`, `POST /api/v1/assessments/{attemptId}/submit`, `POST /api/v1/assessments/personalized`, `GET /api/v1/assessments/personalized` |
+| Certificados | `GET /api/v1/certificates/{certificateNumber}` |
+| Administração | `/api/v1/admin/users`, `/api/v1/admin/questions`, `/api/v1/admin/assessments`, `/api/v1/admin/algorithms/genetic` |
+
+Os endpoints administrativos exigem que a identidade utilizada tenha as permissões adequadas. Consulte os controllers em `src/main/java/com/lia/liaprove/infrastructure/controllers` para os payloads, parâmetros e operações completas.
+
+## 5 - Descrição Geral
 
 Plataforma colaborativa onde usuários profissionais de TI e recrutadores podem submeter questões e mini projetos para compor avaliações técnicas alinhadas a contextos reais do mercado de trabalho. As contribuições passam por curadoria da comunidade e apoiam tanto a autoavaliação dos participantes quanto a criação de avaliações personalizadas por recrutadores. A plataforma também utiliza Inteligência Artificial para apoiar a pré-análise de questões, a estruturação de descrições de vaga e a interpretação de tentativas em avaliações personalizadas. Ao finalizar uma avaliação de múltipla escolha e obter pelo menos 70% de acertos, o usuário recebe um certificado de comprovação de conhecimento.
 
-## 2 - Detalhamento da Proposta
+## 6 - Detalhamento da Proposta
 
-### 2.1 - Descrição
+### 6.1 - Descrição
 
 A plataforma permite que profissionais de TI e recrutadores criem e submetam questões e mini projetos para validar conhecimentos técnicos em áreas relevantes para o mercado de trabalho. As submissões passam por pré-análise feita por uma LLM e, depois, por votação da comunidade; cada usuário pode atribuir notas a cada questão.
 
@@ -17,7 +117,7 @@ Após a submissão e a votação, uma **Rede Bayesiana** apura os votos e decide
 
 No contexto de recrutadores, a plataforma atua como ferramenta de apoio à avaliação técnica. Ela ajuda a estruturar critérios a partir de descrições de vaga, sugerir pesos entre hard skills, soft skills e experiência, selecionar questões e interpretar tentativas com apoio de IA. A decisão final de aprovar ou reprovar um candidato em um processo seletivo permanece humana e externa à regra automática da plataforma.
 
-### 2.1.1 - Visão do Usuário Profissional
+### 6.1.1 - Visão do Usuário Profissional
 
 Um usuário do tipo profissional pode:
 
@@ -28,7 +128,7 @@ Um usuário do tipo profissional pode:
 - Avaliar as questões enviadas por outros usuários, participando da curadoria colaborativa do acervo de questões.
     
 
-### 2.1.2 - Visão do Usuário Recrutador
+### 6.1.2 - Visão do Usuário Recrutador
 
 O recrutador possui as mesmas funcionalidades do profissional e, adicionalmente:
 
@@ -45,7 +145,7 @@ O recrutador possui as mesmas funcionalidades do profissional e, adicionalmente:
 - Recebe sugestões inteligentes de questões e critérios de avaliação com base no contexto da vaga e em padrões de escolha de outros recrutadores.
     
 
-### 2.1.3 - Tipos de Avaliação
+### 6.1.3 - Tipos de Avaliação
 
 A plataforma trabalha com avaliações do sistema e avaliações personalizadas:
 
@@ -74,7 +174,7 @@ A plataforma trabalha com avaliações do sistema e avaliações personalizadas:
     - Podem incorporar critérios e pesos definidos pelo recrutador, além de um snapshot da análise da vaga realizada por IA.
         
 
-### 2.1.4 - Categoria das questões
+### 6.1.4 - Categoria das questões
 
 Cada questão será categorizada por:
 
@@ -87,7 +187,7 @@ Cada questão será categorizada por:
 
 Os usuários terão uma área para visualizar todas as questões submetidas, avaliar ou submeter novas questões.
 
-### 2.1.5 - Validação das questões
+### 6.1.5 - Validação das questões
 
 - A comunidade atribui meta-dados às questões (dificuldade, área, relevância).
     
@@ -98,14 +198,14 @@ Os usuários terão uma área para visualizar todas as questões submetidas, ava
 > **Observação:** a lógica real de decisão bayesiana de aprovação/reprovação está implementada até a camada `application`, mas, para fins demonstrativos, a infraestrutura ainda utiliza `MockEvaluateVotingResultUseCaseImpl`, acionada periodicamente pelo scheduler `QuestionVotingEvaluatorScheduler`.
     
 
-### 2.1.6 - Certificação
+### 6.1.6 - Certificação
 
 - **Múltipla escolha:** certificado automático ao atingir o percentual mínimo (padrão: 70%).
     
 - **Mini projetos:** certificado emitido após avaliação e validação pela comunidade.
     
 
-### 2.1.7 - Sistema de Revisão e Feedback Colaborativo
+### 6.1.7 - Sistema de Revisão e Feedback Colaborativo
 
 - Todos os usuários podem fornecer feedback sobre questões e projetos.
     
@@ -114,7 +214,7 @@ Os usuários terão uma área para visualizar todas as questões submetidas, ava
 - Histórico de avaliações e comentários podem ser mantidos para transparência e auditoria.
     
 
-### 2.1.8 - Assistente de Revisão e Apoio com IA
+### 6.1.8 - Assistente de Revisão e Apoio com IA
 
 A LLM já é utilizada em três fluxos principais da plataforma:
 
